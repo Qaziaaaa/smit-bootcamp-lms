@@ -12,6 +12,7 @@ Bootcamp LMS — Admin + Student portal for managing students, attendance, teams
 | [Architecture](docs/ARCHITECTURE.md) | System design, tech stack, flows, repo layout |
 | [Database Schema](docs/DATABASE_SCHEMA.md) | MongoDB collections and relationships |
 | [API Documentation](docs/API_DOCUMENTATION.md) | REST endpoint contract |
+| [Frontend Design](docs/FRONTEND_DESIGN.md) | UI layout & component contract (wireframes, API bindings) |
 | [Team Distribution](docs/TEAM_DISTRIBUTION.md) | Per-member responsibilities |
 | [Git Workflow](docs/GIT_WORKFLOW.md) | Branch strategy, PR rules, commit conventions |
 | [Coding Standards](docs/CODING_STANDARDS.md) | FE + BE conventions enforced in reviews |
