@@ -2,6 +2,19 @@
 
 Maps the development phases to executable sprints with owners, scope, and acceptance criteria. Each sprint ends with a working, mergeable state on `dev`.
 
+## Phase 1 — Planning & System Design (COMPLETED)
+
+Done by the team lead during setup. Deliverables:
+
+| Deliverable | Status |
+|---|---|
+| SRS Document | docs/SRS.md |
+| System Design | docs/ARCHITECTURE.md |
+| ER Diagram / Database Design | docs/DATABASE_SCHEMA.md |
+| API Documentation | docs/API_DOCUMENTATION.md |
+| Team Task Distribution | docs/TEAM_DISTRIBUTION.md |
+| Wireframes / UI-UX (Figma) | PENDING — frontend members (Phase 1.5) |
+
 ## Sprint 0 — Setup & Foundation (Team Lead + all)
 
 **Duration:** 1 week
