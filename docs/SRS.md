@@ -47,7 +47,7 @@ A student CANNOT:
 - FR-1.1 System shall authenticate admin via email + password.
 - FR-1.2 System shall authenticate student via email + password.
 - FR-1.3 System shall issue a JWT on successful login and validate it on protected routes.
-- FR-1.4 Passwords shall be stored hashed (bcrypt).
+- FR-1.4 Passwords shall be stored hashed (bcryptjs).
 - FR-1.5 Wrong credentials → 401 with a generic message (no account enumeration).
 - FR-1.6 Logout invalidates the client session.
 
@@ -93,7 +93,7 @@ A student CANNOT:
 
 ## 4. Non-Functional Requirements
 
-- **Security (NFR-1):** JWT auth, bcrypt hashing, input validation, no sensitive data in logs, role-based authorization on every endpoint.
+- **Security (NFR-1):** JWT auth, bcryptjs hashing, input validation, no sensitive data in logs, role-based authorization on every endpoint.
 - **Performance (NFR-2):** API responses < 500ms for standard reads; indexed queries for search/filter.
 - **Responsiveness (NFR-3):** UI usable on desktop and mobile (responsive design).
 - **Reliability (NFR-4):** Graceful error handling with loading/empty/error states; no unhandled promise rejections.

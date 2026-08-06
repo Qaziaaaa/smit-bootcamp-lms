@@ -29,7 +29,7 @@ git checkout dev
 mkdir -p backend
 cd backend
 npm init -y
-npm install express mongoose cors dotenv bcrypt jsonwebtoken
+npm install express mongoose cors dotenv bcryptjs jsonwebtoken express-validator helmet morgan
 npm install --save-dev nodemon
 ```
 

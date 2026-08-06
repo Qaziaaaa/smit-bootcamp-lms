@@ -34,7 +34,7 @@ Single collection with `role` discriminator for admin/student authentication.
 {
   _id: ObjectId,
   email: String,          // unique, required, indexed
-  passwordHash: String,   // bcrypt, required
+  passwordHash: String,   // bcryptjs, required
   role: String,           // 'admin' | 'student'
   createdAt: Date,
   updatedAt: Date

@@ -1,0 +1,90 @@
+Recommended Stack
+
+Library/Framework
+
+Express.js
+
+# Mongoose
+
+* jsonwebtoken (JWT)
+
+bcryptjs
+
+express-validator (or
+Zod)
+
+Purpose
+
+Backend Framework
+
+Needed?
+
+Yes
+
+Recommendation
+
+Must Have
+
+MongoDB ODM
+
+Authentication
+
+Yes
+
+Must Have
+
+Yes
+
+Must Have
+
+Password Hashing
+
+Yes
+
+Must Have
+
+Validate API Requests
+
+Yes
+
+Recommended
+
+dotenv
+
+Environment Variables
+
+Yes
+
+Must Have
+
+cors
+
+Connect React to Backend
+
+Yes
+
+Must Have
+
+helmet
+
+Security Headers
+
+Yes
+
+Recommended
+
+* morgan
+
+Yes
+
+# cookie-parser (only if
+usina coo
+cookies)
+
+API Logging
+
+Cookie Authentication
+
+Optional
+
+***

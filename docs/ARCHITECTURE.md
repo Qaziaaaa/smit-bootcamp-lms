@@ -8,9 +8,11 @@ A Bootcamp LMS with an admin management portal and a read-only student portal, c
 | Layer | Technology |
 |---|---|
 | Frontend | React 18 (Create React App), React Router, Axios |
-| Backend | Node.js 18+, Express |
-| Database | MongoDB (Mongoose ODM) |
-| Auth | JWT (Bearer tokens), bcrypt |
+| Backend | Node.js 18+, Express, Mongoose |
+| Database | MongoDB |
+| Auth | jsonwebtoken (JWT Bearer), bcryptjs |
+| Validation | express-validator (or zod) |
+| Security/Logging | helmet, morgan, cors, dotenv |
 | Tooling | Git + GitHub, npm |
 
 ## High-Level System Flow
@@ -36,7 +38,7 @@ Layers:
 ## Data Flow (Authentication)
 
 ```
-Login form → POST /api/auth/login → validate → verify bcrypt hash
+Login form → POST /api/auth/login → validate → verify bcryptjs hash
 → sign JWT (payload: { userId, role }) → return token + user
 → client stores token → subsequent requests send Authorization: Bearer
 → middleware verifies token → attaches user to request → controller proceeds
@@ -74,7 +76,7 @@ Frontend and backend are developed independently (parallel tracks) and integrate
 - JWT required on all protected routes (middleware).
 - Role check (`admin` vs `student`) on every sensitive route.
 - Row-level scoping: student queries always filtered by `req.user.id`.
-- bcrypt password hashing (min 10 rounds).
+- bcryptjs password hashing (min 10 rounds).
 - Input validation at the controller boundary.
 - No secrets in frontend; `.env` only on the backend.
 
