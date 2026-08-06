@@ -1,10 +1,19 @@
 # Frontend Design Contract
 
-Structural UI contract: spaces, elements, components, and data bindings. No colors or themes — this defines **what** to build and **where**, so the designer (Figma) and developers (Abdullah, Shahzad) build layouts that match the backend exactly.
+Structural UI contract: spaces, elements, components, and data bindings — this defines **what** to build and **where**, so the designer (Figma) and developers (Abdullah, Shahzad) build layouts that match the backend exactly.
 
 Source of truth for all field names and endpoints: `API_DOCUMENTATION.md` and `DATABASE_SCHEMA.md`. Never invent field names or data that is not in the contract.
 
 ## 1. Structural Conventions
+
+### Color Palette
+
+| Element | Color |
+|---|---|
+| Sidebar Hover | `#F0F5FF` |
+| Dashboard Background | `#F8FAFB` |
+| Card Header | `#F4F9FF` |
+| Card Body | `#FFFFFF` |
 
 ### Spacing
 - 4px base unit: `4, 8, 12, 16, 24, 32, 48, 64`.
