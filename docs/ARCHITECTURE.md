@@ -11,7 +11,7 @@ A Bootcamp LMS with an admin management portal and a read-only student portal, c
 | Backend | Node.js 18+, Express, Mongoose |
 | Database | MongoDB |
 | Auth | jsonwebtoken (JWT Bearer), bcryptjs |
-| Validation | express-validator (or zod) |
+| Validation | express-validator |
 | Security/Logging | helmet, morgan, cors, dotenv |
 | Tooling | Git + GitHub, npm |
 

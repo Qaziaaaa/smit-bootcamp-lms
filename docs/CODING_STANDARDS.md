@@ -63,7 +63,7 @@ src/
 - Naming: files `student.controller.js`, `student.service.js`, `student.model.js`. Exports are named or default consistently per file type.
 - Use `async/await`. Wrap handlers in an async wrapper that forwards errors to the error middleware.
 - One global error-handling middleware at the app root.
-- Validate all input (see API standards) with `express-validator` (or `zod`).
+- Validate all input (see API standards) with `express-validator`.
 - Hash passwords with `bcryptjs` (min 10 salt rounds). Never store plaintext.
 - JWT for authentication; verify via middleware. Store role in the token.
 - No secrets in code. Everything from `process.env` via `.env`.
