@@ -66,7 +66,7 @@ API runs at `http://localhost:5000`.
 ```bash
 cd ../frontend
 npx create-react-app . --use-npm
-npm install axios react-router-dom
+npm install @mui/material @emotion/react @emotion/styled lucide-react react-router-dom axios react-hook-form zod @tanstack/react-query @reduxjs/toolkit react-redux sonner framer-motion dayjs @tanstack/react-table react-dropzone fuse.js recharts
 ```
 
 ### Environment Variables

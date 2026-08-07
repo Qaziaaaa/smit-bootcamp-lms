@@ -42,10 +42,43 @@ Source of truth for all field names and endpoints: `API_DOCUMENTATION.md` and `D
 - Show at most 5–8 columns; overflow into detail view.
 
 ### States (required on every data region)
-- **Loading:** skeleton rows or centered spinner.
+- **Loading:** skeleton rows or centered spinner (MUI Skeleton).
 - **Empty:** centered icon + "No <entity> found" message.
 - **Error:** centered error message + retry button.
-- **Form error:** per-field message + toast for API-level errors.
+- **Form error:** per-field message + toast (Sonner) for API-level errors.
+
+## 1.1 Frontend Library Stack (STRICT)
+
+These are the **only** libraries allowed. Do not add alternatives without lead approval. Every feature must be built with the library specified here — no custom reimplementations.
+
+| Purpose | Library | Rules |
+|---|---|---|
+| UI components | **MUI** | All components (button, input, modal, table, card, layout) from MUI. |
+| Icons | **Lucide React** | All icons via `lucide-react` (do not mix icon sets). |
+| Routing | **React Router DOM** | All routes, `ProtectedRoute`, navigation. No other router. |
+| API calls | **Axios** | All HTTP via a single axios instance in `src/services/apiClient.js`. |
+| Forms | **React Hook Form + Zod** | All forms use RHF; Zod schema = single validation source. |
+| Charts | **Recharts** | All charts (dashboard, attendance %). |
+| State | **Redux Toolkit** | Global state: auth, user. |
+| Server State | **TanStack Query** | All server data fetching/caching/mutations. No manual `useEffect` fetches. |
+| Notifications | **Sonner** | All toasts/success/error notifications. |
+| Animations | **Framer Motion** | Optional page/component transitions only. |
+| Dates | **Day.js** | All date parsing/formatting. |
+| Tables | **TanStack Table** | All data tables (sorting, filtering, pagination). |
+| Uploads | **React Dropzone** | File uploads (if any). |
+| Loading | **MUI Skeleton** | All loading states. |
+| Search | **Fuse.js** | Client-side fuzzy search where server search is unavailable. |
+
+### Installation (frontend)
+```bash
+npm install @mui/material @emotion/react @emotion/styled lucide-react react-router-dom axios react-hook-form zod @tanstack/react-query @reduxjs/toolkit react-redux sonner framer-motion dayjs @tanstack/react-table react-dropzone fuse.js recharts
+```
+
+### State Rules
+- **TanStack Query** for all server data (queries + mutations) — never store API responses in Redux.
+- **Redux Toolkit** only for global/client state (auth token, current user).
+- No `useEffect` + `fetch` — always TanStack Query + axios.
+- React Hook Form owns form state; Zod validates; TanStack Query mutation submits.
 
 ## 2. Global Layout & Navigation
 
@@ -101,22 +134,22 @@ Topbar right: logged-in admin name/email + Logout.
 
 ## 3. Reusable Component Inventory
 
-| Component | Renders | API / data source |
-|---|---|---|
-| `StatCard` | label, value, icon | dashboard counts |
-| `DataTable` | header + rows, sortable | any list endpoint |
-| `SearchBar` | text input | `?search=` |
-| `FilterBar` | dropdowns (status, batch, team) | `?status=`, `?batch=`, `?teamId=` |
-| `Pagination` | page numbers, limit | `?page=&limit=` |
-| `Modal` | overlay + content | create/edit forms |
-| `ConfirmDialog` | message + confirm/cancel | delete actions |
-| `FormField` | label + input + validation msg | form submissions |
-| `Badge` | status pill | `status` fields |
-| `Avatar` | initials circle | student/user name |
-| `EmptyState` | icon + text | any list |
-| `LoadingState` | skeleton/spinner | any fetch |
-| `ErrorState` | message + retry | any fetch |
-| `Toast` | success/error notification | all mutations |
+| Component | Renders | Library | API / data source |
+|---|---|---|---|
+| `StatCard` | label, value, icon | MUI + Lucide | dashboard counts |
+| `DataTable` | header + rows, sortable | TanStack Table + MUI | any list endpoint |
+| `SearchBar` | text input | MUI | `?search=` |
+| `FilterBar` | dropdowns (status, batch, team) | MUI | `?status=`, `?batch=`, `?teamId=` |
+| `Pagination` | page numbers, limit | TanStack Table | `?page=&limit=` |
+| `Modal` | overlay + content | MUI Dialog | create/edit forms |
+| `ConfirmDialog` | message + confirm/cancel | MUI Dialog | delete actions |
+| `FormField` | label + input + validation msg | MUI + React Hook Form + Zod | form submissions |
+| `Badge` | status pill | MUI Chip | `status` fields |
+| `Avatar` | initials circle | MUI Avatar | student/user name |
+| `EmptyState` | icon + text | MUI + Lucide | any list |
+| `LoadingState` | skeleton/spinner | MUI Skeleton | any fetch |
+| `ErrorState` | message + retry | MUI | any fetch |
+| `Toast` | success/error notification | Sonner | all mutations |
 | `ProtectedRoute` | guards by role | auth context |
 
 ## 4. Screen Blueprints
@@ -334,3 +367,6 @@ Binding: `GET /student/tasks`, `PUT /student/tasks/:id/progress { status }` (onl
 4. Status values use exact strings: attendance `present|absent`; task `pending|in-progress|completed`; project `active|completed|on-hold`.
 5. Every list must support loading/empty/error before it is considered done.
 6. When API contract changes, update `API_DOCUMENTATION.md` + this doc together.
+7. **Library lock-in (STRICT):** only libraries in §1.1. No new library without lead approval. No mixing icon sets or UI kits.
+8. **State rules:** TanStack Query for all server data; Redux Toolkit only for global client state; React Hook Form + Zod for forms; no `useEffect` + raw `fetch`.
+9. Search/filter: server-side `?search=` first; Fuse.js only as fallback for client-side lists.
