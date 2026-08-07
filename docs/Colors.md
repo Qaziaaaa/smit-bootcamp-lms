@@ -1,0 +1,1 @@
+### Updated Color Palette * **Sidebar Hover:** #F0F5FF * **Dashboard Background:** #F8FAFB * **Card Header:** #F4F9FF * **Card Body:** #FFFFFF
