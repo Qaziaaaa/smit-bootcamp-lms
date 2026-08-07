@@ -1,6 +1,6 @@
-# Task Schedule (Aug 6 – Aug 12)
+# Task Schedule (Aug 7 – Aug 12)
 
-Deadline: **Wed Aug 12**. 7 working days. Every member follows the Git Workflow: work on own branch → commit → push → PR (base `dev`, reviewer: lead) → lead merges.
+Deadline: **Wed Aug 12**. 6 working days. Every member follows the Git Workflow: work on own branch → commit → push → PR (base `dev`, reviewer: lead) → lead merges.
 
 Each day ends with a 15-minute standup: done / next / blockers.
 
@@ -14,7 +14,7 @@ Each day ends with a 15-minute standup: done / next / blockers.
 
 ---
 
-## Day 1 — Thu Aug 6 · Setup & Scaffolding
+## Day 1 — Fri Aug 7 · Setup & Scaffolding
 
 **Goal:** every machine runs the project; backend and frontend skeletons exist; DB connected; shared components ready.
 
@@ -63,7 +63,7 @@ Each day ends with a 15-minute standup: done / next / blockers.
 
 ---
 
-## Day 2 — Fri Aug 7 · Phase 2 Foundation
+## Day 2 — Sat Aug 8 · Phase 2 Foundation
 
 **Goal:** secure login works end-to-end; admin sees dashboard layout.
 
@@ -100,7 +100,7 @@ Each day ends with a 15-minute standup: done / next / blockers.
 
 ---
 
-## Day 3 — Sat Aug 8 · Core Modules I
+## Day 3 — Sun Aug 9 · Core Modules I
 
 **Goal:** students + attendance fully working (API + UI).
 
@@ -131,7 +131,7 @@ Each day ends with a 15-minute standup: done / next / blockers.
 
 ---
 
-## Day 4 — Sun Aug 9 · Core Modules II + Student Portal
+## Day 4 — Mon Aug 10 · Core Modules II + Student Portal
 
 **Goal:** projects/tasks done; student portal reads real data.
 
@@ -162,49 +162,35 @@ Each day ends with a 15-minute standup: done / next / blockers.
 
 ---
 
-## Day 5 — Mon Aug 10 · Integration
+## Day 5 — Tue Aug 11 · Integration & QA
 
-**Goal:** every screen works against the real backend.
+**Goal:** every screen works against the real backend; stable release candidate.
 
 ### All Members
 - [ ] Connect every frontend screen to its API (remove mocks)
 - [ ] Fix integration bugs found
 - [ ] Every data region has loading/empty/error state
 - [ ] Forms validate client-side + show server errors
-- [ ] ✅ PRs: integration fixes
-
-### Team Lead
-- [ ] Full end-to-end walkthrough (login → admin flows → student flows)
-- [ ] Log all bugs in a shared checklist; assign fixes
-- [ ] Merge day-5 PRs
-- [ ] Standup
-
----
-
-## Day 6 — Tue Aug 11 · QA & Polish
-
-**Goal:** stable release candidate; deploy prep.
-
-### All Members
-- [ ] Fix all open bugs from day-5 checklist
 - [ ] Responsive pass (mobile/tablet/desktop)
 - [ ] Security checks: invalid token, wrong role, bad input
 - [ ] Remove all `console.log`, unused code
-- [ ] ✅ PRs: final bug fixes
+- [ ] ✅ PRs: integration + bug-fix PRs
 
 ### Shafqatullah + Lead
 - [ ] Prepare production env vars (`.env`, Mongo Atlas)
 - [ ] Backend build/start in production mode
 
 ### Team Lead
+- [ ] Full end-to-end walkthrough (login → admin flows → student flows)
 - [ ] Run QA checklist (login, CRUD, attendance %, student restrictions)
+- [ ] Log all bugs in a shared checklist; assign fixes
 - [ ] Freeze `dev` for new features
-- [ ] Deploy prep verified
+- [ ] Merge day-5 PRs
 - [ ] Standup
 
 ---
 
-## Day 7 — Wed Aug 12 · Deployment & Presentation (DEADLINE)
+## Day 6 — Wed Aug 12 · Deployment & Presentation (DEADLINE)
 
 **Goal:** live application + final presentation.
 

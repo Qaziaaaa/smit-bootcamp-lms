@@ -2,6 +2,8 @@
 
 Maps the development phases to executable sprints with owners, scope, and acceptance criteria. Each sprint ends with a working, mergeable state on `dev`.
 
+**Project window: Aug 7 – Aug 12 (6 days).** See `TASK_SCHEDULE.md` for the day-by-day task list.
+
 ## Phase 1 — Planning & System Design (COMPLETED)
 
 Done by the team lead during setup. Deliverables:
@@ -17,7 +19,7 @@ Done by the team lead during setup. Deliverables:
 
 ## Sprint 0 — Setup & Foundation (Team Lead + all)
 
-**Duration:** 1 week
+**Dates:** Fri Aug 7
 
 | Task | Owner |
 |---|---|
@@ -31,7 +33,7 @@ Done by the team lead during setup. Deliverables:
 
 ## Sprint 1 — Phase 2 Foundation
 
-**Duration:** 1 week
+**Dates:** Sat Aug 8
 
 | Task | Owner |
 |---|---|
@@ -44,7 +46,7 @@ Done by the team lead during setup. Deliverables:
 
 ## Sprint 2 — Phase 3 Core Modules (Backend)
 
-**Duration:** 1 week
+**Dates:** Sun Aug 9
 
 | Task | Owner |
 |---|---|
@@ -57,7 +59,7 @@ Done by the team lead during setup. Deliverables:
 
 ## Sprint 3 — Phase 3 Core Modules (Frontend)
 
-**Duration:** 1 week
+**Dates:** Mon Aug 10
 
 | Task | Owner |
 |---|---|
@@ -70,7 +72,7 @@ Done by the team lead during setup. Deliverables:
 
 ## Sprint 4 — Phase 4 Student Portal
 
-**Duration:** 1 week
+**Dates:** Mon Aug 10 (runs parallel with Sprint 3)
 
 | Task | Owner |
 |---|---|
@@ -82,7 +84,7 @@ Done by the team lead during setup. Deliverables:
 
 ## Sprint 5 — Phase 5 Integration & QA
 
-**Duration:** 1 week
+**Dates:** Tue Aug 11
 
 | Task | Owner |
 |---|---|
@@ -96,7 +98,7 @@ Done by the team lead during setup. Deliverables:
 
 ## Sprint 6 — Phase 6 Deployment & Presentation
 
-**Duration:** 1 week
+**Dates:** Wed Aug 12 (deadline)
 
 | Task | Owner |
 |---|---|
@@ -108,8 +110,8 @@ Done by the team lead during setup. Deliverables:
 ## Dependency Ordering
 
 ```
-Sprint 0 → Sprint 1 → Sprint 2 (API first) → Sprint 3 (consumes API)
-         → Sprint 4 (needs Sprints 1–3) → Sprint 5 → Sprint 6
+Sprint 0 (Aug 7) → Sprint 1 (Aug 8) → Sprint 2 (Aug 9)
+→ Sprint 3 + 4 (Aug 10, parallel) → Sprint 5 (Aug 11) → Sprint 6 (Aug 12)
 ```
 
 Frontend Sprints 2 and 3 run against the documented API contract in parallel when possible — do not block on the other team; use the API docs as the source of truth.
