@@ -8,6 +8,7 @@ Bootcamp LMS — Admin + Student portal for managing students, attendance, teams
 |---|---|
 | [Project Plan](docs/PROJECT_PLAN.md) | Master project plan (overview, roles, phases, roadmap) |
 | [Sprint Plan](docs/SPRINT_PLAN.md) | Sprint breakdown with owners and acceptance |
+| [Task Schedule](docs/TASK_SCHEDULE.md) | Daily tasks for all members (Aug 6–12) |
 | [SRS](docs/SRS.md) | Requirements, roles, permissions, acceptance criteria |
 | [Architecture](docs/ARCHITECTURE.md) | System design, tech stack, flows, repo layout |
 | [Database Schema](docs/DATABASE_SCHEMA.md) | MongoDB collections and relationships |

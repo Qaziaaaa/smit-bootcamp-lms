@@ -47,11 +47,13 @@ git commit -m "feat(auth): add login form"
 git push -u origin <member>/<feature>
 ```
 
-Then on GitHub: **New Pull Request** → base `dev` → compare your branch → Create PR.
+Then on GitHub: **New Pull Request** → **IMPORTANT: set base to `dev`** → compare your branch → Create PR.
+
+> ⚠️ **WARNING:** `main` is the repo's default branch, so GitHub will pre-select **`main`** as the PR base. You MUST change it to `dev` every time, otherwise the PR will be merged into `main` instead of `dev`. Look at the top of the PR page: base should read `dev`, never `main`.
 
 ## Pull Request Rules
 
-- Base branch is always `dev`. Never `main`.
+- Base branch is always `dev`. **Never `main`** — check it on every PR.
 - Title describes the change: `feat(module): what it does`.
 - Add a short description of what changed and how to test it.
 - The team lead reviews and merges. Nobody merges their own PR.
