@@ -2,6 +2,7 @@ import app from './app.js';
 import connectDB from './config/db.js';
 import env from './config/env.js';
 import logger from './utils/logger.js';
+import './models/index.js';
 
 process.on('unhandledRejection', (err) => {
   logger.error(`Unhandled rejection: ${err.message}`);

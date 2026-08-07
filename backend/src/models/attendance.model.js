@@ -21,7 +21,7 @@ const attendanceSchema = new mongoose.Schema(
       ref: 'User',
     },
   },
-  { timestamps: true }
+  { timestamps: true, collection: 'attendance' }
 );
 
 attendanceSchema.index({ studentId: 1, date: 1 }, { unique: true });
