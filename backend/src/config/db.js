@@ -1,13 +1,24 @@
 import mongoose from 'mongoose';
+import env from './env.js';
+import logger from '../utils/logger.js';
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`MongoDB connection error: ${error.message}`);
+    mongoose.set('strictQuery', true);
+    await mongoose.connect(env.mongoUri);
+    logger.info(`MongoDB connected at ${mongoose.connection.host}`);
+  } catch (err) {
+    logger.error(`MongoDB connection failed: ${err.message}`);
     process.exit(1);
   }
 };
+
+mongoose.connection.on('error', (err) => {
+  logger.error(`MongoDB runtime error: ${err.message}`);
+});
+
+mongoose.connection.on('disconnected', () => {
+  logger.warn('MongoDB disconnected');
+});
 
 export default connectDB;
