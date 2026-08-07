@@ -26,17 +26,17 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [ ] `express-validator`, `helmet`, `morgan`, `cors` wired in
 - [ ] ✅ PR: backend skeleton + health endpoint
 
-### Shafqatullah (Backend)
-- [ ] Create all Mongoose models per DATABASE_SCHEMA.md:
-  - [ ] `users` (email unique, role, passwordHash)
-  - [ ] `students`
-  - [ ] `attendance`
-  - [ ] `teams`
-  - [ ] `projects`
-  - [ ] `tasks`
-- [ ] Global error-handling middleware + standard response envelope
-- [ ] Indexes on email, `{ studentId, date }`, foreign keys
-- [ ] ✅ PR: models + error handler
+### Shafqat ullah (Backend)
+- [x] Create all Mongoose models per DATABASE_SCHEMA.md:
+  - [x] `users` (email unique, role, passwordHash)
+  - [x] `students`
+  - [x] `attendance`
+  - [x] `teams`
+  - [x] `projects`
+  - [x] `tasks`
+- [x] Global error-handling middleware + standard response envelope
+- [x] Indexes on email, `{ studentId, date }`, foreign keys
+- [x] ✅ PR: models + error handler
 
 ### Abdullah (Frontend)
 - [ ] Create `frontend/` (Vite), install axios + react-router-dom + MUI stack
