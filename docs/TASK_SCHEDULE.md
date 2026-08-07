@@ -26,7 +26,7 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [ ] `express-validator`, `helmet`, `morgan`, `cors` wired in
 - [ ] ✅ PR: backend skeleton + health endpoint
 
-### Shafqatullah (Backend)
+### Shafqat ullah (Backend)
 - [ ] Create all Mongoose models per DATABASE_SCHEMA.md:
   - [ ] `users` (email unique, role, passwordHash)
   - [ ] `students`

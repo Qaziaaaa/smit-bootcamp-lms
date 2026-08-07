@@ -31,7 +31,7 @@ Responsible for:
 
 ## Backend Team (Node.js + Express)
 
-### Hakimullah
+### Hakim ullah
 
 Responsible for:
 
