@@ -27,7 +27,7 @@ Done by the team lead during setup. Deliverables:
 | Docs: this plan + setup guide + coding standards | Team lead |
 | Environment setup on every machine | All members |
 | Backend boilerplate: server, config, db connection, health endpoint | Hakimullah |
-| Frontend boilerplate: CRA app, router, layout shell | Abdullah |
+| Frontend boilerplate: Vite app, router, layout shell | Abdullah |
 
 **Acceptance:** Both apps run locally; `/api/health` returns 200; setup guide verified by all.
 
