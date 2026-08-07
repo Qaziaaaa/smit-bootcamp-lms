@@ -18,7 +18,7 @@ Saylani-Bootcamp-LMS3/
   docs/
 ```
 
-(The `backend/` and `frontend/` folders are created in Phase 2. Until then, set up the tooling below.)
+The `backend/` and `frontend/` scaffolds are already committed to the repo. Members only clone, install, and run.
 
 ## Backend Setup
 
@@ -26,11 +26,8 @@ Saylani-Bootcamp-LMS3/
 git clone https://github.com/SMIT-Bootcamp/Saylani-Bootcamp-LMS3.git
 cd Saylani-Bootcamp-LMS3
 git checkout dev
-mkdir -p backend
 cd backend
-npm init -y
-npm install express mongoose cors dotenv bcryptjs jsonwebtoken express-validator helmet morgan
-npm install --save-dev nodemon
+npm install
 ```
 
 ### Environment Variables
@@ -65,25 +62,24 @@ API runs at `http://localhost:5000`.
 
 ```bash
 cd ../frontend
-npx create-react-app . --use-npm
-npm install @mui/material @emotion/react @emotion/styled lucide-react react-router-dom axios react-hook-form zod @tanstack/react-query @reduxjs/toolkit react-redux sonner framer-motion dayjs @tanstack/react-table react-dropzone fuse.js recharts
+npm install
 ```
 
 ### Environment Variables
 
-Create `.env` in `frontend/`:
+Create `.env` in `frontend/` (Vite env vars are prefixed `VITE_`):
 
 ```
-REACT_APP_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5000/api
 ```
 
 ### Run
 
 ```bash
-npm start
+npm run dev
 ```
 
-App runs at `http://localhost:3000`.
+App runs at `http://localhost:5173`.
 
 ## MongoDB
 
@@ -98,14 +94,14 @@ mongosh --eval "db.runCommand({ ping: 1 })"
 ## First Run Checklist
 
 - [ ] Backend starts and logs "Connected to MongoDB"
-- [ ] Frontend loads at localhost:3000
+- [ ] Frontend loads at localhost:5173
 - [ ] A health endpoint `/api/health` returns `{ success: true }`
 
 ## Troubleshooting
 
 - **Port already in use** — change `PORT` in `backend/.env` or stop the conflicting process.
 - **MongoDB connection refused** — start MongoDB service: `net start MongoDB` (Windows) or `sudo systemctl start mongod` (Linux).
-- **CORS errors** — confirm `cors()` is enabled and `REACT_APP_API_URL` matches the backend port.
+- **CORS errors** — confirm `cors()` is enabled and `VITE_API_URL` matches the backend port.
 - **Secrets committed** — never commit `.env`; add `.env` to `.gitignore`.
 
 ## .gitignore (both frontend and backend)

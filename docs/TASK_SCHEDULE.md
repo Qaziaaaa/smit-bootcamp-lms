@@ -39,7 +39,7 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [ ] ✅ PR: models + error handler
 
 ### Abdullah (Frontend)
-- [ ] Create `frontend/` (CRA), install axios + react-router-dom
+- [ ] Create `frontend/` (Vite), install axios + react-router-dom + MUI stack
 - [ ] Router with all 15 routes from FRONTEND_DESIGN.md §2
 - [ ] `ProtectedRoute` (admin + student roles)
 - [ ] Auth context (token store, login/logout state)

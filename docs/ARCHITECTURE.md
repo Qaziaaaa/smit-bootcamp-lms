@@ -7,7 +7,7 @@ A Bootcamp LMS with an admin management portal and a read-only student portal, c
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18 (CRA), MUI, Lucide React, React Router, Axios, React Hook Form + Zod, Redux Toolkit, TanStack Query, TanStack Table, Recharts, Sonner, Framer Motion, Day.js, React Dropzone, Fuse.js |
+| Frontend | React 18 (Vite), MUI, Lucide React, React Router, Axios, React Hook Form + Zod, Redux Toolkit, TanStack Query, TanStack Table, Recharts, Sonner, Framer Motion, Day.js, React Dropzone, Fuse.js |
 | Backend | Node.js 18+, Express, Mongoose |
 | Database | MongoDB |
 | Auth | jsonwebtoken (JWT Bearer), bcryptjs |
