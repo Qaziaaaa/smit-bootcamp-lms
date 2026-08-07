@@ -18,7 +18,7 @@ Saylani-Bootcamp-LMS3/
   docs/
 ```
 
-(The `backend/` and `frontend/` folders are created in Phase 2. Until then, set up the tooling below.)
+The `backend/` and `frontend/` scaffolds are already committed to the repo. Members only clone, install, and run.
 
 ## Backend Setup
 
@@ -26,11 +26,8 @@ Saylani-Bootcamp-LMS3/
 git clone https://github.com/SMIT-Bootcamp/Saylani-Bootcamp-LMS3.git
 cd Saylani-Bootcamp-LMS3
 git checkout dev
-mkdir -p backend
 cd backend
-npm init -y
-npm install express mongoose cors dotenv bcryptjs jsonwebtoken express-validator helmet morgan
-npm install --save-dev nodemon
+npm install
 ```
 
 ### Environment Variables
@@ -65,9 +62,7 @@ API runs at `http://localhost:5000`.
 
 ```bash
 cd ../frontend
-npm create vite@latest . -- --template react
 npm install
-npm install @mui/material @emotion/react @emotion/styled lucide-react react-router-dom axios react-hook-form zod @tanstack/react-query @reduxjs/toolkit react-redux sonner framer-motion dayjs @tanstack/react-table react-dropzone fuse.js recharts
 ```
 
 ### Environment Variables
