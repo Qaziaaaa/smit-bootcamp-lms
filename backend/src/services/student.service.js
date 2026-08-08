@@ -1,42 +1,102 @@
-import bcrypt from 'bcryptjs';
-
-import ApiError from '../utils/ApiError.js';
-import env from '../config/env.js';
-import Student from '../models/student.model.js';
+import mongoose from 'mongoose';
 import User from '../models/user.model.js';
+import Student from '../models/student.model.js';
 import Attendance from '../models/attendance.model.js';
+import bcrypt from 'bcryptjs';
+import env from '../config/env.js';
+import ApiError from '../utils/ApiError.js';
 
-const listStudents = async ({ search, batch, teamId, status, page, limit }) => {
-  const filter = {};
+const createStudent = async (data) => {
+  const { name, email, password, phone, batch, teamId } = data;
+
+  const existingUser = await User.findOne({ email: email.toLowerCase() });
+  if (existingUser) {
+    throw new ApiError(409, 'Email already exists.', ['A user with this email already exists.']);
+  }
+
+  const existingStudent = await Student.findOne({ email: email.toLowerCase() });
+  if (existingStudent) {
+    throw new ApiError(409, 'Email already exists.', ['A student with this email already exists.']);
+  }
+
+  const passwordHash = await bcrypt.hash(password, env.bcryptRounds);
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const user = await User.create([{ email: email.toLowerCase(), passwordHash, role: 'student' }], { session });
+
+    const student = await Student.create(
+      [
+        {
+          userId: user[0]._id,
+          name,
+          email: email.toLowerCase(),
+          phone,
+          batch,
+          teamId,
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return student[0];
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
+};
+
+const getStudents = async (filters = {}, pagination = {}) => {
+  const { search, batch, teamId, status } = filters;
+  const { page = 1, limit = 10 } = pagination;
+
+  const query = {};
 
   if (search) {
-    const regex = new RegExp(search, 'i');
-    filter.$or = [{ name: regex }, { email: regex }];
+    query.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } },
+      { batch: { $regex: search, $options: 'i' } },
+    ];
   }
-  if (batch) filter.batch = batch;
-  if (teamId) filter.teamId = teamId;
-  if (status) filter.status = status;
 
-  const pageNum = Math.max(1, Number(page) || 1);
-  const pageSize = Math.min(100, Math.max(1, Number(limit) || 10));
-  const skip = (pageNum - 1) * pageSize;
+  if (batch) {
+    query.batch = batch;
+  }
+
+  if (teamId) {
+    query.teamId = teamId;
+  }
+
+  if (status) {
+    query.status = status;
+  }
+
+  const skip = (page - 1) * limit;
 
   const [students, total] = await Promise.all([
-    Student.find(filter)
+    Student.find(query)
       .populate('teamId', 'name')
+      .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(pageSize)
+      .limit(limit)
       .lean(),
-    Student.countDocuments(filter),
+    Student.countDocuments(query),
   ]);
 
   return {
     students,
     pagination: {
-      page: pageNum,
-      limit: pageSize,
+      page: Number(page),
+      limit: Number(limit),
       total,
-      totalPages: Math.ceil(total / pageSize) || 1,
+      pages: Math.ceil(total / limit),
     },
   };
 };
@@ -44,113 +104,91 @@ const listStudents = async ({ search, batch, teamId, status, page, limit }) => {
 const getStudentById = async (id) => {
   const student = await Student.findById(id).populate('teamId', 'name').lean();
   if (!student) {
-    throw new ApiError(404, 'Student not found.');
+    throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
   }
-
-  const attendanceCounts = await Attendance.aggregate([
-    { $match: { studentId: student._id } },
-    {
-      $group: {
-        _id: null,
-        totalDays: { $sum: 1 },
-        present: { $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] } },
-        absent: { $sum: { $cond: [{ $eq: ['$status', 'absent'] }, 1, 0] } },
-      },
-    },
-  ]);
-
-  const summary = attendanceCounts[0] || { totalDays: 0, present: 0, absent: 0 };
-  summary.percentage = summary.totalDays > 0 ? Math.round((summary.present / summary.totalDays) * 100) : 0;
-
-  return { ...student, attendanceSummary: summary };
+  return student;
 };
 
-const createStudent = async ({ name, email, password, phone, batch, teamId }) => {
-  if (!name || !email || !password) {
-    throw new ApiError(400, 'name, email and password are required.');
-  }
-
-  const existing = await User.findOne({ email });
-  if (existing) {
-    throw new ApiError(409, 'Email already exists.');
-  }
-
-  const passwordHash = await bcrypt.hash(password, env.bcryptRounds);
-  const user = await User.create({ email, passwordHash, role: 'student' });
-
-  const student = await Student.create({
-    userId: user._id,
-    name,
-    email,
-    phone,
-    batch,
-    teamId,
-  });
-
-  return student.toObject();
-};
-
-const updateStudent = async (id, updateData) => {
+const updateStudent = async (id, data) => {
+  const { email, ...rest } = data;
   const student = await Student.findById(id);
   if (!student) {
-    throw new ApiError(404, 'Student not found.');
+    throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
   }
 
-  if (updateData.email && updateData.email !== student.email) {
-    const existing = await User.findOne({ email: updateData.email });
-    if (existing) {
-      throw new ApiError(409, 'Email already exists.');
+  if (email) {
+    const existingStudent = await Student.findOne({
+      email: email.toLowerCase(),
+      _id: { $ne: id },
+    });
+    if (existingStudent) {
+      throw new ApiError(409, 'Email already exists.', ['A student with this email already exists.']);
     }
-    await User.findByIdAndUpdate(student.userId, { email: updateData.email });
+
+    const existingUser = await User.findOne({
+      email: email.toLowerCase(),
+      _id: { $ne: student.userId },
+    });
+    if (existingUser) {
+      throw new ApiError(409, 'Email already exists.', ['A user with this email already exists.']);
+    }
   }
 
-  const allowedFields = ['name', 'email', 'phone', 'batch', 'teamId', 'status'];
-  allowedFields.forEach((field) => {
-    if (updateData[field] !== undefined) {
-      student[field] = updateData[field];
-    }
-  });
-  await student.save();
+  const updated = await Student.findByIdAndUpdate(
+    id,
+    { ...rest, ...(email && { email: email.toLowerCase() }) },
+    { new: true, runValidators: true }
+  ).populate('teamId', 'name');
 
-  return student.toObject();
+  if (email) {
+    await User.findByIdAndUpdate(student.userId, { email: email.toLowerCase() });
+  }
+
+  return updated;
 };
 
 const deleteStudent = async (id) => {
   const student = await Student.findById(id);
   if (!student) {
-    throw new ApiError(404, 'Student not found.');
+    throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
   }
 
-  await Attendance.deleteMany({ studentId: student._id });
+  await Student.findByIdAndDelete(id);
   await User.findByIdAndDelete(student.userId);
-  await Student.findByIdAndDelete(student._id);
+  await Attendance.deleteMany({ studentId: id });
 
-  return { id: student._id };
+  return { success: true };
 };
 
-const getStudentAttendance = async (id) => {
-  const student = await Student.findById(id);
-  if (!student) {
-    throw new ApiError(404, 'Student not found.');
-  }
+const getStudentAttendance = async (studentId) => {
+  const records = await Attendance.find({ studentId }).sort({ date: 1 }).lean();
 
-  const records = await Attendance.find({ studentId: student._id })
-    .sort({ date: -1 })
-    .lean();
-
-  const present = records.filter((record) => record.status === 'present').length;
+  const presentCount = records.filter((r) => r.status === 'present').length;
+  const absentCount = records.filter((r) => r.status === 'absent').length;
   const totalDays = records.length;
+  const percentage = totalDays > 0 ? ((presentCount / totalDays) * 100).toFixed(2) : 0;
 
   return {
-    student: { id: student._id, name: student.name, email: student.email },
-    attendance: records,
+    records,
     summary: {
+      present: presentCount,
+      absent: absentCount,
       totalDays,
-      present,
-      absent: totalDays - present,
-      percentage: totalDays > 0 ? Math.round((present / totalDays) * 100) : 0,
+      percentage: Number(percentage),
     },
   };
 };
 
-export { listStudents, getStudentById, createStudent, updateStudent, deleteStudent, getStudentAttendance };
+const findStudentByUserId = async (userId) => {
+  return Student.findOne({ userId }).populate('teamId', 'name').lean();
+};
+
+export default {
+  createStudent,
+  getStudents,
+  getStudentById,
+  updateStudent,
+  deleteStudent,
+  getStudentAttendance,
+  findStudentByUserId,
+};

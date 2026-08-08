@@ -7,22 +7,37 @@ const AuthContext = createContext(null)
 export { AuthContext }
 
 function readStoredUser() {
+  const raw = sessionStorage.getItem(USER_KEY) || localStorage.getItem(USER_KEY)
   try {
-    return JSON.parse(localStorage.getItem(USER_KEY)) || null
+    return JSON.parse(raw) || null
   } catch {
     return null
   }
 }
 
+// Demo logins are preview-only: they live in sessionStorage so a fresh visit
+// always starts at the login screen. Real logins persist in localStorage.
+function initToken() {
+  // migrate: drop any legacy demo session previously persisted in localStorage,
+  // including a leftover demo-token even if its demo flag was lost
+  const localToken = localStorage.getItem(TOKEN_KEY)
+  if (localStorage.getItem(DEMO_KEY) === '1' || localToken === 'demo-token') {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
+    localStorage.removeItem(DEMO_KEY)
+  }
+  return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY)
+}
+
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY))
-  const [user, setUser] = useState(() => readStoredUser())
-  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem(TOKEN_KEY)))
+  const [token, setToken] = useState(initToken)
+  const [user, setUser] = useState(readStoredUser)
+  const [loading, setLoading] = useState(() => Boolean(token))
 
   useEffect(() => {
     if (!token) return
 
-    if (localStorage.getItem(DEMO_KEY) === '1') {
+    if (sessionStorage.getItem(DEMO_KEY) === '1') {
       setLoading(false)
       return
     }
@@ -35,6 +50,8 @@ export function AuthProvider({ children }) {
       })
       .catch(() => {
         if (!cancelled) {
+          sessionStorage.removeItem(TOKEN_KEY)
+          sessionStorage.removeItem(USER_KEY)
           localStorage.removeItem(TOKEN_KEY)
           localStorage.removeItem(USER_KEY)
           setToken(null)
@@ -66,9 +83,12 @@ export function AuthProvider({ children }) {
       email: role === 'admin' ? 'admin@lms.com' : 'student@lms.com',
       role,
     }
-    localStorage.setItem(TOKEN_KEY, 'demo-token')
-    localStorage.setItem(USER_KEY, JSON.stringify(demoUser))
-    localStorage.setItem(DEMO_KEY, '1')
+    sessionStorage.setItem(TOKEN_KEY, 'demo-token')
+    sessionStorage.setItem(USER_KEY, JSON.stringify(demoUser))
+    sessionStorage.setItem(DEMO_KEY, '1')
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
+    localStorage.removeItem(DEMO_KEY)
     setToken('demo-token')
     setUser(demoUser)
     return demoUser
@@ -80,6 +100,9 @@ export function AuthProvider({ children }) {
     } catch {
       // token is discarded client-side regardless
     }
+    sessionStorage.removeItem(TOKEN_KEY)
+    sessionStorage.removeItem(USER_KEY)
+    sessionStorage.removeItem(DEMO_KEY)
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
     localStorage.removeItem(DEMO_KEY)

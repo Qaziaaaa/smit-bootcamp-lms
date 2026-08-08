@@ -1,48 +1,46 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import { sendSuccess } from '../utils/response.js';
-import * as studentService from '../services/student.service.js';
+import studentService from '../services/student.service.js';
 
-const listStudents = asyncHandler(async (req, res) => {
-  const result = await studentService.listStudents({
-    search: req.query.search,
-    batch: req.query.batch,
-    teamId: req.query.teamId,
-    status: req.query.status,
-    page: req.query.page,
-    limit: req.query.limit,
-  });
+const createStudent = asyncHandler(async (req, res) => {
+  const student = await studentService.createStudent(req.body);
+  sendSuccess(res, 201, student, 'Student created successfully');
+});
 
-  sendSuccess(res, 200, result, 'Students fetched successfully');
+const getStudents = asyncHandler(async (req, res) => {
+  const { search, batch, teamId, status, page, limit } = req.query;
+  const result = await studentService.getStudents(
+    { search, batch, teamId, status },
+    { page: Number(page) || 1, limit: Number(limit) || 10 }
+  );
+  sendSuccess(res, 200, result, 'Students retrieved successfully');
 });
 
 const getStudentById = asyncHandler(async (req, res) => {
-  const result = await studentService.getStudentById(req.params.id);
-
-  sendSuccess(res, 200, result, 'Student fetched successfully');
-});
-
-const createStudent = asyncHandler(async (req, res) => {
-  const result = await studentService.createStudent(req.body);
-
-  sendSuccess(res, 201, result, 'Student created successfully');
+  const student = await studentService.getStudentById(req.params.id);
+  sendSuccess(res, 200, student, 'Student retrieved successfully');
 });
 
 const updateStudent = asyncHandler(async (req, res) => {
-  const result = await studentService.updateStudent(req.params.id, req.body);
-
-  sendSuccess(res, 200, result, 'Student updated successfully');
+  const student = await studentService.updateStudent(req.params.id, req.body);
+  sendSuccess(res, 200, student, 'Student updated successfully');
 });
 
 const deleteStudent = asyncHandler(async (req, res) => {
   await studentService.deleteStudent(req.params.id);
-
-  sendSuccess(res, 200, { id: req.params.id }, 'Student deleted successfully');
+  sendSuccess(res, 200, { deleted: true }, 'Student deleted successfully');
 });
 
 const getStudentAttendance = asyncHandler(async (req, res) => {
   const result = await studentService.getStudentAttendance(req.params.id);
-
-  sendSuccess(res, 200, result, 'Attendance fetched successfully');
+  sendSuccess(res, 200, result, 'Student attendance retrieved successfully');
 });
 
-export { listStudents, getStudentById, createStudent, updateStudent, deleteStudent, getStudentAttendance };
+export default {
+  createStudent,
+  getStudents,
+  getStudentById,
+  updateStudent,
+  deleteStudent,
+  getStudentAttendance,
+};
