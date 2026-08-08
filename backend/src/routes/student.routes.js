@@ -7,6 +7,7 @@ const router = Router();
 router.use(authRequired);
 
 router.get('/', studentController.listStudents);
+router.post('/', studentController.createStudent);
 router.get('/:id', studentController.getStudentById);
 
 export default router;

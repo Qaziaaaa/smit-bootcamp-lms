@@ -1,5 +1,9 @@
+import bcrypt from 'bcryptjs';
+
 import ApiError from '../utils/ApiError.js';
+import env from '../config/env.js';
 import Student from '../models/student.model.js';
+import User from '../models/user.model.js';
 import Attendance from '../models/attendance.model.js';
 
 const listStudents = async ({ search, batch, teamId, status, page, limit }) => {
@@ -61,4 +65,29 @@ const getStudentById = async (id) => {
   return { ...student, attendanceSummary: summary };
 };
 
-export { listStudents, getStudentById };
+const createStudent = async ({ name, email, password, phone, batch, teamId }) => {
+  if (!name || !email || !password) {
+    throw new ApiError(400, 'name, email and password are required.');
+  }
+
+  const existing = await User.findOne({ email });
+  if (existing) {
+    throw new ApiError(409, 'Email already exists.');
+  }
+
+  const passwordHash = await bcrypt.hash(password, env.bcryptRounds);
+  const user = await User.create({ email, passwordHash, role: 'student' });
+
+  const student = await Student.create({
+    userId: user._id,
+    name,
+    email,
+    phone,
+    batch,
+    teamId,
+  });
+
+  return student.toObject();
+};
+
+export { listStudents, getStudentById, createStudent };
