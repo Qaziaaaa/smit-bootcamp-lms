@@ -115,4 +115,17 @@ const updateStudent = async (id, updateData) => {
   return student.toObject();
 };
 
-export { listStudents, getStudentById, createStudent, updateStudent };
+const deleteStudent = async (id) => {
+  const student = await Student.findById(id);
+  if (!student) {
+    throw new ApiError(404, 'Student not found.');
+  }
+
+  await Attendance.deleteMany({ studentId: student._id });
+  await User.findByIdAndDelete(student.userId);
+  await Student.findByIdAndDelete(student._id);
+
+  return { id: student._id };
+};
+
+export { listStudents, getStudentById, createStudent, updateStudent, deleteStudent };
