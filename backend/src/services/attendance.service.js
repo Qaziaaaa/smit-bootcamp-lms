@@ -42,9 +42,9 @@ const getAttendance = async (filters = {}, pagination = {}) => {
     matchStage.status = status;
   }
 
-  let studentMatch = {};
+  const studentMatch = {};
   if (batch) {
-    studentMatch.batch = batch;
+    studentMatch['student.batch'] = batch;
   }
 
   const skip = (page - 1) * limit;
@@ -63,7 +63,7 @@ const getAttendance = async (filters = {}, pagination = {}) => {
   ];
 
   if (Object.keys(studentMatch).length > 0) {
-    pipeline.push({ $match: { student: studentMatch } });
+    pipeline.push({ $match: studentMatch });
   }
 
   pipeline.push(
@@ -99,7 +99,7 @@ const getAttendance = async (filters = {}, pagination = {}) => {
   ];
 
   if (Object.keys(studentMatch).length > 0) {
-    countPipeline.push({ $match: { student: studentMatch } });
+    countPipeline.push({ $match: studentMatch });
   }
 
   countPipeline.push({ $count: 'total' });
@@ -135,9 +135,9 @@ const updateAttendance = async (id, status) => {
 };
 
 const getAttendanceSummary = async (batch) => {
-  let studentMatch = { status: 'active' };
+  const studentMatch = { 'student.status': 'active' };
   if (batch) {
-    studentMatch.batch = batch;
+    studentMatch['student.batch'] = batch;
   }
 
   const pipeline = [
@@ -150,7 +150,7 @@ const getAttendanceSummary = async (batch) => {
       },
     },
     { $unwind: '$student' },
-    { $match: { student: studentMatch } },
+    { $match: studentMatch },
     {
       $group: {
         _id: '$student._id',
