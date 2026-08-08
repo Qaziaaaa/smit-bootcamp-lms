@@ -75,9 +75,9 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [ ] ✅ PR: auth API
 
 ### Shafqatullah (Backend)
-- [ ] Student CRUD APIs (`GET/POST/PUT/DELETE /students`)
-- [ ] Pagination + `search/batch/teamId` filters
-- [ ] `GET /students/:id` + `GET /students/:id/attendance`
+- [x] Student CRUD APIs (`GET/POST/PUT/DELETE /students`)
+- [x] Pagination + `search/batch/teamId` filters
+- [x] `GET /students/:id` + `GET /students/:id/attendance`
 - [ ] ✅ PR: student APIs
 
 ### Abdullah (Frontend)
