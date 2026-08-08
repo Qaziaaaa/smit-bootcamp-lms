@@ -39,4 +39,10 @@ const deleteStudent = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, { id: req.params.id }, 'Student deleted successfully');
 });
 
-export { listStudents, getStudentById, createStudent, updateStudent, deleteStudent };
+const getStudentAttendance = asyncHandler(async (req, res) => {
+  const result = await studentService.getStudentAttendance(req.params.id);
+
+  sendSuccess(res, 200, result, 'Attendance fetched successfully');
+});
+
+export { listStudents, getStudentById, createStudent, updateStudent, deleteStudent, getStudentAttendance };

@@ -128,4 +128,29 @@ const deleteStudent = async (id) => {
   return { id: student._id };
 };
 
-export { listStudents, getStudentById, createStudent, updateStudent, deleteStudent };
+const getStudentAttendance = async (id) => {
+  const student = await Student.findById(id);
+  if (!student) {
+    throw new ApiError(404, 'Student not found.');
+  }
+
+  const records = await Attendance.find({ studentId: student._id })
+    .sort({ date: -1 })
+    .lean();
+
+  const present = records.filter((record) => record.status === 'present').length;
+  const totalDays = records.length;
+
+  return {
+    student: { id: student._id, name: student.name, email: student.email },
+    attendance: records,
+    summary: {
+      totalDays,
+      present,
+      absent: totalDays - present,
+      percentage: totalDays > 0 ? Math.round((present / totalDays) * 100) : 0,
+    },
+  };
+};
+
+export { listStudents, getStudentById, createStudent, updateStudent, deleteStudent, getStudentAttendance };
