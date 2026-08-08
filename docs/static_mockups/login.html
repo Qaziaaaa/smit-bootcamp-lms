@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMIT - Sign In | Bootcamp LMS Portal</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="font-sans antialiased bg-[#F8FAFA] text-[#0A0A0A] min-h-screen flex flex-col justify-center items-center p-4">
+
+  <div class="w-full max-w-md space-y-6">
+    <!-- Header Logo -->
+    <div class="text-center space-y-3 flex flex-col items-center">
+      <div class="relative shrink-0 rounded-xl bg-gradient-to-br from-[#294683] via-[#0277BD] to-[#1E3A8A] p-3 flex items-center justify-center text-white shadow-sm h-14 w-14 mb-2">
+        <svg viewBox="0 0 24 24" fill="none" class="w-full h-full stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10L12 5L2 10L12 15L22 10Z"></path>
+          <path d="M6 12V16.5C6 16.5 9 19 12 19C15 19 18 16.5 18 16.5V12"></path>
+          <path d="M22 10V16" stroke-width="1.5"></path>
+          <circle cx="12" cy="10" r="1.5" fill="#60A5FA" stroke="none"></circle>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight text-[#0A0A0A]">Sign in to your account</h1>
+      <p class="text-sm text-[#828283]">Enter your bootcamp credentials to access your dashboard.</p>
+    </div>
+
+    <!-- Quick Demo Presets -->
+    <div class="grid grid-cols-2 gap-3">
+      <a href="index.html" class="p-3 rounded-xl border border-[#E2E8F0] bg-white text-[#474B53] hover:border-[#294683]/50 transition-colors duration-150 flex items-center justify-between cursor-pointer block text-left">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shield" class="h-4 w-4 shrink-0 text-current" stroke-width="1.8"></i>
+          <div>
+            <p class="text-xs font-medium text-[#0A0A0A]">Admin Demo</p>
+            <p class="text-[10px] text-[#828283]">Full Access</p>
+          </div>
+        </div>
+      </a>
+
+      <a href="student_dashboard.html" class="p-3 rounded-xl border border-[#E2E8F0] bg-white text-[#474B53] hover:border-[#294683]/50 transition-colors duration-150 flex items-center justify-between cursor-pointer block text-left">
+        <div class="flex items-center gap-2">
+          <i data-lucide="user" class="h-4 w-4 shrink-0 text-current" stroke-width="1.8"></i>
+          <div>
+            <p class="text-xs font-medium text-[#0A0A0A]">Student Demo</p>
+            <p class="text-[10px] text-[#828283]">Student View</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="rounded-xl border border-[#E2E8F0] shadow-sm bg-white overflow-hidden">
+      <div class="p-5 border-b border-[#E2E8F0] bg-[#F4F9FF]">
+        <h3 class="font-semibold leading-none tracking-tight text-lg">Sign In</h3>
+      </div>
+      <div class="p-6">
+        <form class="space-y-4" action="index.html">
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium uppercase tracking-wider text-[#828283]">
+              Email Address
+            </label>
+            <div class="relative">
+              <input type="email" placeholder="name@bootcamp.dev" value="admin@saylani.org" class="flex h-10 w-full rounded-md border border-[#E2E8F0] bg-white px-3 py-2 text-sm pl-9 focus:ring-2 focus:ring-[#2D69EB] outline-none" />
+              <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#828283]" stroke-width="1.75"></i>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium uppercase tracking-wider text-[#828283]">
+              Password
+            </label>
+            <div class="relative">
+              <input type="password" placeholder="••••••••" value="password123" class="flex h-10 w-full rounded-md border border-[#E2E8F0] bg-white px-3 py-2 text-sm pl-9 focus:ring-2 focus:ring-[#2D69EB] outline-none" />
+              <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#828283]" stroke-width="1.75"></i>
+            </div>
+          </div>
+
+          <a href="index.html" class="inline-flex items-center justify-center rounded-md w-full bg-[#2D69EB] hover:bg-[#0E3B9A] text-white font-semibold h-11 text-sm shadow-sm transition-colors mt-2">
+            Sign In as Admin
+            <i data-lucide="arrow-right" class="ml-2 h-4 w-4" stroke-width="1.75"></i>
+          </a>
+        </form>
+      </div>
+    </div>
+
+    <p class="text-center text-[10px] text-[#828283]">
+      Bootcamp OS v2.4 • Strict Architectural Contract Enforced
+    </p>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
