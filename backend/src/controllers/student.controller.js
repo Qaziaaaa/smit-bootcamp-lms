@@ -27,4 +27,10 @@ const createStudent = asyncHandler(async (req, res) => {
   sendSuccess(res, 201, result, 'Student created successfully');
 });
 
-export { listStudents, getStudentById, createStudent };
+const updateStudent = asyncHandler(async (req, res) => {
+  const result = await studentService.updateStudent(req.params.id, req.body);
+
+  sendSuccess(res, 200, result, 'Student updated successfully');
+});
+
+export { listStudents, getStudentById, createStudent, updateStudent };

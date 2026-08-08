@@ -90,4 +90,29 @@ const createStudent = async ({ name, email, password, phone, batch, teamId }) =>
   return student.toObject();
 };
 
-export { listStudents, getStudentById, createStudent };
+const updateStudent = async (id, updateData) => {
+  const student = await Student.findById(id);
+  if (!student) {
+    throw new ApiError(404, 'Student not found.');
+  }
+
+  if (updateData.email && updateData.email !== student.email) {
+    const existing = await User.findOne({ email: updateData.email });
+    if (existing) {
+      throw new ApiError(409, 'Email already exists.');
+    }
+    await User.findByIdAndUpdate(student.userId, { email: updateData.email });
+  }
+
+  const allowedFields = ['name', 'email', 'phone', 'batch', 'teamId', 'status'];
+  allowedFields.forEach((field) => {
+    if (updateData[field] !== undefined) {
+      student[field] = updateData[field];
+    }
+  });
+  await student.save();
+
+  return student.toObject();
+};
+
+export { listStudents, getStudentById, createStudent, updateStudent };

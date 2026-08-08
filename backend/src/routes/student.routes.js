@@ -9,5 +9,6 @@ router.use(authRequired);
 router.get('/', studentController.listStudents);
 router.post('/', studentController.createStudent);
 router.get('/:id', studentController.getStudentById);
+router.put('/:id', studentController.updateStudent);
 
 export default router;
