@@ -1,4 +1,6 @@
+import ApiError from '../utils/ApiError.js';
 import Student from '../models/student.model.js';
+import Attendance from '../models/attendance.model.js';
 
 const listStudents = async ({ search, batch, teamId, status, page, limit }) => {
   const filter = {};
@@ -35,4 +37,28 @@ const listStudents = async ({ search, batch, teamId, status, page, limit }) => {
   };
 };
 
-export { listStudents };
+const getStudentById = async (id) => {
+  const student = await Student.findById(id).populate('teamId', 'name').lean();
+  if (!student) {
+    throw new ApiError(404, 'Student not found.');
+  }
+
+  const attendanceCounts = await Attendance.aggregate([
+    { $match: { studentId: student._id } },
+    {
+      $group: {
+        _id: null,
+        totalDays: { $sum: 1 },
+        present: { $sum: { $cond: [{ $eq: ['$status', 'present'] }, 1, 0] } },
+        absent: { $sum: { $cond: [{ $eq: ['$status', 'absent'] }, 1, 0] } },
+      },
+    },
+  ]);
+
+  const summary = attendanceCounts[0] || { totalDays: 0, present: 0, absent: 0 };
+  summary.percentage = summary.totalDays > 0 ? Math.round((summary.present / summary.totalDays) * 100) : 0;
+
+  return { ...student, attendanceSummary: summary };
+};
+
+export { listStudents, getStudentById };

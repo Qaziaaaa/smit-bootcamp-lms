@@ -15,4 +15,10 @@ const listStudents = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, result, 'Students fetched successfully');
 });
 
-export { listStudents };
+const getStudentById = asyncHandler(async (req, res) => {
+  const result = await studentService.getStudentById(req.params.id);
+
+  sendSuccess(res, 200, result, 'Student fetched successfully');
+});
+
+export { listStudents, getStudentById };
