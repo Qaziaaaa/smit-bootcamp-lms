@@ -39,12 +39,12 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] ✅ PR: models + error handler
 
 ### Abdullah (Frontend)
-- [ ] Create `frontend/` (Vite), install axios + react-router-dom + MUI stack
-- [ ] Router with all 15 routes from FRONTEND_DESIGN.md §2
-- [ ] `ProtectedRoute` (admin + student roles)
-- [ ] Auth context (token store, login/logout state)
-- [ ] Admin shell layout (sidebar 240px + topbar + content)
-- [ ] ✅ PR: frontend scaffold + routing + shell
+- [x] Create `frontend/` (Vite), install axios + react-router-dom + MUI stack
+- [x] Router with all 15 routes from FRONTEND_DESIGN.md §2
+- [x] `ProtectedRoute` (admin + student roles)
+- [x] Auth context (token store, login/logout state)
+- [x] Admin shell layout (sidebar 240px + topbar + content)
+- [x] ✅ PR: frontend scaffold + routing + shell
 
 ### Shahzad (Frontend)
 - [ ] Shared component library per FRONTEND_DESIGN.md §3:
@@ -78,14 +78,14 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] Student CRUD APIs (`GET/POST/PUT/DELETE /students`)
 - [x] Pagination + `search/batch/teamId` filters
 - [x] `GET /students/:id` + `GET /students/:id/attendance`
-- [ ] ✅ PR: student APIs
+- [x] ✅ PR: student APIs (#47)
 
 ### Abdullah (Frontend)
-- [ ] Login page (FRONTEND_DESIGN.md §4.1)
-- [ ] Wire auth context → login → redirect by role
-- [ ] 401/403 handling + redirect to `/login`
-- [ ] Admin dashboard layout with StatCards
-- [ ] ✅ PR: login + dashboard shell
+- [x] Login page (FRONTEND_DESIGN.md §4.1)
+- [x] Wire auth context → login → redirect by role
+- [x] 401/403 handling + redirect to `/login`
+- [x] Admin dashboard layout with StatCards
+- [x] ✅ PR: login + dashboard shell (#34)
 
 ### Shahzad (Frontend)
 - [ ] Students list page: SearchBar, FilterBar, DataTable, Pagination
