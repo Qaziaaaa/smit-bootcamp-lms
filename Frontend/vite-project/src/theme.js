@@ -39,9 +39,12 @@ export const theme = createTheme({
       },
     },
     MuiPaper: {
-      defaultProps: { variant: 'outlined' },
       styleOverrides: {
-        root: { backgroundImage: 'none' },
+        root: {
+          backgroundImage: 'none',
+          boxShadow:
+            '0 1px 3px 0 rgb(15 23 42 / 0.07), 0 4px 10px -2px rgb(15 23 42 / 0.10), 0 16px 32px -12px rgb(15 23 42 / 0.16)',
+        },
       },
     },
   },
