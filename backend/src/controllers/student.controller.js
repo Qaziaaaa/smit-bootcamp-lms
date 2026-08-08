@@ -1,0 +1,18 @@
+import asyncHandler from '../utils/asyncHandler.js';
+import { sendSuccess } from '../utils/response.js';
+import * as studentService from '../services/student.service.js';
+
+const listStudents = asyncHandler(async (req, res) => {
+  const result = await studentService.listStudents({
+    search: req.query.search,
+    batch: req.query.batch,
+    teamId: req.query.teamId,
+    status: req.query.status,
+    page: req.query.page,
+    limit: req.query.limit,
+  });
+
+  sendSuccess(res, 200, result, 'Students fetched successfully');
+});
+
+export { listStudents };
