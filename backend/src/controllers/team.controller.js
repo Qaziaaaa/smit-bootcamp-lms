@@ -8,6 +8,12 @@ const getTeams = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, { teams }, 'Teams retrieved successfully');
 });
 
+const getTeamById = asyncHandler(async (req, res) => {
+  const team = await teamService.getTeamById(req.params.id);
+  sendSuccess(res, 200, team, 'Team retrieved successfully');
+});
+
 export default {
   getTeams,
+  getTeamById,
 };

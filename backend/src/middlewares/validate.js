@@ -92,6 +92,11 @@ const validateTeamsQuery = [
   handleValidationErrors,
 ];
 
+const validateTeamId = [
+  param('id').isMongoId().withMessage('Invalid team ID.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -104,4 +109,5 @@ export {
   validateMongoId,
   validateAttendanceSummaryQuery,
   validateTeamsQuery,
+  validateTeamId,
 };

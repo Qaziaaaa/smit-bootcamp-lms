@@ -1,4 +1,7 @@
+import ApiError from '../utils/ApiError.js';
 import Team from '../models/team.model.js';
+import Student from '../models/student.model.js';
+import Project from '../models/project.model.js';
 
 const getTeams = async ({ search }) => {
   const match = {};
@@ -31,6 +34,23 @@ const getTeams = async ({ search }) => {
   return teams;
 };
 
+const getTeamById = async (id) => {
+  const team = await Team.findById(id).lean();
+  if (!team) {
+    throw new ApiError(404, 'Team not found.', ['Team does not exist.']);
+  }
+
+  const members = await Student.find({ teamId: team._id })
+    .select('name email batch status')
+    .sort({ name: 1 })
+    .lean();
+
+  const project = team.projectId ? await Project.findById(team.projectId).lean() : null;
+
+  return { ...team, members, project };
+};
+
 export default {
   getTeams,
+  getTeamById,
 };
