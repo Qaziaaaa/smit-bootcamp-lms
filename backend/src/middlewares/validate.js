@@ -119,6 +119,14 @@ const validateTeamStudentsAssign = [
   handleValidationErrors,
 ];
 
+const validateProjectsQuery = [
+  query('status').optional().isIn(['active', 'completed', 'on-hold']).withMessage('Invalid status.'),
+  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100.').toInt(),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -135,4 +143,5 @@ export {
   validateTeamCreate,
   validateTeamUpdate,
   validateTeamStudentsAssign,
+  validateProjectsQuery,
 };
