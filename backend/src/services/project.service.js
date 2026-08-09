@@ -1,4 +1,6 @@
+import ApiError from '../utils/ApiError.js';
 import Project from '../models/project.model.js';
+import Task from '../models/task.model.js';
 
 const getProjects = async ({ status, search }, { page = 1, limit = 10 }) => {
   const query = {};
@@ -37,6 +39,21 @@ const getProjects = async ({ status, search }, { page = 1, limit = 10 }) => {
   };
 };
 
+const getProjectById = async (id) => {
+  const project = await Project.findById(id).populate('teamId', 'name').lean();
+  if (!project) {
+    throw new ApiError(404, 'Project not found.', ['Project does not exist.']);
+  }
+
+  const tasks = await Task.find({ projectId: project._id })
+    .select('title description status priority deadline assignedTo')
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return { ...project, tasks };
+};
+
 export default {
   getProjects,
+  getProjectById,
 };

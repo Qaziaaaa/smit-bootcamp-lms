@@ -127,6 +127,11 @@ const validateProjectsQuery = [
   handleValidationErrors,
 ];
 
+const validateProjectId = [
+  param('id').isMongoId().withMessage('Invalid project ID.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -144,4 +149,5 @@ export {
   validateTeamUpdate,
   validateTeamStudentsAssign,
   validateProjectsQuery,
+  validateProjectId,
 };

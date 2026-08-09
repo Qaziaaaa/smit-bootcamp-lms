@@ -11,6 +11,12 @@ const getProjects = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, result, 'Projects retrieved successfully');
 });
 
+const getProjectById = asyncHandler(async (req, res) => {
+  const project = await projectService.getProjectById(req.params.id);
+  sendSuccess(res, 200, project, 'Project retrieved successfully');
+});
+
 export default {
   getProjects,
+  getProjectById,
 };
