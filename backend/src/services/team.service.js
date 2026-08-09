@@ -90,10 +90,34 @@ const deleteTeam = async (id) => {
   return { success: true };
 };
 
+const assignStudentsToTeam = async (id, studentIds) => {
+  const team = await Team.findById(id);
+  if (!team) {
+    throw new ApiError(404, 'Team not found.', ['Team does not exist.']);
+  }
+
+  const students = await Student.find({ _id: { $in: studentIds } }).select('_id');
+  const foundIds = students.map((s) => s._id.toString());
+  const missing = studentIds.filter((sid) => !foundIds.includes(sid.toString()));
+  if (missing.length > 0) {
+    throw new ApiError(400, 'Some students were not found.', [`Invalid student IDs: ${missing.join(', ')}`]);
+  }
+
+  await Student.updateMany({ _id: { $in: studentIds } }, { $set: { teamId: id } });
+
+  const members = await Student.find({ teamId: id })
+    .select('name email batch status')
+    .sort({ name: 1 })
+    .lean();
+
+  return { team: { id: team._id, name: team.name }, members };
+};
+
 export default {
   getTeams,
   getTeamById,
   createTeam,
   updateTeam,
   deleteTeam,
+  assignStudentsToTeam,
 };

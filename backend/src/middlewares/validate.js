@@ -1,4 +1,5 @@
 import { body, param, query, validationResult } from 'express-validator';
+import mongoose from 'mongoose';
 
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
@@ -108,6 +109,16 @@ const validateTeamUpdate = [
   handleValidationErrors,
 ];
 
+const validateTeamStudentsAssign = [
+  param('id').isMongoId().withMessage('Invalid team ID.'),
+  body('studentIds')
+    .isArray({ min: 1 })
+    .withMessage('studentIds must be a non-empty array.')
+    .custom((value) => value.every((id) => mongoose.isValidObjectId(id)))
+    .withMessage('Each student ID must be a valid ObjectId.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -123,4 +134,5 @@ export {
   validateTeamId,
   validateTeamCreate,
   validateTeamUpdate,
+  validateTeamStudentsAssign,
 };

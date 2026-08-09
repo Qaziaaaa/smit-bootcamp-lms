@@ -28,10 +28,16 @@ const deleteTeam = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, { deleted: true }, 'Team deleted successfully');
 });
 
+const assignStudentsToTeam = asyncHandler(async (req, res) => {
+  const result = await teamService.assignStudentsToTeam(req.params.id, req.body.studentIds);
+  sendSuccess(res, 200, result, 'Students assigned to team successfully');
+});
+
 export default {
   getTeams,
   getTeamById,
   createTeam,
   updateTeam,
   deleteTeam,
+  assignStudentsToTeam,
 };
