@@ -59,10 +59,11 @@ const getStudents = async (filters = {}, pagination = {}) => {
   const query = {};
 
   if (search) {
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     query.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-      { batch: { $regex: search, $options: 'i' } },
+      { name: { $regex: escaped, $options: 'i' } },
+      { email: { $regex: escaped, $options: 'i' } },
+      { batch: { $regex: escaped, $options: 'i' } },
     ];
   }
 
