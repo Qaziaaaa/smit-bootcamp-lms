@@ -21,8 +21,20 @@ const createProject = asyncHandler(async (req, res) => {
   sendSuccess(res, 201, project, 'Project created successfully');
 });
 
+const updateProject = asyncHandler(async (req, res) => {
+  const project = await projectService.updateProject(req.params.id, req.body);
+  sendSuccess(res, 200, project, 'Project updated successfully');
+});
+
+const deleteProject = asyncHandler(async (req, res) => {
+  await projectService.deleteProject(req.params.id);
+  sendSuccess(res, 200, { deleted: true }, 'Project deleted successfully');
+});
+
 export default {
   getProjects,
   getProjectById,
   createProject,
+  updateProject,
+  deleteProject,
 };
