@@ -189,6 +189,12 @@ const validateTaskUpdate = [
   handleValidationErrors,
 ];
 
+const validateTaskProgress = [
+  param('id').isMongoId().withMessage('Invalid task ID.'),
+  body('status').trim().notEmpty().withMessage('Status is required.').isIn(['pending', 'in-progress', 'completed']).withMessage('Invalid status.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -213,4 +219,5 @@ export {
   validateTaskId,
   validateTaskCreate,
   validateTaskUpdate,
+  validateTaskProgress,
 };
