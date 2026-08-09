@@ -18,8 +18,20 @@ const createTeam = asyncHandler(async (req, res) => {
   sendSuccess(res, 201, team, 'Team created successfully');
 });
 
+const updateTeam = asyncHandler(async (req, res) => {
+  const team = await teamService.updateTeam(req.params.id, req.body);
+  sendSuccess(res, 200, team, 'Team updated successfully');
+});
+
+const deleteTeam = asyncHandler(async (req, res) => {
+  await teamService.deleteTeam(req.params.id);
+  sendSuccess(res, 200, { deleted: true }, 'Team deleted successfully');
+});
+
 export default {
   getTeams,
   getTeamById,
   createTeam,
+  updateTeam,
+  deleteTeam,
 };

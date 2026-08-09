@@ -60,8 +60,40 @@ const createTeam = async ({ name }) => {
   return team;
 };
 
+const updateTeam = async (id, { name }) => {
+  const team = await Team.findById(id);
+  if (!team) {
+    throw new ApiError(404, 'Team not found.', ['Team does not exist.']);
+  }
+
+  if (name && name !== team.name) {
+    const existing = await Team.findOne({ name });
+    if (existing) {
+      throw new ApiError(409, 'Team name already exists.', ['A team with this name already exists.']);
+    }
+  }
+
+  const updated = await Team.findByIdAndUpdate(id, { name }, { new: true, runValidators: true });
+  return updated;
+};
+
+const deleteTeam = async (id) => {
+  const team = await Team.findById(id);
+  if (!team) {
+    throw new ApiError(404, 'Team not found.', ['Team does not exist.']);
+  }
+
+  await Student.updateMany({ teamId: id }, { $unset: { teamId: '' } });
+  await Project.updateMany({ teamId: id }, { $unset: { teamId: '' } });
+  await Team.findByIdAndDelete(id);
+
+  return { success: true };
+};
+
 export default {
   getTeams,
   getTeamById,
   createTeam,
+  updateTeam,
+  deleteTeam,
 };

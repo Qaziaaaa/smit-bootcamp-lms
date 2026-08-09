@@ -102,6 +102,12 @@ const validateTeamCreate = [
   handleValidationErrors,
 ];
 
+const validateTeamUpdate = [
+  param('id').isMongoId().withMessage('Invalid team ID.'),
+  body('name').trim().notEmpty().withMessage('Team name cannot be empty.').isLength({ max: 100 }).withMessage('Team name must be at most 100 characters.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -116,4 +122,5 @@ export {
   validateTeamsQuery,
   validateTeamId,
   validateTeamCreate,
+  validateTeamUpdate,
 };
