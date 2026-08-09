@@ -1,6 +1,7 @@
 import ApiError from '../utils/ApiError.js';
 import Project from '../models/project.model.js';
 import Task from '../models/task.model.js';
+import Team from '../models/team.model.js';
 
 const getProjects = async ({ status, search }, { page = 1, limit = 10 }) => {
   const query = {};
@@ -53,7 +54,25 @@ const getProjectById = async (id) => {
   return { ...project, tasks };
 };
 
+const createProject = async ({ title, description, teamId, status, deadline }) => {
+  if (teamId) {
+    const team = await Team.findById(teamId);
+    if (!team) {
+      throw new ApiError(404, 'Team not found.', ['Assigned team does not exist.']);
+    }
+  }
+
+  const project = await Project.create({ title, description, teamId, status, deadline });
+
+  if (teamId) {
+    await Team.findByIdAndUpdate(teamId, { projectId: project._id });
+  }
+
+  return project;
+};
+
 export default {
   getProjects,
   getProjectById,
+  createProject,
 };

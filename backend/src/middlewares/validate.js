@@ -132,6 +132,15 @@ const validateProjectId = [
   handleValidationErrors,
 ];
 
+const validateProjectCreate = [
+  body('title').trim().notEmpty().withMessage('Project title is required.').isLength({ max: 200 }).withMessage('Project title must be at most 200 characters.'),
+  body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description must be at most 1000 characters.'),
+  body('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
+  body('status').optional().isIn(['active', 'completed', 'on-hold']).withMessage('Invalid status.'),
+  body('deadline').optional().isISO8601().withMessage('Valid deadline date is required.').toDate(),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -150,4 +159,5 @@ export {
   validateTeamStudentsAssign,
   validateProjectsQuery,
   validateProjectId,
+  validateProjectCreate,
 };
