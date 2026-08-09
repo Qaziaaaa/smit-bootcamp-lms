@@ -1,3 +1,4 @@
+import ApiError from '../utils/ApiError.js';
 import Task from '../models/task.model.js';
 
 const getTasks = async ({ projectId, status, assignedTo, search }, { page = 1, limit = 10 }) => {
@@ -46,6 +47,20 @@ const getTasks = async ({ projectId, status, assignedTo, search }, { page = 1, l
   };
 };
 
+const getTaskById = async (id) => {
+  const task = await Task.findById(id)
+    .populate('projectId', 'title')
+    .populate('assignedTo', 'name email')
+    .lean();
+
+  if (!task) {
+    throw new ApiError(404, 'Task not found.', ['Task does not exist.']);
+  }
+
+  return task;
+};
+
 export default {
   getTasks,
+  getTaskById,
 };

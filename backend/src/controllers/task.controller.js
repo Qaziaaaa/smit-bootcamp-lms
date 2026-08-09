@@ -11,6 +11,12 @@ const getTasks = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, result, 'Tasks retrieved successfully');
 });
 
+const getTaskById = asyncHandler(async (req, res) => {
+  const task = await taskService.getTaskById(req.params.id);
+  sendSuccess(res, 200, task, 'Task retrieved successfully');
+});
+
 export default {
   getTasks,
+  getTaskById,
 };

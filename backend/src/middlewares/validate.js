@@ -161,6 +161,11 @@ const validateTasksQuery = [
   handleValidationErrors,
 ];
 
+const validateTaskId = [
+  param('id').isMongoId().withMessage('Invalid task ID.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -182,4 +187,5 @@ export {
   validateProjectCreate,
   validateProjectUpdate,
   validateTasksQuery,
+  validateTaskId,
 };
