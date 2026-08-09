@@ -151,6 +151,16 @@ const validateProjectUpdate = [
   handleValidationErrors,
 ];
 
+const validateTasksQuery = [
+  query('projectId').optional().isMongoId().withMessage('Invalid project ID.'),
+  query('status').optional().isIn(['pending', 'in-progress', 'completed']).withMessage('Invalid status.'),
+  query('assignedTo').optional().isMongoId().withMessage('Invalid assignedTo ID.'),
+  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100.').toInt(),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -171,4 +181,5 @@ export {
   validateProjectId,
   validateProjectCreate,
   validateProjectUpdate,
+  validateTasksQuery,
 };
