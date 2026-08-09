@@ -87,6 +87,11 @@ const validateAttendanceSummaryQuery = [
   handleValidationErrors,
 ];
 
+const validateTeamsQuery = [
+  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -98,4 +103,5 @@ export {
   validateStudentsQuery,
   validateMongoId,
   validateAttendanceSummaryQuery,
+  validateTeamsQuery,
 };
