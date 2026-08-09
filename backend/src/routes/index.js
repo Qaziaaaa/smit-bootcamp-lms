@@ -4,6 +4,8 @@ import authRoutes from './auth.routes.js';
 import studentRoutes from './student.routes.js';
 import attendanceRoutes from './attendance.routes.js';
 import studentPortalRoutes from './studentPortal.routes.js';
+import teamRoutes from './team.routes.js';
+import projectRoutes from './project.routes.js';
 
 const router = Router();
 
@@ -15,5 +17,7 @@ router.use('/auth', authRoutes);
 router.use('/students', studentRoutes);
 router.use('/attendance', attendanceRoutes);
 router.use('/student', studentPortalRoutes);
+router.use('/teams', teamRoutes);
+router.use('/projects', projectRoutes);
 
 export default router;

@@ -111,8 +111,8 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [ ] ✅ PR: attendance APIs
 
 ### Shafqatullah (Backend)
-- [ ] Team APIs: CRUD + `POST /teams/:id/students`
-- [ ] Project APIs: CRUD
+- [x] Team APIs: CRUD + `POST /teams/:id/students`
+- [x] Project APIs: CRUD
 - [ ] ✅ PR: team + project APIs
 
 ### Abdullah (Frontend)

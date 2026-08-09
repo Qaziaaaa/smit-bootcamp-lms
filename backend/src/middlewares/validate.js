@@ -1,4 +1,5 @@
 import { body, param, query, validationResult } from 'express-validator';
+import mongoose from 'mongoose';
 
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
@@ -87,6 +88,69 @@ const validateAttendanceSummaryQuery = [
   handleValidationErrors,
 ];
 
+const validateTeamsQuery = [
+  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
+  handleValidationErrors,
+];
+
+const validateTeamId = [
+  param('id').isMongoId().withMessage('Invalid team ID.'),
+  handleValidationErrors,
+];
+
+const validateTeamCreate = [
+  body('name').trim().notEmpty().withMessage('Team name is required.').isLength({ max: 100 }).withMessage('Team name must be at most 100 characters.'),
+  handleValidationErrors,
+];
+
+const validateTeamUpdate = [
+  param('id').isMongoId().withMessage('Invalid team ID.'),
+  body('name').trim().notEmpty().withMessage('Team name cannot be empty.').isLength({ max: 100 }).withMessage('Team name must be at most 100 characters.'),
+  handleValidationErrors,
+];
+
+const validateTeamStudentsAssign = [
+  param('id').isMongoId().withMessage('Invalid team ID.'),
+  body('studentIds')
+    .isArray({ min: 1 })
+    .withMessage('studentIds must be a non-empty array.')
+    .custom((value) => value.every((id) => mongoose.isValidObjectId(id)))
+    .withMessage('Each student ID must be a valid ObjectId.'),
+  handleValidationErrors,
+];
+
+const validateProjectsQuery = [
+  query('status').optional().isIn(['active', 'completed', 'on-hold']).withMessage('Invalid status.'),
+  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100.').toInt(),
+  handleValidationErrors,
+];
+
+const validateProjectId = [
+  param('id').isMongoId().withMessage('Invalid project ID.'),
+  handleValidationErrors,
+];
+
+const validateProjectCreate = [
+  body('title').trim().notEmpty().withMessage('Project title is required.').isLength({ max: 200 }).withMessage('Project title must be at most 200 characters.'),
+  body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description must be at most 1000 characters.'),
+  body('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
+  body('status').optional().isIn(['active', 'completed', 'on-hold']).withMessage('Invalid status.'),
+  body('deadline').optional().isISO8601().withMessage('Valid deadline date is required.').toDate(),
+  handleValidationErrors,
+];
+
+const validateProjectUpdate = [
+  param('id').isMongoId().withMessage('Invalid project ID.'),
+  body('title').optional().trim().notEmpty().withMessage('Project title cannot be empty.').isLength({ max: 200 }).withMessage('Project title must be at most 200 characters.'),
+  body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description must be at most 1000 characters.'),
+  body('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
+  body('status').optional().isIn(['active', 'completed', 'on-hold']).withMessage('Invalid status.'),
+  body('deadline').optional().isISO8601().withMessage('Valid deadline date is required.').toDate(),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -98,4 +162,13 @@ export {
   validateStudentsQuery,
   validateMongoId,
   validateAttendanceSummaryQuery,
+  validateTeamsQuery,
+  validateTeamId,
+  validateTeamCreate,
+  validateTeamUpdate,
+  validateTeamStudentsAssign,
+  validateProjectsQuery,
+  validateProjectId,
+  validateProjectCreate,
+  validateProjectUpdate,
 };
