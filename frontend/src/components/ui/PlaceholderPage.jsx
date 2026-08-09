@@ -12,7 +12,7 @@ export function PlaceholderPage() {
         py: 8,
       }}
     >
-      <Paper sx={{ width: '100%', maxWidth: 480, p: 4, textAlign: 'center' }}>
+      <Paper variant="outlined" sx={{ width: '100%', maxWidth: 480, p: 4, textAlign: 'center', borderRadius: 2, bgcolor: '#ffffff' }}>
         <Box
           sx={{
             display: 'flex',
@@ -22,16 +22,16 @@ export function PlaceholderPage() {
             borderRadius: '50%',
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: 'rgba(37, 99, 235, 0.1)',
-            color: 'primary.main',
+            bgcolor: '#F4F9FF',
+            color: '#2D69EB',
           }}
         >
           <Construction size={26} />
         </Box>
-        <Typography variant="h6" sx={{ mt: 2, fontWeight: 600 }}>
+        <Typography variant="h6" sx={{ mt: 2, fontWeight: 600, color: '#0A0A0A' }}>
           Coming soon
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography variant="body2" sx={{ color: '#828283', mt: 1 }}>
           This page will be built in the upcoming sprint days.
         </Typography>
       </Paper>

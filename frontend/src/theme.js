@@ -3,18 +3,19 @@ import { createTheme } from '@mui/material/styles'
 export const theme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#2563eb' },
-    background: { default: '#f8fafb', paper: '#ffffff' },
-    text: { primary: '#0f172a', secondary: '#64748b' },
-    divider: '#e2e8f0',
-    error: { main: '#dc2626' },
-    success: { main: '#16a34a' },
-    warning: { main: '#b45309' },
+    primary: { main: '#2D69EB', contrastText: '#ffffff' },
+    background: { default: '#F8FAFA', paper: '#ffffff' },
+    text: { primary: '#0A0A0A', secondary: '#828283' },
+    divider: '#E2E8F0',
+    error: { main: '#DC2626' },
+    success: { main: '#22C55E' },
+    warning: { main: '#D97706' },
+    info: { main: '#0277BD' },
   },
   typography: {
-    fontFamily: "'Plus Jakarta Sans', 'Segoe UI', Roboto, -apple-system, sans-serif",
+    fontFamily: "'Poppins', 'Segoe UI', Roboto, -apple-system, sans-serif",
   },
-  shape: { borderRadius: 10 },
+  shape: { borderRadius: 8 },
   components: {
     MuiButton: {
       defaultProps: { disableElevation: true },
@@ -23,13 +24,38 @@ export const theme = createTheme({
           textTransform: 'none',
           borderRadius: 8,
           fontWeight: 600,
+          minHeight: 36,
+          '&:hover': { backgroundColor: '#0E3B9A' },
+        },
+        outlined: {
+          borderColor: '#E2E8F0',
+          color: '#0A0A0A',
+          '&:hover': { backgroundColor: '#F1F5F9', borderColor: '#E2E8F0' },
+        },
+        containedPrimary: {
+          '&:hover': { backgroundColor: '#0E3B9A' },
         },
       },
     },
     MuiTextField: {
       styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': { borderRadius: 8 },
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 8,
+            '& fieldset': { borderColor: '#E2E8F0' },
+            '&.Mui-focused fieldset': { borderColor: '#2D69EB', borderWidth: 2 },
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          boxShadow: 'none',
+        },
+        outlined: {
+          borderColor: '#E2E8F0',
         },
       },
     },
@@ -38,13 +64,9 @@ export const theme = createTheme({
         root: { borderRadius: 8 },
       },
     },
-    MuiPaper: {
+    MuiLinearProgress: {
       styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-          boxShadow:
-            '0 1px 3px 0 rgb(15 23 42 / 0.07), 0 4px 10px -2px rgb(15 23 42 / 0.10), 0 16px 32px -12px rgb(15 23 42 / 0.16)',
-        },
+        root: { borderRadius: 9999 },
       },
     },
   },

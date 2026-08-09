@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Alert, Box, Button, Paper, TextField, Typography } from '@mui/material'
-import { ArrowRight } from 'lucide-react'
+import { Alert, Box, Button, InputAdornment, Paper, TextField, Typography } from '@mui/material'
+import { ArrowRight, Lock, ShieldCheck, User } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { Logo } from '../components/ui/Logo'
 
@@ -61,101 +61,140 @@ export default function LoginPage() {
     <Box
       sx={{
         minHeight: '100vh',
+        bgcolor: '#F8FAFA',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         px: 2,
         py: 8,
       }}
     >
-      <Paper sx={{ width: '100%', maxWidth: 420, p: 3, borderRadius: 2 }}>
-        <Box sx={{ mb: 3 }}>
-          <Logo />
-        </Box>
-        <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: -0.2 }}>
-          Sign in
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Access the learning workspace for teachers and students.
-        </Typography>
-
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            label="Email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@school.edu"
-            fullWidth
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            error={Boolean(fieldErrors.email)}
-            helperText={fieldErrors.email}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            fullWidth
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            error={Boolean(fieldErrors.password)}
-            helperText={fieldErrors.password}
-          />
-          {formError && <Alert severity="error">{formError}</Alert>}
-          <Button type="submit" variant="contained" size="large" disabled={submitting} sx={{ mt: 0.5 }}>
-            {submitting ? 'Signing in...' : 'Sign in'}
-          </Button>
+      <Box sx={{ width: '100%', maxWidth: 448 }}>
+        <Box sx={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, mb: 4 }}>
+          <Logo size={56} compact />
+          <Typography variant="h4" sx={{ mt: 2, fontWeight: 700, color: '#0A0A0A', letterSpacing: '-0.02em' }}>
+            Sign in to your account
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#828283' }}>
+            Enter your bootcamp credentials to access your dashboard.
+          </Typography>
         </Box>
 
         {DEMO_ENABLED && (
-          <Paper variant="outlined" sx={{ mt: 3, p: 2, bgcolor: 'rgba(241, 245, 249, 0.7)' }}>
-            <Typography
-              variant="caption"
-              sx={{ fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: 'text.secondary' }}
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5, mb: 3 }}>
+            <Button
+              variant="outlined"
+              color="inherit"
+              fullWidth
+              onClick={() => handleDemo('admin')}
+              sx={{
+                justifyContent: 'flex-start',
+                gap: 1.5,
+                px: 1.75,
+                py: 1.25,
+                bgcolor: '#ffffff',
+                color: '#474B53',
+                textAlign: 'left',
+                '&:hover': { borderColor: 'rgba(41, 70, 131, 0.5)' },
+              }}
             >
-              Demo access
-            </Typography>
-            <Box sx={{ mt: 1.5, display: 'grid', gap: 1 }}>
-              <Button
-                variant="outlined"
-                color="inherit"
-                fullWidth
-                onClick={() => handleDemo('admin')}
-                sx={{
-                  justifyContent: 'space-between',
-                  px: 1.5,
-                  py: 1,
-                  color: 'text.primary',
-                  bgcolor: 'background.paper',
-                }}
-              >
-                Continue as Admin{' '}
-                <Box component="span" sx={{ display: 'inline-flex', color: 'primary.main' }}>
-                  <ArrowRight size={16} />
-                </Box>
-              </Button>
-              <Button
-                variant="outlined"
-                color="inherit"
-                fullWidth
-                onClick={() => handleDemo('student')}
-                sx={{
-                  justifyContent: 'space-between',
-                  px: 1.5,
-                  py: 1,
-                  color: 'text.primary',
-                  bgcolor: 'background.paper',
-                }}
-              >
-                Continue as Student{' '}
-                <Box component="span" sx={{ display: 'inline-flex', color: 'primary.main' }}>
-                  <ArrowRight size={16} />
-                </Box>
-              </Button>
-            </Box>
-          </Paper>
+              <ShieldCheck size={18} strokeWidth={1.8} />
+              <Box>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }}>Admin Demo</Typography>
+                <Typography sx={{ fontSize: 10, color: '#828283' }}>Full Access</Typography>
+              </Box>
+            </Button>
+            <Button
+              variant="outlined"
+              color="inherit"
+              fullWidth
+              onClick={() => handleDemo('student')}
+              sx={{
+                justifyContent: 'flex-start',
+                gap: 1.5,
+                px: 1.75,
+                py: 1.25,
+                bgcolor: '#ffffff',
+                color: '#474B53',
+                textAlign: 'left',
+                '&:hover': { borderColor: 'rgba(41, 70, 131, 0.5)' },
+              }}
+            >
+              <User size={18} strokeWidth={1.8} />
+              <Box>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }}>Student Demo</Typography>
+                <Typography sx={{ fontSize: 10, color: '#828283' }}>Student View</Typography>
+              </Box>
+            </Button>
+          </Box>
         )}
-      </Paper>
+
+        <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 2 }}>
+          <Box sx={{ px: 2.5, py: 2, borderBottom: 1, borderColor: 'divider', bgcolor: '#F4F9FF' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: '#0A0A0A' }}>
+              Sign In
+            </Typography>
+          </Box>
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="Email Address"
+              type="email"
+              autoComplete="email"
+              placeholder="name@bootcamp.dev"
+              fullWidth
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              error={Boolean(fieldErrors.email)}
+              helperText={fieldErrors.email}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <User size={16} color="#828283" />
+                    </InputAdornment>
+                  ),
+                },
+                inputLabel: {
+                  sx: { fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' },
+                },
+              }}
+            />
+            <TextField
+              label="Password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              fullWidth
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              error={Boolean(fieldErrors.password)}
+              helperText={fieldErrors.password}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock size={16} color="#828283" />
+                    </InputAdornment>
+                  ),
+                },
+                inputLabel: {
+                  sx: { fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' },
+                },
+              }}
+            />
+            {formError && <Alert severity="error">{formError}</Alert>}
+            <Button type="submit" variant="contained" size="large" disabled={submitting} sx={{ minHeight: 44, mt: 1 }}>
+              {submitting ? 'Signing in...' : 'Sign In'}
+              {!submitting && <ArrowRight size={16} style={{ marginLeft: 8 }} />}
+            </Button>
+          </Box>
+        </Paper>
+
+        <Typography sx={{ textAlign: 'center', fontSize: 10, color: '#828283', mt: 3 }}>
+          Bootcamp OS v2.4 • Strict Architectural Contract Enforced
+        </Typography>
+      </Box>
     </Box>
   )
 }

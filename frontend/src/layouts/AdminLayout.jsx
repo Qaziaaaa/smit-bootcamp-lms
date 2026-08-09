@@ -14,13 +14,14 @@ import {
 } from '@mui/material'
 import {
   CalendarCheck,
-  FolderKanban,
+  CheckSquare,
+  ChevronRight,
+  FolderGit2,
   LayoutDashboard,
-  ListTodo,
+  Layers,
   LogOut,
   Menu,
   Users,
-  UsersRound,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { Logo } from '../components/ui/Logo'
@@ -28,20 +29,24 @@ import { Logo } from '../components/ui/Logo'
 const DRAWER_WIDTH = 240
 
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Overview of your section this week' },
-  { to: '/students', label: 'Students', icon: Users, description: 'Manage student profiles and batches' },
-  { to: '/attendance', label: 'Attendance', icon: CalendarCheck, description: 'Mark and review daily attendance' },
-  { to: '/teams', label: 'Teams', icon: UsersRound, description: 'Organize students into teams' },
-  { to: '/projects', label: 'Projects', icon: FolderKanban, description: 'Track team projects' },
-  { to: '/tasks', label: 'Tasks', icon: ListTodo, description: 'Manage and assign tasks' },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/students', label: 'Students', icon: Users },
+  { to: '/attendance', label: 'Attendance', icon: CalendarCheck },
+  { to: '/teams', label: 'Teams', icon: Layers },
+  { to: '/projects', label: 'Projects', icon: FolderGit2 },
+  { to: '/tasks', label: 'Tasks', icon: CheckSquare },
 ]
 
 function isPathActive(pathname, to) {
   return pathname === to || pathname.startsWith(`${to}/`)
 }
 
+function todayLabel() {
+  return new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+}
+
 function SidebarContent({ pathname, onNavigate }) {
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
 
   async function handleLogout() {
@@ -50,50 +55,122 @@ function SidebarContent({ pathname, onNavigate }) {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box sx={{ px: 2.5, py: 2.5 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#F8FAFA' }}>
+      <Box
+        sx={{
+          px: 2,
+          py: 2,
+          borderBottom: 1,
+          borderColor: 'divider',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+        }}
+      >
         <Logo />
       </Box>
-      <List sx={{ px: 1, flexGrow: 1 }}>
+
+      <List sx={{ px: 1.5, py: 1.5, flexGrow: 1, overflowY: 'auto' }}>
         <Typography
           variant="caption"
           sx={{
             display: 'block',
             px: 1.5,
-            py: 0.75,
-            fontWeight: 700,
-            letterSpacing: 0.6,
+            py: 1,
+            fontWeight: 500,
+            fontSize: 10,
+            letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            color: 'text.secondary',
+            color: '#828283',
           }}
         >
-          Admin
+          Management
         </Typography>
-        {NAV_ITEMS.map((item) => (
-          <ListItemButton
-            key={item.to}
-            component={Link}
-            to={item.to}
-            selected={isPathActive(pathname, item.to)}
-            onClick={onNavigate}
-            sx={{ mb: 0.25 }}
-          >
-            <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
-              <item.icon size={20} />
-            </ListItemIcon>
-            <ListItemText
-              primary={item.label}
-              slotProps={{ primary: { fontSize: 14, fontWeight: 500 } }}
-            />
-          </ListItemButton>
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const active = isPathActive(pathname, item.to)
+          return (
+            <ListItemButton
+              key={item.to}
+              component={Link}
+              to={item.to}
+              selected={active}
+              onClick={onNavigate}
+              sx={{
+                minHeight: 44,
+                mb: 0.25,
+                px: 1.75,
+                borderRadius: 1.5,
+                color: active ? '#294683' : '#474B53',
+                fontWeight: active ? 600 : 500,
+                bgcolor: active ? '#F0F5FF' : 'transparent',
+                '&:hover': { bgcolor: '#F0F5FF', color: '#294683' },
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 34, color: 'inherit' }}>
+                <item.icon size={20} strokeWidth={1.8} />
+              </ListItemIcon>
+              <ListItemText primary={item.label} slotProps={{ primary: { fontSize: 14, fontWeight: 'inherit' } }} />
+            </ListItemButton>
+          )
+        })}
       </List>
-      <Box sx={{ borderTop: 1, borderColor: 'divider', p: 2 }}>
-        <ListItemButton onClick={handleLogout} sx={{ px: 1.5 }}>
-          <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
-            <LogOut size={18} />
-          </ListItemIcon>
-          <ListItemText primary="Logout" slotProps={{ primary: { fontSize: 14, fontWeight: 500 } }} />
+
+      <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', bgcolor: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+        <Box
+          sx={{
+            p: 1.5,
+            borderRadius: 1.5,
+            border: 1,
+            borderColor: 'divider',
+            bgcolor: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.25,
+            mb: 1,
+          }}
+        >
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              bgcolor: '#2D69EB',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+              fontWeight: 600,
+              flexShrink: 0,
+            }}
+          >
+            {(user?.name || 'A').charAt(0).toUpperCase()}
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {user?.name || 'Admin'}
+            </Typography>
+            <Typography sx={{ fontSize: 10, color: '#828283', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {user?.email}
+            </Typography>
+          </Box>
+        </Box>
+
+        <ListItemButton
+          onClick={handleLogout}
+          sx={{
+            px: 1.5,
+            minHeight: 36,
+            borderRadius: 1,
+            color: '#474B53',
+            justifyContent: 'center',
+            gap: 0.75,
+            '&:hover': { color: '#DC2626', bgcolor: '#FEF2F2' },
+          }}
+        >
+          <LogOut size={16} strokeWidth={1.8} />
+          <Typography sx={{ fontSize: 14, fontWeight: 500, color: 'inherit' }}>Logout</Typography>
         </ListItemButton>
       </Box>
     </Box>
@@ -101,16 +178,14 @@ function SidebarContent({ pathname, onNavigate }) {
 }
 
 export function AdminLayout() {
-  const { user } = useAuth()
   const { pathname } = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const current = NAV_ITEMS.find((item) => isPathActive(pathname, item.to))
   const title = current?.label || 'Dashboard'
-  const description = current?.description || ''
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F8FAFA' }}>
       <Drawer
         variant="permanent"
         open
@@ -118,7 +193,7 @@ export function AdminLayout() {
           width: DRAWER_WIDTH,
           flexShrink: 0,
           display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH, borderColor: '#E2E8F0' },
         }}
       >
         <SidebarContent pathname={pathname} />
@@ -131,82 +206,51 @@ export function AdminLayout() {
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH, borderColor: '#E2E8F0' },
         }}
       >
         <SidebarContent pathname={pathname} onNavigate={() => setMobileOpen(false)} />
       </Drawer>
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          minWidth: 0,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
+      <Box component="main" sx={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column', bgcolor: '#F7F9FA' }}>
         <AppBar
           position="sticky"
           elevation={0}
           color="inherit"
-          sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}
+          sx={{ height: 64, justifyContent: 'center', bgcolor: '#ffffff', borderBottom: 1, borderColor: 'divider' }}
         >
-          <Toolbar>
+          <Toolbar sx={{ px: { xs: 2, md: 3 }, minHeight: '64px !important' }}>
             <IconButton
               edge="start"
-              sx={{ mr: 1.5, display: { md: 'none' } }}
+              sx={{ mr: 1, display: { md: 'none' }, color: '#0A0A0A', '&:hover': { bgcolor: '#F0F5FF' } }}
               onClick={() => setMobileOpen(true)}
               aria-label="Toggle navigation menu"
             >
               <Menu size={20} />
             </IconButton>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, letterSpacing: -0.2 }}>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0, flex: 1 }}>
+              <Typography sx={{ fontSize: { xs: 12, sm: 14 }, fontWeight: 500, color: '#0A0A0A', whiteSpace: 'nowrap' }}>
+                Home
+              </Typography>
+              <ChevronRight size={14} color="#828283" />
+              <Typography sx={{ fontSize: { xs: 12, sm: 14 }, fontWeight: 600, color: '#0A0A0A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {title}
               </Typography>
-              {description && (
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: 13 }}>
-                  {description}
-                </Typography>
-              )}
             </Box>
-            <Box sx={{ display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 1.5, mr: 1 }}>
-              <Box sx={{ textAlign: 'right' }}>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  {user?.name || 'Admin'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {user?.email}
-                </Typography>
-              </Box>
-            </Box>
-            <TopbarLogoutButton />
+
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#828283', display: { xs: 'none', md: 'block' } }}>
+              {todayLabel()}
+            </Typography>
           </Toolbar>
         </AppBar>
 
-        <Box sx={{ flexGrow: 1, p: 3 }}>
+        <Box sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 4 } }}>
           <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
             <Outlet />
           </Box>
         </Box>
       </Box>
     </Box>
-  )
-}
-
-function TopbarLogoutButton() {
-  const { logout } = useAuth()
-  const navigate = useNavigate()
-
-  async function handleLogout() {
-    await logout()
-    navigate('/login', { replace: true })
-  }
-
-  return (
-    <IconButton onClick={handleLogout} aria-label="Logout" sx={{ color: 'text.secondary' }}>
-      <LogOut size={18} />
-    </IconButton>
   )
 }
