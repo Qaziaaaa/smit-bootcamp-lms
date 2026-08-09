@@ -7,6 +7,7 @@ import studentPortalRoutes from './studentPortal.routes.js';
 import teamRoutes from './team.routes.js';
 import projectRoutes from './project.routes.js';
 import taskRoutes from './task.routes.js';
+import dashboardRoutes from './dashboard.routes.js';
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use('/student', studentPortalRoutes);
 router.use('/teams', teamRoutes);
 router.use('/projects', projectRoutes);
 router.use('/tasks', taskRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export default router;
