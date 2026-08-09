@@ -13,7 +13,13 @@ const getTeamById = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, team, 'Team retrieved successfully');
 });
 
+const createTeam = asyncHandler(async (req, res) => {
+  const team = await teamService.createTeam(req.body);
+  sendSuccess(res, 201, team, 'Team created successfully');
+});
+
 export default {
   getTeams,
   getTeamById,
+  createTeam,
 };

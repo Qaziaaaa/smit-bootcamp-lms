@@ -97,6 +97,11 @@ const validateTeamId = [
   handleValidationErrors,
 ];
 
+const validateTeamCreate = [
+  body('name').trim().notEmpty().withMessage('Team name is required.').isLength({ max: 100 }).withMessage('Team name must be at most 100 characters.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -110,4 +115,5 @@ export {
   validateAttendanceSummaryQuery,
   validateTeamsQuery,
   validateTeamId,
+  validateTeamCreate,
 };

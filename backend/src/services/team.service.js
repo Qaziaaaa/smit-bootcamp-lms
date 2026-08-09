@@ -50,7 +50,18 @@ const getTeamById = async (id) => {
   return { ...team, members, project };
 };
 
+const createTeam = async ({ name }) => {
+  const existing = await Team.findOne({ name });
+  if (existing) {
+    throw new ApiError(409, 'Team name already exists.', ['A team with this name already exists.']);
+  }
+
+  const team = await Team.create({ name });
+  return team;
+};
+
 export default {
   getTeams,
   getTeamById,
+  createTeam,
 };
