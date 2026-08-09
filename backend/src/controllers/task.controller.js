@@ -21,8 +21,20 @@ const createTask = asyncHandler(async (req, res) => {
   sendSuccess(res, 201, task, 'Task created successfully');
 });
 
+const updateTask = asyncHandler(async (req, res) => {
+  const task = await taskService.updateTask(req.params.id, req.body);
+  sendSuccess(res, 200, task, 'Task updated successfully');
+});
+
+const deleteTask = asyncHandler(async (req, res) => {
+  await taskService.deleteTask(req.params.id);
+  sendSuccess(res, 200, { deleted: true }, 'Task deleted successfully');
+});
+
 export default {
   getTasks,
   getTaskById,
   createTask,
+  updateTask,
+  deleteTask,
 };

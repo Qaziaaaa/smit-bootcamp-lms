@@ -81,8 +81,48 @@ const createTask = async (data) => {
   return task;
 };
 
+const updateTask = async (id, data) => {
+  const task = await Task.findById(id);
+  if (!task) {
+    throw new ApiError(404, 'Task not found.', ['Task does not exist.']);
+  }
+
+  if (data.projectId) {
+    const project = await Project.findById(data.projectId);
+    if (!project) {
+      throw new ApiError(404, 'Project not found.', ['Assigned project does not exist.']);
+    }
+  }
+
+  if (data.assignedTo) {
+    const student = await Student.findById(data.assignedTo);
+    if (!student) {
+      throw new ApiError(404, 'Student not found.', ['Assigned student does not exist.']);
+    }
+  }
+
+  const updated = await Task.findByIdAndUpdate(id, data, { new: true, runValidators: true })
+    .populate('projectId', 'title')
+    .populate('assignedTo', 'name email');
+
+  return updated;
+};
+
+const deleteTask = async (id) => {
+  const task = await Task.findById(id);
+  if (!task) {
+    throw new ApiError(404, 'Task not found.', ['Task does not exist.']);
+  }
+
+  await Task.findByIdAndDelete(id);
+
+  return { success: true };
+};
+
 export default {
   getTasks,
   getTaskById,
   createTask,
+  updateTask,
+  deleteTask,
 };
