@@ -1,5 +1,7 @@
 import ApiError from '../utils/ApiError.js';
 import Task from '../models/task.model.js';
+import Project from '../models/project.model.js';
+import Student from '../models/student.model.js';
 
 const getTasks = async ({ projectId, status, assignedTo, search }, { page = 1, limit = 10 }) => {
   const query = {};
@@ -60,7 +62,27 @@ const getTaskById = async (id) => {
   return task;
 };
 
+const createTask = async (data) => {
+  const { projectId, title, description, assignedTo, priority, status, deadline } = data;
+
+  const project = await Project.findById(projectId);
+  if (!project) {
+    throw new ApiError(404, 'Project not found.', ['Assigned project does not exist.']);
+  }
+
+  if (assignedTo) {
+    const student = await Student.findById(assignedTo);
+    if (!student) {
+      throw new ApiError(404, 'Student not found.', ['Assigned student does not exist.']);
+    }
+  }
+
+  const task = await Task.create({ projectId, title, description, assignedTo, priority, status, deadline });
+  return task;
+};
+
 export default {
   getTasks,
   getTaskById,
+  createTask,
 };

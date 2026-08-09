@@ -166,6 +166,17 @@ const validateTaskId = [
   handleValidationErrors,
 ];
 
+const validateTaskCreate = [
+  body('projectId').isMongoId().withMessage('Valid project ID is required.'),
+  body('title').trim().notEmpty().withMessage('Task title is required.').isLength({ max: 200 }).withMessage('Task title must be at most 200 characters.'),
+  body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description must be at most 1000 characters.'),
+  body('assignedTo').optional().isMongoId().withMessage('Invalid assignedTo ID.'),
+  body('priority').optional().isIn(['low', 'medium', 'high']).withMessage('Invalid priority.'),
+  body('status').optional().isIn(['pending', 'in-progress', 'completed']).withMessage('Invalid status.'),
+  body('deadline').optional().isISO8601().withMessage('Valid deadline date is required.').toDate(),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -188,4 +199,5 @@ export {
   validateProjectUpdate,
   validateTasksQuery,
   validateTaskId,
+  validateTaskCreate,
 };

@@ -16,7 +16,13 @@ const getTaskById = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, task, 'Task retrieved successfully');
 });
 
+const createTask = asyncHandler(async (req, res) => {
+  const task = await taskService.createTask(req.body);
+  sendSuccess(res, 201, task, 'Task created successfully');
+});
+
 export default {
   getTasks,
   getTaskById,
+  createTask,
 };
