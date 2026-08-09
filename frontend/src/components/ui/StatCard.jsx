@@ -1,18 +1,36 @@
 import { Box, Paper, Typography } from '@mui/material'
+import { TrendingUp } from 'lucide-react'
 
-export function StatCard({ label, value, subtitle, icon: Icon }) {
+export function StatCard({
+  label,
+  value,
+  trend,
+  subtitle,
+  subtitleColor,
+  icon: Icon,
+  iconBg,
+  iconBorder,
+  iconColor,
+  trendColor = '#22C55E',
+}) {
   return (
-    <Paper sx={{ p: 2.5, borderRadius: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+    <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff' }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1.5 }}>
         <Box>
-          <Typography variant="body2" color="text.secondary">
+          <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
             {label}
           </Typography>
-          <Typography variant="h4" sx={{ mt: 0.5, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+          <Typography variant="h4" sx={{ mt: 0.5, fontWeight: 500, color: '#0A0A0A', fontVariantNumeric: 'tabular-nums' }}>
             {value}
           </Typography>
-          {subtitle && (
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+          {trend && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
+              <TrendingUp size={14} strokeWidth={1.75} style={{ color: trendColor }} />
+              <Typography sx={{ fontSize: 11, fontWeight: 500, color: trendColor }}>{trend}</Typography>
+            </Box>
+          )}
+          {subtitle && !trend && (
+            <Typography sx={{ fontSize: 11, mt: 1, color: subtitleColor || '#828283', fontWeight: subtitleColor ? 500 : 400 }}>
               {subtitle}
             </Typography>
           )}
@@ -20,16 +38,19 @@ export function StatCard({ label, value, subtitle, icon: Icon }) {
         <Box
           sx={{
             display: 'flex',
-            width: 36,
-            height: 36,
-            borderRadius: 1.5,
+            width: 48,
+            height: 48,
+            borderRadius: 2,
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: 'rgba(37, 99, 235, 0.1)',
-            color: 'primary.main',
+            flexShrink: 0,
+            bgcolor: iconBg,
+            border: 1,
+            borderColor: iconBorder,
+            color: iconColor,
           }}
         >
-          <Icon size={18} />
+          <Icon size={24} strokeWidth={1.75} />
         </Box>
       </Box>
     </Paper>

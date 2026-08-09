@@ -1,17 +1,123 @@
-import { Box, LinearProgress, Paper, Typography } from '@mui/material'
-import { CalendarCheck, ListTodo, Users, UsersRound } from 'lucide-react'
+import { Box, Button, Paper, Typography } from '@mui/material'
+import {
+  ArrowUpRight,
+  Award,
+  CalendarCheck,
+  CheckSquare,
+  Clock,
+  Layers,
+  Plus,
+  Users,
+} from 'lucide-react'
 import { StatCard } from '../components/ui/StatCard'
 
 const STAT_CARDS = [
-  { label: 'Students', value: 0, subtitle: '6 in Section B', icon: Users },
-  { label: "Today's attendance", value: '0/0', subtitle: '0% present', icon: CalendarCheck },
-  { label: 'Teams', value: 0, subtitle: 'Project groups', icon: UsersRound },
-  { label: 'Tasks', value: 0, subtitle: '0 completed this week', icon: ListTodo },
+  {
+    label: 'Total Students',
+    value: '2,450',
+    trend: '+12% this month',
+    icon: Users,
+    iconBg: '#F4F9FF',
+    iconBorder: 'rgba(45, 105, 235, 0.2)',
+    iconColor: '#2D69EB',
+  },
+  {
+    label: 'Attendance Rate',
+    value: '92.4%',
+    trend: '+2.1% vs last week',
+    icon: CalendarCheck,
+    iconBg: '#ECFDF5',
+    iconBorder: 'rgba(34, 197, 94, 0.25)',
+    iconColor: '#22C55E',
+  },
+  {
+    label: 'Active Teams',
+    value: '124',
+    subtitle: 'Across 2 Active Batches',
+    icon: Layers,
+    iconBg: '#EEF2FF',
+    iconBorder: 'rgba(47, 43, 112, 0.2)',
+    iconColor: '#2F2B70',
+  },
+  {
+    label: 'Pending Tasks',
+    value: '38',
+    subtitle: 'Requires Student Review',
+    subtitleColor: '#D97706',
+    icon: CheckSquare,
+    iconBg: '#FFFBEB',
+    iconBorder: 'rgba(217, 119, 6, 0.25)',
+    iconColor: '#D97706',
+  },
+]
+
+const PROJECT_STATUS = [
+  { label: 'Completed', value: '4 Projects', color: '#22C55E' },
+  { label: 'Active', value: '5 Projects', color: '#2D69EB' },
+  { label: 'On-Hold', value: '2 Projects', color: '#828283' },
+]
+
+const ACTIVITY_ITEMS = [
+  {
+    text: 'Marcus Chen completed "Setup TanStack Query Cache"',
+    meta: 'Team Alpha (Nexus) • AI Analytics Dashboard',
+    status: 'Completed',
+    statusColor: '#22C55E',
+    statusBg: '#ECFDF5',
+    icon: Award,
+    iconBg: '#ECFDF5',
+    iconColor: '#22C55E',
+  },
+  {
+    text: 'Sophia Vance moved "Design Attendance Heatmap" to In Progress',
+    meta: 'Batch 12 - Web Dev',
+    status: 'In Progress',
+    statusColor: '#374151',
+    statusBg: '#F1F5F9',
+    icon: Clock,
+    iconBg: '#DBEAFE',
+    iconColor: '#2D69EB',
+  },
 ]
 
 export default function DashboardPage() {
   return (
     <Box sx={{ display: 'grid', gap: 3 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'flex-start' }, justifyContent: 'space-between', gap: 2 }}>
+        <Box>
+          <Typography
+            component="span"
+            sx={{
+              display: 'inline-flex',
+              px: 1.25,
+              py: 0.25,
+              mb: 1,
+              borderRadius: 9999,
+              fontSize: 11,
+              fontWeight: 500,
+              bgcolor: 'rgba(2, 119, 189, 0.1)',
+              color: '#0277BD',
+            }}
+          >
+            Saylani Mass IT Training (SMIT)
+          </Typography>
+          <Typography variant="h5" sx={{ fontWeight: 500, color: '#0A0A0A', letterSpacing: '-0.02em' }}>
+            SMIT Bootcamp Overview
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
+            Real-time SMIT batch performance, attendance rates, and active team progress.
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Button variant="contained" size="small" startIcon={<Plus size={16} />} sx={{ height: 36 }}>
+            Add Student
+          </Button>
+          <Button variant="outlined" size="small" sx={{ height: 36 }}>
+            Mark Attendance
+          </Button>
+        </Box>
+      </Box>
+
       <Box
         sx={{
           display: 'grid',
@@ -25,58 +131,165 @@ export default function DashboardPage() {
       </Box>
 
       <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' } }}>
-        <Paper>
-          <Box sx={{ px: 2.5, py: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'rgba(244, 249, 255, 1)' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Recent Activity
-            </Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ p: 2.5 }}>
-            Activity will appear here as records are created.
-          </Typography>
-        </Paper>
-
-        <Paper>
-          <Box sx={{ px: 2.5, py: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'rgba(244, 249, 255, 1)' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Attendance today
-            </Typography>
-          </Box>
-          <Box sx={{ p: 2.5 }}>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Present rate
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 1 }}>
-              <LinearProgress
-                variant="determinate"
-                value={0}
-                sx={{ flexGrow: 1, height: 6, borderRadius: 9999, bgcolor: 'rgba(241, 245, 249, 1)' }}
-              />
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                0%
+        <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff' }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, p: 3 }}>
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>
+                Attendance Trend (This Week)
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
+                Average daily attendance rate percentage
               </Typography>
             </Box>
-            <Box sx={{ mt: 2, display: 'grid', gap: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="text.secondary">
-                  Present
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  0
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="text.secondary">
-                  Absent
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  0
-                </Typography>
-              </Box>
+            <Typography
+              component="span"
+              sx={{
+                display: 'inline-flex',
+                px: 1.25,
+                py: 0.25,
+                borderRadius: 9999,
+                fontSize: 12,
+                fontWeight: 600,
+                bgcolor: '#D1FAE5',
+                color: '#22C55E',
+              }}
+            >
+              96.2% Avg
+            </Typography>
+          </Box>
+          <Box sx={{ p: 3, pt: 0 }}>
+            <Box
+              sx={{
+                height: 256,
+                borderRadius: 1,
+                border: 1,
+                borderStyle: 'dashed',
+                borderColor: '#E2E8F0',
+                bgcolor: '#F8FAFA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#828283',
+                fontSize: 14,
+              }}
+            >
+              [Area Chart Placeholder]
+            </Box>
+          </Box>
+        </Paper>
+
+        <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff' }}>
+          <Box sx={{ p: 3 }}>
+            <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>Project Status</Typography>
+            <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
+              Overall bootcamp deliverables
+            </Typography>
+          </Box>
+          <Box sx={{ px: 3, pb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box
+              sx={{
+                width: '100%',
+                height: 192,
+                borderRadius: 1,
+                border: 1,
+                borderStyle: 'dashed',
+                borderColor: '#E2E8F0',
+                bgcolor: '#F8FAFA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#828283',
+                fontSize: 14,
+                mb: 2,
+              }}
+            >
+              [Pie Chart Placeholder]
+            </Box>
+            <Box sx={{ width: '100%', display: 'grid', gap: 1 }}>
+              {PROJECT_STATUS.map((item) => (
+                <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: item.color }} />
+                    <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }}>{item.label}</Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#828283' }}>{item.value}</Typography>
+                </Box>
+              ))}
             </Box>
           </Box>
         </Paper>
       </Box>
+
+      <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff' }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, p: 3 }}>
+          <Box>
+            <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>Recent Bootcamp Activity</Typography>
+            <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
+              Latest task completions and team submissions
+            </Typography>
+          </Box>
+          <Button size="small" color="primary" sx={{ fontSize: 12, gap: 0.5 }}>
+            View All Tasks <ArrowUpRight size={14} />
+          </Button>
+        </Box>
+        <Box sx={{ borderTop: 1, borderColor: 'divider' }}>
+          {ACTIVITY_ITEMS.map((item, index) => (
+            <Box
+              key={index}
+              sx={{
+                px: 3,
+                py: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 2,
+                borderBottom: index < ACTIVITY_ITEMS.length - 1 ? 1 : 0,
+                borderColor: 'divider',
+                '&:hover': { bgcolor: '#F8FAFA' },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    bgcolor: item.iconBg,
+                    color: item.iconColor,
+                  }}
+                >
+                  <item.icon size={16} strokeWidth={1.75} />
+                </Box>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }} noWrap>
+                    {item.text}
+                  </Typography>
+                  <Typography sx={{ fontSize: 10, color: '#828283' }}>{item.meta}</Typography>
+                </Box>
+              </Box>
+              <Typography
+                component="span"
+                sx={{
+                  px: 1.25,
+                  py: 0.25,
+                  borderRadius: 9999,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                  bgcolor: item.statusBg,
+                  color: item.statusColor,
+                }}
+              >
+                {item.status}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+      </Paper>
     </Box>
   )
 }
