@@ -15,7 +15,7 @@ const generateToken = (user) => {
 
 const login = async (email, password) => {
   const user = await User.findOne({ email: email.toLowerCase() });
-  if (!user) {
+  if (!user || !user.passwordHash) {
     throw new ApiError(401, 'Invalid credentials.', ['Invalid email or password.']);
   }
 
