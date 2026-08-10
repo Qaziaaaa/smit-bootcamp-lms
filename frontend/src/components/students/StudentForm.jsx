@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button, Grid2 } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 import { Modal } from '../ui/Modal';
 import { FormField } from '../ui/FormField';
 
@@ -69,28 +69,28 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
       actions={actions}
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <Grid2 container spacing={2}>
-          <Grid2 item xs={12} sm={6}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
             <FormField name="name" control={control} label="Full Name" />
-          </Grid2>
-          <Grid2 item xs={12} sm={6}>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <FormField name="email" control={control} label="Email Address" type="email" />
-          </Grid2>
-          <Grid2 item xs={12} sm={6}>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <FormField name="phone" control={control} label="Phone Number" />
-          </Grid2>
-          <Grid2 item xs={12} sm={6}>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <FormField name="batch" control={control} label="Batch" />
-          </Grid2>
-          <Grid2 item xs={12} sm={6}>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <FormField name="team" control={control} label="Team (Optional)" />
-          </Grid2>
+          </Grid>
           {!isEditing && (
-            <Grid2 item xs={12} sm={6}>
+            <Grid item xs={12} sm={6}>
               <FormField name="password" control={control} label="Initial Password" type="password" />
-            </Grid2>
+            </Grid>
           )}
-        </Grid2>
+        </Grid>
       </form>
     </Modal>
   );

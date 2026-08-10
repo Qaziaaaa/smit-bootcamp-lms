@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button, Grid2, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Button, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Modal } from '../ui/Modal';
 import { FormField } from '../ui/FormField';
 
@@ -79,11 +79,11 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null }) => 
       actions={actions}
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <Grid2 container spacing={2}>
-          <Grid2 item xs={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <FormField name="title" control={control} label="Project Title *" />
-          </Grid2>
-          <Grid2 item xs={12}>
+          </Grid>
+          <Grid item xs={12}>
             <FormField
               name="description"
               control={control}
@@ -91,8 +91,8 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null }) => 
               multiline
               rows={3}
             />
-          </Grid2>
-          <Grid2 item xs={12} sm={6}>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             {/* Team selector */}
             <Controller
               name="teamId"
@@ -109,8 +109,8 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null }) => 
                 </FormControl>
               )}
             />
-          </Grid2>
-          <Grid2 item xs={12} sm={6}>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             {/* Status selector */}
             <Controller
               name="status"
@@ -126,11 +126,11 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null }) => 
                 </FormControl>
               )}
             />
-          </Grid2>
-          <Grid2 item xs={12} sm={6}>
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <FormField name="deadline" control={control} label="Deadline (Optional)" type="date" />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </form>
     </Modal>
   );
