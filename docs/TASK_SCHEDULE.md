@@ -19,12 +19,12 @@ Each day ends with a 15-minute standup: done / next / blockers.
 **Goal:** every machine runs the project; backend and frontend skeletons exist; DB connected; shared components ready.
 
 ### Hakimullah (Backend)
-- [ ] Follow SETUP_GUIDE.md — Node, MongoDB, `.env`
-- [ ] Create `backend/` scaffold: `src/config/`, `src/server.js`
-- [ ] Connect MongoDB (mongoose), handle connection errors
-- [ ] `/api/health` endpoint → `{ success: true }`
-- [ ] `express-validator`, `helmet`, `morgan`, `cors` wired in
-- [ ] ✅ PR: backend skeleton + health endpoint
+- [x] Follow SETUP_GUIDE.md — Node, MongoDB, `.env`
+- [x] Create `backend/` scaffold: `src/config/`, `src/server.js`
+- [x] Connect MongoDB (mongoose), handle connection errors
+- [x] `/api/health` endpoint → `{ success: true }`
+- [x] `express-validator`, `helmet`, `morgan`, `cors` wired in
+- [x] ✅ PR: backend skeleton + health endpoint
 
 ### Shafqat ullah (Backend)
 - [x] Create all Mongoose models per DATABASE_SCHEMA.md:
@@ -79,7 +79,7 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] ✅ PR: student APIs (#47)
 
 ### Shafqatullah (Backend)
-- [ ] Assist Hakimullah with student API testing / input validation
+- [x] Assist Hakimullah with student API testing / input validation
 
 ### Abdullah (Frontend)
 - [x] Login page (FRONTEND_DESIGN.md §4.1)
@@ -137,9 +137,9 @@ Each day ends with a 15-minute standup: done / next / blockers.
 **Goal:** projects/tasks done; student portal reads real data.
 
 ### Hakimullah (Backend)
-- [ ] Student-scoped endpoints: `/student/profile`, `/student/attendance`, `/student/team`, `/student/tasks`
-- [ ] Row-level security: queries scoped to logged-in student
-- [ ] ✅ PR: student portal APIs
+- [x] Student-scoped endpoints: `/student/profile`, `/student/attendance`, `/student/team`, `/student/tasks`
+- [x] Row-level security: queries scoped to logged-in student
+- [x] ✅ PR: student portal APIs (#72)
 
 ### Shafqatullah (Backend)
 - [ ] Task APIs: CRUD + filters (`projectId/status/assignedTo/search`)
