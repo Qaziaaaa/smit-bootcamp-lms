@@ -10,77 +10,167 @@ import {
   Users,
 } from 'lucide-react'
 import { StatCard } from '../components/ui/StatCard'
+import { useEffect, useState } from 'react'
+import { getDashboard } from '../services/dashboardService'
+import { apiClient } from '../services/apiClient'
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 
-const STAT_CARDS = [
-  {
-    label: 'Total Students',
-    value: '2,450',
-    trend: '+12% this month',
-    icon: Users,
-    iconBg: '#F4F9FF',
-    iconBorder: 'rgba(45, 105, 235, 0.2)',
-    iconColor: '#2D69EB',
-  },
-  {
-    label: 'Attendance Rate',
-    value: '92.4%',
-    trend: '+2.1% vs last week',
-    icon: CalendarCheck,
-    iconBg: '#ECFDF5',
-    iconBorder: 'rgba(34, 197, 94, 0.25)',
-    iconColor: '#22C55E',
-  },
-  {
-    label: 'Active Teams',
-    value: '124',
-    subtitle: 'Across 2 Active Batches',
-    icon: Layers,
-    iconBg: '#EEF2FF',
-    iconBorder: 'rgba(47, 43, 112, 0.2)',
-    iconColor: '#2F2B70',
-  },
-  {
-    label: 'Pending Tasks',
-    value: '38',
-    subtitle: 'Requires Student Review',
-    subtitleColor: '#D97706',
-    icon: CheckSquare,
-    iconBg: '#FFFBEB',
-    iconBorder: 'rgba(217, 119, 6, 0.25)',
-    iconColor: '#D97706',
-  },
-]
-
-const PROJECT_STATUS = [
-  { label: 'Completed', value: '4 Projects', color: '#22C55E' },
-  { label: 'Active', value: '5 Projects', color: '#2D69EB' },
-  { label: 'On-Hold', value: '2 Projects', color: '#828283' },
-]
-
-const ACTIVITY_ITEMS = [
-  {
-    text: 'Marcus Chen completed "Setup TanStack Query Cache"',
-    meta: 'Team Alpha (Nexus) • AI Analytics Dashboard',
-    status: 'Completed',
-    statusColor: '#22C55E',
-    statusBg: '#ECFDF5',
-    icon: Award,
-    iconBg: '#ECFDF5',
-    iconColor: '#22C55E',
-  },
-  {
-    text: 'Sophia Vance moved "Design Attendance Heatmap" to In Progress',
-    meta: 'Batch 12 - Web Dev',
-    status: 'In Progress',
-    statusColor: '#374151',
-    statusBg: '#F1F5F9',
-    icon: Clock,
-    iconBg: '#DBEAFE',
-    iconColor: '#2D69EB',
-  },
-]
+const TASK_STATUS_STYLE = {
+  completed: { status: 'Completed', statusColor: '#22C55E', statusBg: '#ECFDF5', icon: Award, iconBg: '#ECFDF5', iconColor: '#22C55E' },
+  'in-progress': { status: 'In Progress', statusColor: '#374151', statusBg: '#F1F5F9', icon: Clock, iconBg: '#DBEAFE', iconColor: '#2D69EB' },
+  pending: { status: 'Pending', statusColor: '#D97706', statusBg: '#FFFBEB', icon: CheckSquare, iconBg: '#FFFBEB', iconColor: '#D97706' },
+}
 
 export default function DashboardPage() {
+  const [dashboard, setDashboard] = useState(null)
+  const [attendanceTrend, setAttendanceTrend] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        setLoading(true)
+
+        const response = await getDashboard()
+
+        setDashboard(response)
+      } catch (error) {
+        console.error('Dashboard API error:', error)
+        setError('Failed to load dashboard data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadDashboard()
+  }, [])
+
+  useEffect(() => {
+    const loadAttendanceTrend = async () => {
+      try {
+        const response = await apiClient.get('/attendance', { params: { limit: 100 } })
+        const records = response.data?.data?.records ?? []
+        const byDate = {}
+        for (const record of records) {
+          const day = new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+          byDate[day] = byDate[day] ?? { present: 0, total: 0 }
+          byDate[day].total += 1
+          if (record.status === 'present') byDate[day].present += 1
+        }
+        const trend = Object.entries(byDate)
+          .map(([date, value]) => ({ date, rate: Math.round((value.present / value.total) * 100) }))
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
+        setAttendanceTrend(trend)
+      } catch (error) {
+        console.error('Attendance trend error:', error)
+      }
+    }
+
+    loadAttendanceTrend()
+  }, [])
+
+  const counts = dashboard?.counts ?? {}
+  const taskStatus = dashboard?.taskStatus ?? {}
+  const todayAttendance = dashboard?.todayAttendance ?? {}
+
+  const avgRate = attendanceTrend.length
+    ? Math.round(attendanceTrend.reduce((sum, item) => sum + item.rate, 0) / attendanceTrend.length)
+    : null
+
+  const pieData = [
+    { name: 'Completed', value: taskStatus.completed ?? 0, color: '#22C55E' },
+    { name: 'Active', value: taskStatus.inProgress ?? 0, color: '#2D69EB' },
+    { name: 'On-Hold', value: taskStatus.pending ?? 0, color: '#828283' },
+  ]
+
+  const STAT_CARDS = [
+    {
+      label: 'Total Students',
+      value: counts.students ?? '0',
+      trend: '+12% this month',
+      icon: Users,
+      iconBg: '#F4F9FF',
+      iconBorder: 'rgba(45, 105, 235, 0.2)',
+      iconColor: '#2D69EB',
+    },
+    {
+      label: 'Attendance Rate',
+      value: todayAttendance.present ?? '0',
+      trend: '+2.1% vs last week',
+      icon: CalendarCheck,
+      iconBg: '#ECFDF5',
+      iconBorder: 'rgba(34, 197, 94, 0.25)',
+      iconColor: '#22C55E',
+    },
+    {
+      label: 'Active Teams',
+      value: counts.teams ?? '0',
+      subtitle: 'Across 2 Active Batches',
+      icon: Layers,
+      iconBg: '#EEF2FF',
+      iconBorder: 'rgba(47, 43, 112, 0.2)',
+      iconColor: '#2F2B70',
+    },
+    {
+      label: 'Pending Tasks',
+      value: taskStatus.pending ?? '0',
+      subtitle: 'Requires Student Review',
+      subtitleColor: '#D97706',
+      icon: CheckSquare,
+      iconBg: '#FFFBEB',
+      iconBorder: 'rgba(217, 119, 6, 0.25)',
+      iconColor: '#D97706',
+    },
+  ]
+
+  const PROJECT_STATUS = [
+    { label: 'Completed', value: `${taskStatus.completed ?? 0} Projects`, color: '#22C55E' },
+    { label: 'Active', value: `${taskStatus.inProgress ?? 0} Projects`, color: '#2D69EB' },
+    { label: 'On-Hold', value: `${taskStatus.pending ?? 0} Projects`, color: '#828283' },
+  ]
+
+  const ACTIVITY_ITEMS = (dashboard?.recentTasks ?? []).map((task) => {
+    const style = TASK_STATUS_STYLE[task.status] ?? TASK_STATUS_STYLE.pending
+    return {
+      text: task.title,
+      meta: `${task.assignedTo?.name ?? '—'} • ${task.projectId?.title ?? 'Project'}`,
+      status: style.status,
+      statusColor: style.statusColor,
+      statusBg: style.statusBg,
+      icon: style.icon,
+      iconBg: style.iconBg,
+      iconColor: style.iconColor,
+    }
+  })
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
+        <Typography color="#828283">Loading dashboard...</Typography>
+      </Box>
+    )
+  }
+
+  if (error || !dashboard) {
+    return (
+      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
+        <Typography color="#D97706">Failed to load dashboard data</Typography>
+      </Box>
+    )
+  }
+
   return (
     <Box sx={{ display: 'grid', gap: 3 }}>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'flex-start' }, justifyContent: 'space-between', gap: 2 }}>
@@ -154,27 +244,25 @@ export default function DashboardPage() {
                 color: '#22C55E',
               }}
             >
-              96.2% Avg
+              {avgRate != null ? `${avgRate}% Avg` : '—'}
             </Typography>
           </Box>
           <Box sx={{ p: 3, pt: 0 }}>
-            <Box
-              sx={{
-                height: 256,
-                borderRadius: 1,
-                border: 1,
-                borderStyle: 'dashed',
-                borderColor: '#E2E8F0',
-                bgcolor: '#F8FAFA',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#828283',
-                fontSize: 14,
-              }}
-            >
-              [Area Chart Placeholder]
-            </Box>
+            <ResponsiveContainer width="100%" height={256}>
+              <AreaChart data={attendanceTrend}>
+                <defs>
+                  <linearGradient id="attendanceFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2D69EB" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#2D69EB" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#828283' }} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#828283' }} />
+                <Tooltip />
+                <Area type="monotone" dataKey="rate" name="Attendance %" stroke="#2D69EB" fill="url(#attendanceFill)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
           </Box>
         </Paper>
 
@@ -186,25 +274,16 @@ export default function DashboardPage() {
             </Typography>
           </Box>
           <Box sx={{ px: 3, pb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Box
-              sx={{
-                width: '100%',
-                height: 192,
-                borderRadius: 1,
-                border: 1,
-                borderStyle: 'dashed',
-                borderColor: '#E2E8F0',
-                bgcolor: '#F8FAFA',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#828283',
-                fontSize: 14,
-                mb: 2,
-              }}
-            >
-              [Pie Chart Placeholder]
-            </Box>
+            <ResponsiveContainer width="100%" height={192}>
+              <PieChart>
+                <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={75} paddingAngle={3}>
+                  {pieData.map((entry, index) => (
+                    <Cell key={index} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
             <Box sx={{ width: '100%', display: 'grid', gap: 1 }}>
               {PROJECT_STATUS.map((item) => (
                 <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

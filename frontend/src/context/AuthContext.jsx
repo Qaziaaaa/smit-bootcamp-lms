@@ -1,5 +1,5 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
-import { DEMO_KEY, TOKEN_KEY, USER_KEY } from '../constants'
+import { TOKEN_KEY, USER_KEY } from '../constants'
 import { getMe, login as loginRequest, logout as logoutRequest } from '../services/authService'
 
 const AuthContext = createContext(null)
@@ -15,17 +15,7 @@ function readStoredUser() {
   }
 }
 
-// Demo logins are preview-only: they live in sessionStorage so a fresh visit
-// always starts at the login screen. Real logins persist in localStorage.
 function initToken() {
-  // migrate: drop any legacy demo session previously persisted in localStorage,
-  // including a leftover demo-token even if its demo flag was lost
-  const localToken = localStorage.getItem(TOKEN_KEY)
-  if (localStorage.getItem(DEMO_KEY) === '1' || localToken === 'demo-token') {
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
-    localStorage.removeItem(DEMO_KEY)
-  }
   return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY)
 }
 
@@ -36,11 +26,6 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!token) return
-
-    if (sessionStorage.getItem(DEMO_KEY) === '1') {
-      setLoading(false)
-      return
-    }
 
     let cancelled = false
 
@@ -76,24 +61,6 @@ export function AuthProvider({ children }) {
     return newUser
   }, [])
 
-  const loginAsDemo = useCallback((role) => {
-    const demoUser = {
-      id: `demo-${role}`,
-      name: role === 'admin' ? 'Admin' : 'Student',
-      email: role === 'admin' ? 'admin@lms.com' : 'student@lms.com',
-      role,
-    }
-    sessionStorage.setItem(TOKEN_KEY, 'demo-token')
-    sessionStorage.setItem(USER_KEY, JSON.stringify(demoUser))
-    sessionStorage.setItem(DEMO_KEY, '1')
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
-    localStorage.removeItem(DEMO_KEY)
-    setToken('demo-token')
-    setUser(demoUser)
-    return demoUser
-  }, [])
-
   const logout = useCallback(async () => {
     try {
       await logoutRequest()
@@ -102,10 +69,8 @@ export function AuthProvider({ children }) {
     }
     sessionStorage.removeItem(TOKEN_KEY)
     sessionStorage.removeItem(USER_KEY)
-    sessionStorage.removeItem(DEMO_KEY)
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
-    localStorage.removeItem(DEMO_KEY)
     setToken(null)
     setUser(null)
   }, [])
@@ -117,10 +82,9 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(token),
       loading,
       login,
-      loginAsDemo,
       logout,
     }),
-    [user, token, loading, login, loginAsDemo, logout],
+    [user, token, loading, login, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

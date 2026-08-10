@@ -3,9 +3,9 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { Box, CircularProgress } from '@mui/material'
 import { ProtectedRoute } from './ProtectedRoute'
 import { RedirectByRole } from './RedirectByRole'
-import { PlaceholderPage } from '../components/ui/PlaceholderPage'
 
 const AdminLayout = lazy(() => import('../layouts/AdminLayout').then((m) => ({ default: m.AdminLayout })))
+const StudentLayout = lazy(() => import('../layouts/StudentLayout').then((m) => ({ default: m.StudentLayout })))
 const LoginPage = lazy(() => import('../pages/LoginPage'))
 const AccessDeniedPage = lazy(() => import('../pages/AccessDeniedPage'))
 const DashboardPage = lazy(() => import('../pages/DashboardPage'))
@@ -17,6 +17,10 @@ const TeamDetailPage = lazy(() => import('../pages/TeamDetailPage'))
 const ProjectsPage = lazy(() => import('../pages/ProjectsPage'))
 const ProjectDetailPage = lazy(() => import('../pages/ProjectDetailPage'))
 const TasksPage = lazy(() => import('../pages/TasksPage'))
+const StudentDashboardPage = lazy(() => import('../pages/StudentDashboardPage'))
+const StudentAttendancePage = lazy(() => import('../pages/StudentAttendancePage'))
+const StudentTeamPage = lazy(() => import('../pages/StudentTeamPage'))
+const StudentTasksPage = lazy(() => import('../pages/StudentTasksPage'))
 
 function PageFallback() {
   return (
@@ -53,37 +57,17 @@ export default function AppRoutes() {
         </Route>
 
         <Route
-          path="/student/dashboard"
           element={
             <ProtectedRoute roles={['student']}>
-              <PlaceholderPage />
+              <StudentLayout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/student/attendance"
-          element={
-            <ProtectedRoute roles={['student']}>
-              <PlaceholderPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/team"
-          element={
-            <ProtectedRoute roles={['student']}>
-              <PlaceholderPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/student/tasks"
-          element={
-            <ProtectedRoute roles={['student']}>
-              <PlaceholderPage />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route path="/student/dashboard" element={<StudentDashboardPage />} />
+          <Route path="/student/attendance" element={<StudentAttendancePage />} />
+          <Route path="/student/team" element={<StudentTeamPage />} />
+          <Route path="/student/tasks" element={<StudentTasksPage />} />
+        </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

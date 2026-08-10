@@ -1,14 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Alert, Box, Button, InputAdornment, Paper, TextField, Typography } from '@mui/material'
-import { ArrowRight, Lock, ShieldCheck, User } from 'lucide-react'
+import { ArrowRight, Lock, User } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { Logo } from '../components/ui/Logo'
 
-const DEMO_ENABLED = import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true'
-
 export default function LoginPage() {
-  const { login, loginAsDemo } = useAuth()
+  const { login } = useAuth()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
@@ -19,10 +17,6 @@ export default function LoginPage() {
 
   function goHome(user) {
     navigate(user.role === 'admin' ? '/dashboard' : '/student/dashboard', { replace: true })
-  }
-
-  function handleDemo(role) {
-    goHome(loginAsDemo(role))
   }
 
   async function handleSubmit(event) {
@@ -80,55 +74,6 @@ export default function LoginPage() {
             Enter your bootcamp credentials to access your dashboard.
           </Typography>
         </Box>
-
-        {DEMO_ENABLED && (
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5, mb: 3 }}>
-            <Button
-              variant="outlined"
-              color="inherit"
-              fullWidth
-              onClick={() => handleDemo('admin')}
-              sx={{
-                justifyContent: 'flex-start',
-                gap: 1.5,
-                px: 1.75,
-                py: 1.25,
-                bgcolor: '#ffffff',
-                color: '#474B53',
-                textAlign: 'left',
-                '&:hover': { borderColor: 'rgba(41, 70, 131, 0.5)' },
-              }}
-            >
-              <ShieldCheck size={18} strokeWidth={1.8} />
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }}>Admin Demo</Typography>
-                <Typography sx={{ fontSize: 10, color: '#828283' }}>Full Access</Typography>
-              </Box>
-            </Button>
-            <Button
-              variant="outlined"
-              color="inherit"
-              fullWidth
-              onClick={() => handleDemo('student')}
-              sx={{
-                justifyContent: 'flex-start',
-                gap: 1.5,
-                px: 1.75,
-                py: 1.25,
-                bgcolor: '#ffffff',
-                color: '#474B53',
-                textAlign: 'left',
-                '&:hover': { borderColor: 'rgba(41, 70, 131, 0.5)' },
-              }}
-            >
-              <User size={18} strokeWidth={1.8} />
-              <Box>
-                <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }}>Student Demo</Typography>
-                <Typography sx={{ fontSize: 10, color: '#828283' }}>Student View</Typography>
-              </Box>
-            </Button>
-          </Box>
-        )}
 
         <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 2 }}>
           <Box sx={{ px: 2.5, py: 2, borderBottom: 1, borderColor: 'divider', bgcolor: '#F4F9FF' }}>
