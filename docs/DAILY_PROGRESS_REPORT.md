@@ -20,6 +20,10 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 - bcryptjs hashing + express-validator on login — `auth.service.js` (`bcrypt.compare`), `validate.js` (`validateLogin`).
 - Seed admin user — `seed.js` (`admin@lms.com` / `password123`), wired as `npm run seed`.
 
+### Day 2 (per TEAM_DISTRIBUTION realignment) — Student APIs ✅
+- Student CRUD APIs are assigned to **Hakimullah** per `TEAM_DISTRIBUTION.md`; merged via PR #47 (implemented by Shafqatullah before the realignment).
+- Full CRUD `POST/GET/PUT/DELETE /students` + pagination + `search/batch/teamId` filters + `GET /:id` + `GET /:id/attendance` — all present and admin-guarded.
+
 ### Day 3 — Attendance APIs ✅ (PR #72 merged)
 - `POST /attendance`, `GET /attendance`, `PUT /attendance/:id` — present (`attendance.routes.js`).
 - Upsert per `{ studentId, date }` — `markAttendance` uses `findOneAndUpdate(..., { upsert: true })`.
@@ -37,9 +41,10 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 - Indexes: `attendance {studentId, date}` unique, `user.email` unique, `team.name` unique, FK indexes.
 - Global error handler + response envelope (`ApiError`, `asyncHandler`, `response.js`, `errorHandler`).
 
-### Day 2 — Student APIs ✅
+### Day 2 — Student APIs ✅ (assigned to Hakimullah per TEAM_DISTRIBUTION)
 - Full CRUD `POST/GET/PUT/DELETE /students` + pagination + `search/batch/teamId` filters (regex-escaped).
 - `GET /students/:id` + `GET /students/:id/attendance` (summary %). Admin-guarded.
+- Merged via PR #47; moved under Hakimullah to match `TEAM_DISTRIBUTION.md` (implemented by Shafqatullah).
 
 ### Day 3 — Team + Project APIs ✅ (PR #58 merged)
 - Teams: list (w/ member count), create, get-by-id, update, delete, `POST /teams/:id/students`.

@@ -73,12 +73,13 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] bcryptjs hashing, express-validator on login
 - [x] Seed an admin user for testing
 - [x] ✅ PR: auth API (#72)
-
-### Shafqatullah (Backend)
 - [x] Student CRUD APIs (`GET/POST/PUT/DELETE /students`)
 - [x] Pagination + `search/batch/teamId` filters
 - [x] `GET /students/:id` + `GET /students/:id/attendance`
 - [x] ✅ PR: student APIs (#47)
+
+### Shafqatullah (Backend)
+- [ ] Assist Hakimullah with student API testing / input validation
 
 ### Abdullah (Frontend)
 - [x] Login page (FRONTEND_DESIGN.md §4.1)
