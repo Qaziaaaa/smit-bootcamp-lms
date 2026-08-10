@@ -52,7 +52,6 @@ const getStudentTasks = async (userId) => {
 
   const tasks = await Task.find({ assignedTo: student._id })
     .populate('projectId', 'title')
-    .populate('assignedBy', 'name')
     .sort({ createdAt: -1 })
     .lean();
 
