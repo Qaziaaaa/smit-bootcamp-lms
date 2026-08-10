@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button, Grid2, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Button, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Modal } from '../ui/Modal';
 import { FormField } from '../ui/FormField';
 
@@ -109,11 +109,11 @@ export const TaskForm = ({
       actions={actions}
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <Grid2 container spacing={2}>
-          <Grid2 item xs={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
             <FormField name="title" control={control} label="Task Title *" />
-          </Grid2>
-          <Grid2 item xs={12}>
+          </Grid>
+          <Grid item xs={12}>
             <FormField
               name="description"
               control={control}
@@ -121,10 +121,10 @@ export const TaskForm = ({
               multiline
               rows={3}
             />
-          </Grid2>
+          </Grid>
 
           {/* Project selector — locked when opened from a project detail */}
-          <Grid2 item xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <Controller
               name="projectId"
               control={control}
@@ -140,10 +140,10 @@ export const TaskForm = ({
                 </FormControl>
               )}
             />
-          </Grid2>
+          </Grid>
 
           {/* Assigned student */}
-          <Grid2 item xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <Controller
               name="assignedTo"
               control={control}
@@ -159,10 +159,10 @@ export const TaskForm = ({
                 </FormControl>
               )}
             />
-          </Grid2>
+          </Grid>
 
           {/* Priority */}
-          <Grid2 item xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <Controller
               name="priority"
               control={control}
@@ -177,10 +177,10 @@ export const TaskForm = ({
                 </FormControl>
               )}
             />
-          </Grid2>
+          </Grid>
 
           {/* Status */}
-          <Grid2 item xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <Controller
               name="status"
               control={control}
@@ -195,12 +195,12 @@ export const TaskForm = ({
                 </FormControl>
               )}
             />
-          </Grid2>
+          </Grid>
 
-          <Grid2 item xs={12} sm={6}>
+          <Grid item xs={12} sm={6}>
             <FormField name="deadline" control={control} label="Deadline (Optional)" type="date" />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </form>
     </Modal>
   );
