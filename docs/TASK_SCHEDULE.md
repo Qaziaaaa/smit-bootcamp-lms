@@ -119,8 +119,8 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] ✅ PR: team + project APIs (#58)
 
 ### Abdullah (Frontend)
-- [ ] Admin Dashboard wired to `GET /dashboard`
-- [ ] ✅ PR: live dashboard
+- [x] Admin Dashboard wired to `GET /dashboard`
+- [x] ✅ PR: live dashboard (#94)
 
 ### Shahzad (Frontend)
 - [x] Attendance page: date/batch/status filters + mark present/absent toggle
@@ -151,8 +151,8 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] ✅ PR: tasks + dashboard APIs (#74)
 
 ### Abdullah (Frontend)
-- [ ] Student portal pages: dashboard, attendance, team, tasks (read-only)
-- [ ] ✅ PR: student portal UI
+- [x] Student portal pages: dashboard, attendance, team, tasks (read-only)
+- [x] ✅ PR: student portal UI (#100)
 - **ℹ️ Backend ready (PR #72) — no dependency left.**
 
 ### Shahzad (Frontend)

@@ -1,6 +1,6 @@
 # Daily Progress Report — Day 4 (Mon Aug 10)
 
-Audit of Day 1–4 work for **all 4 members**, verified against code on `dev` (HEAD `1adfb86`, after merges of PR #74 + #83), not just commit messages.
+Audit of Day 1–4 work for **all 4 members**, verified against code on `dev` (HEAD `17a7154`, after merges of PR #74, #83, #94 + #100), not just commit messages.
 
 Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 
@@ -66,7 +66,7 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 
 ---
 
-## Abdullah (Frontend) — ⚠️ Day 1 & 2 done, Day 3 & 4 NOT done
+## Abdullah (Frontend) — ✅ COMPLETE Day 1–4 (Day 3 & 4 merged via PR #94 + #100)
 
 ### Day 1 — Scaffold + routing + shell ✅
 - Vite app, axios + react-router-dom + MUI stack; all 15 routes; `ProtectedRoute` (admin + student roles); auth context; admin shell (sidebar 240px + topbar + content).
@@ -74,16 +74,15 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 ### Day 2 — Login + dashboard shell ✅
 - Login page, auth context → login → role redirect, 401/403 handling + redirect to `/login`, dashboard layout with StatCards.
 
-### Day 3 — ❌ "Admin Dashboard wired to `GET /dashboard`" — NOT DONE
-- `DashboardPage.jsx` uses **hardcoded** STAT_CARDS (`'2,450'`, `'92.4%'`), chart placeholders, fake activity feed.
-- No API call / no `dashboardService`.
-- **Backend now ready** (Shafqatullah's `/dashboard` merged in PR #74) — can be wired immediately.
+### Day 3 — Admin Dashboard wired to `GET /dashboard` ✅ (PR #94 merged)
+- `DashboardPage.jsx` now fetches live stats via `services/dashboardService.js` (removed hardcoded `'2,450'` / `'92.4%'`).
+- Charts rendered with `recharts` (new dep, added during merge).
 
-### Day 4 — ❌ "Student portal pages (dashboard, attendance, team, tasks)" — NOT DONE
-- `/student/dashboard`, `/student/attendance`, `/student/team`, `/student/tasks` still render `<PlaceholderPage />` (`AppRoutes.jsx`).
-- **Backend is ready** (Hakimullah's Day 4 PR #72 merged) — pages can be built against the live contract now.
+### Day 4 — Student portal pages ✅ (PR #100 merged)
+- `/student/dashboard`, `/student/attendance`, `/student/team`, `/student/tasks` now render `StudentDashboardPage`, `StudentAttendancePage`, `StudentTeamPage`, `StudentTasksPage` wrapped in `StudentLayout`.
+- API calls via `services/studentService.js` against Hakimullah's merged student endpoints.
 
-**Team-wide note:** the frontend has **zero API integration** — no page calls axios/fetch; only `services/apiClient.js` + `authService.js` exist. Everything renders mock data.
+**Team-wide note:** at last full audit only `services/apiClient.js` + `authService.js` existed; Abdullah's PRs added `dashboardService.js` + `studentService.js`. Shahzad's admin module pages may still render mock data pending Day 5 integration.
 
 ---
 
@@ -114,14 +113,16 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 |---|---|---|---|---|---|
 | Hakimullah | ✅* | ✅ | ✅ | ✅ | Backend complete (auth, students, attendance, student portal) |
 | Shafqatullah | ✅ | ✅ | ✅ | ✅ | Backend complete (teams, projects, tasks, dashboard) — PR #74 merged |
-| Abdullah | ✅ | ✅ | ❌ | ❌ | Dashboard hardcoded; student portal pages not built |
+| Abdullah | ✅ | ✅ | ✅ | ✅ | Dashboard live + student portal pages merged (#94, #100) |
 | Shahzad | ⚠️ | ⚠️ | ⚠️ | ⚠️ | All UI written + routed (PR #83) but **build broken — deps missing** |
 
 \* Day 1 deliverables present on `dev`, but authored by the lead's Sprint-0 scaffold rather than Hakim's own commits.
 
+> **Note (merge fix):** Abdullah's PRs #94 + #100 were accidentally merged to `main` (base set to main). `main` was reset to `605cc83` (Initial commit) and the work was merged into `dev` correctly.
+
 ## Required next steps
-1. **CRITICAL — fix build:** add `sonner`, `react-hook-form`, `zod`, `@tanstack/react-table` to `frontend/package.json` and install. Frontend cannot run until this is done.
-2. **Abdullah (Day 3):** wire DashboardPage to the now-merged `GET /dashboard` API (no dependency left).
-3. **Abdullah (Day 4):** build the 4 student portal pages against Hakimullah's merged student APIs (no dependency left).
-4. **All (Day 5):** connect every Shahzad page to real APIs — currently all mock data.
+1. **CRITICAL — verify build:** deps now added (`sonner`, `react-hook-form`, `zod`, `@hookform/resolvers`, `@tanstack/react-table` v9, `recharts`) and build passes locally. Confirm on a fresh clone.
+2. **Abdullah:** student portal + dashboard done — QA against live backend (student login flow).
+3. **Shahzad (Day 5):** connect his admin module pages (students/attendance/teams/projects/tasks) to real APIs — currently mock data.
+4. **All (Day 5):** loading/empty/error states, form validation wiring, responsive pass, remove unused imports (lint warnings).
 5. **Security fixes (lead + backend):** lock CORS to the frontend origin (`app.js:12`), make `JWT_SECRET` fail closed (`env.js:6`), and confirm a student token cannot reach any admin endpoint (403 test) before Day 5 integration/QA.
