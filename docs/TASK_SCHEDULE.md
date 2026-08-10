@@ -68,17 +68,18 @@ Each day ends with a 15-minute standup: done / next / blockers.
 **Goal:** secure login works end-to-end; admin sees dashboard layout.
 
 ### Hakimullah (Backend)
-- [ ] Auth APIs: `POST /auth/login`, `GET /auth/me`
-- [ ] JWT sign/verify middleware + role guard
-- [ ] bcryptjs hashing, express-validator on login
-- [ ] Seed an admin user for testing
-- [ ] ✅ PR: auth API
-
-### Shafqatullah (Backend)
+- [x] Auth APIs: `POST /auth/login`, `GET /auth/me`
+- [x] JWT sign/verify middleware + role guard
+- [x] bcryptjs hashing, express-validator on login
+- [x] Seed an admin user for testing
+- [x] ✅ PR: auth API (#72)
 - [x] Student CRUD APIs (`GET/POST/PUT/DELETE /students`)
 - [x] Pagination + `search/batch/teamId` filters
 - [x] `GET /students/:id` + `GET /students/:id/attendance`
 - [x] ✅ PR: student APIs (#47)
+
+### Shafqatullah (Backend)
+- [ ] Assist Hakimullah with student API testing / input validation
 
 ### Abdullah (Frontend)
 - [x] Login page (FRONTEND_DESIGN.md §4.1)
@@ -105,15 +106,15 @@ Each day ends with a 15-minute standup: done / next / blockers.
 **Goal:** students + attendance fully working (API + UI).
 
 ### Hakimullah (Backend)
-- [ ] Attendance APIs: `POST /attendance`, `GET /attendance`, `PUT /attendance/:id`
-- [ ] Attendance upsert per `{ studentId, date }`
-- [ ] `GET /attendance/summary` (percentages by batch)
-- [ ] ✅ PR: attendance APIs
+- [x] Attendance APIs: `POST /attendance`, `GET /attendance`, `PUT /attendance/:id`
+- [x] Attendance upsert per `{ studentId, date }`
+- [x] `GET /attendance/summary` (percentages by batch)
+- [x] ✅ PR: attendance APIs (#72)
 
 ### Shafqatullah (Backend)
 - [x] Team APIs: CRUD + `POST /teams/:id/students`
 - [x] Project APIs: CRUD
-- [ ] ✅ PR: team + project APIs
+- [x] ✅ PR: team + project APIs (#58)
 
 ### Abdullah (Frontend)
 - [ ] Admin Dashboard wired to `GET /dashboard`
