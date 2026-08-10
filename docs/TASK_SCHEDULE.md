@@ -142,9 +142,9 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] ✅ PR: student portal APIs (#72)
 
 ### Shafqatullah (Backend)
-- [ ] Task APIs: CRUD + filters (`projectId/status/assignedTo/search`)
-- [ ] `GET /dashboard` (counts + recent activity)
-- [ ] `PUT /student/tasks/:id/progress`
+- [x] Task APIs: CRUD + filters (`projectId/status/assignedTo/search`)
+- [x] `GET /dashboard` (counts + recent activity)
+- [x] `PUT /student/tasks/:id/progress`
 - [ ] ✅ PR: tasks + dashboard APIs
 
 ### Abdullah (Frontend)

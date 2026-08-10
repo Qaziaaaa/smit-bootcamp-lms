@@ -151,6 +151,50 @@ const validateProjectUpdate = [
   handleValidationErrors,
 ];
 
+const validateTasksQuery = [
+  query('projectId').optional().isMongoId().withMessage('Invalid project ID.'),
+  query('status').optional().isIn(['pending', 'in-progress', 'completed']).withMessage('Invalid status.'),
+  query('assignedTo').optional().isMongoId().withMessage('Invalid assignedTo ID.'),
+  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100.').toInt(),
+  handleValidationErrors,
+];
+
+const validateTaskId = [
+  param('id').isMongoId().withMessage('Invalid task ID.'),
+  handleValidationErrors,
+];
+
+const validateTaskCreate = [
+  body('projectId').isMongoId().withMessage('Valid project ID is required.'),
+  body('title').trim().notEmpty().withMessage('Task title is required.').isLength({ max: 200 }).withMessage('Task title must be at most 200 characters.'),
+  body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description must be at most 1000 characters.'),
+  body('assignedTo').optional().isMongoId().withMessage('Invalid assignedTo ID.'),
+  body('priority').optional().isIn(['low', 'medium', 'high']).withMessage('Invalid priority.'),
+  body('status').optional().isIn(['pending', 'in-progress', 'completed']).withMessage('Invalid status.'),
+  body('deadline').optional().isISO8601().withMessage('Valid deadline date is required.').toDate(),
+  handleValidationErrors,
+];
+
+const validateTaskUpdate = [
+  param('id').isMongoId().withMessage('Invalid task ID.'),
+  body('projectId').optional().isMongoId().withMessage('Invalid project ID.'),
+  body('title').optional().trim().notEmpty().withMessage('Task title cannot be empty.').isLength({ max: 200 }).withMessage('Task title must be at most 200 characters.'),
+  body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description must be at most 1000 characters.'),
+  body('assignedTo').optional().isMongoId().withMessage('Invalid assignedTo ID.'),
+  body('priority').optional().isIn(['low', 'medium', 'high']).withMessage('Invalid priority.'),
+  body('status').optional().isIn(['pending', 'in-progress', 'completed']).withMessage('Invalid status.'),
+  body('deadline').optional().isISO8601().withMessage('Valid deadline date is required.').toDate(),
+  handleValidationErrors,
+];
+
+const validateTaskProgress = [
+  param('id').isMongoId().withMessage('Invalid task ID.'),
+  body('status').trim().notEmpty().withMessage('Status is required.').isIn(['pending', 'in-progress', 'completed']).withMessage('Invalid status.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -171,4 +215,9 @@ export {
   validateProjectId,
   validateProjectCreate,
   validateProjectUpdate,
+  validateTasksQuery,
+  validateTaskId,
+  validateTaskCreate,
+  validateTaskUpdate,
+  validateTaskProgress,
 };

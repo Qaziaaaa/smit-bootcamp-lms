@@ -22,9 +22,15 @@ const getTasks = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, tasks, 'Tasks retrieved successfully');
 });
 
+const updateTaskProgress = asyncHandler(async (req, res) => {
+  const task = await studentPortalService.updateTaskProgress(req.user.userId, req.params.id, req.body);
+  sendSuccess(res, 200, task, 'Task progress updated successfully');
+});
+
 export default {
   getProfile,
   getAttendance,
   getTeam,
   getTasks,
+  updateTaskProgress,
 };

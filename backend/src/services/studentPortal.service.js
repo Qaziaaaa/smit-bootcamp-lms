@@ -52,11 +52,31 @@ const getStudentTasks = async (userId) => {
 
   const tasks = await Task.find({ assignedTo: student._id })
     .populate('projectId', 'title')
-    .populate('assignedBy', 'name')
     .sort({ createdAt: -1 })
     .lean();
 
   return tasks;
+};
+
+const updateTaskProgress = async (userId, taskId, data) => {
+  const student = await Student.findOne({ userId }).lean();
+  if (!student) {
+    throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
+  }
+
+  const task = await Task.findById(taskId);
+  if (!task) {
+    throw new ApiError(404, 'Task not found.', ['Task does not exist.']);
+  }
+
+  if (!task.assignedTo || task.assignedTo.toString() !== student._id.toString()) {
+    throw new ApiError(403, 'Forbidden.', ['You can only update your own tasks.']);
+  }
+
+  task.status = data.status;
+  await task.save();
+
+  return task;
 };
 
 export default {
@@ -64,4 +84,5 @@ export default {
   getStudentAttendance,
   getStudentTeam,
   getStudentTasks,
+  updateTaskProgress,
 };
