@@ -21,3 +21,5 @@ gh pr create --base dev --head <your-branch> --title "feat: describe your change
 **IMPORTANT:** PR base must be `dev`, never `main`. On the GitHub website, change the base dropdown from `main` to `dev` before creating the PR.
 
 If the `--rebase` step shows conflicts, fix them now (files marked `<<<<<<<`), then `git add .` and `git rebase --continue`, then push. Leave the PR for the lead to review and merge.
+
+**If you still see the OLD UI after a merge:** your local `dev` is probably behind. Run `git checkout dev` then `git pull origin dev` to grab the merged code, then hard-refresh the browser (Ctrl+Shift+R) or restart `npm run dev`.
