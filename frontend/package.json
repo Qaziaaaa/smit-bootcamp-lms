@@ -12,12 +12,17 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^5.7.1",
     "@mui/material": "^9.3.1",
+    "@tanstack/react-table": "^9.1.2",
     "axios": "^1.19.0",
     "lucide-react": "^1.30.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.2"
+    "react-hook-form": "^7.85.0",
+    "react-router-dom": "^7.18.2",
+    "sonner": "^2.0.8",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

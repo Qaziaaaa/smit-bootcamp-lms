@@ -24,12 +24,14 @@ export const SearchBar = ({ value, onChange, placeholder = "Search...", delay = 
       placeholder={placeholder}
       value={localValue}
       onChange={(e) => setLocalValue(e.target.value)}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <Search size={18} />
-          </InputAdornment>
-        ),
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <Search size={18} />
+            </InputAdornment>
+          ),
+        },
       }}
       sx={{ minWidth: { xs: '100%', sm: '300px' } }}
     />
