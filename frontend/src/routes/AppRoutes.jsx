@@ -9,6 +9,14 @@ const AdminLayout = lazy(() => import('../layouts/AdminLayout').then((m) => ({ d
 const LoginPage = lazy(() => import('../pages/LoginPage'))
 const AccessDeniedPage = lazy(() => import('../pages/AccessDeniedPage'))
 const DashboardPage = lazy(() => import('../pages/DashboardPage'))
+const StudentsPage = lazy(() => import('../pages/StudentsPage'))
+const StudentDetailPage = lazy(() => import('../pages/StudentDetailPage'))
+const AttendancePage = lazy(() => import('../pages/AttendancePage'))
+const TeamsPage = lazy(() => import('../pages/TeamsPage'))
+const TeamDetailPage = lazy(() => import('../pages/TeamDetailPage'))
+const ProjectsPage = lazy(() => import('../pages/ProjectsPage'))
+const ProjectDetailPage = lazy(() => import('../pages/ProjectDetailPage'))
+const TasksPage = lazy(() => import('../pages/TasksPage'))
 
 function PageFallback() {
   return (
@@ -34,14 +42,14 @@ export default function AppRoutes() {
           }
         >
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/students" element={<PlaceholderPage />} />
-          <Route path="/students/:id" element={<PlaceholderPage />} />
-          <Route path="/attendance" element={<PlaceholderPage />} />
-          <Route path="/teams" element={<PlaceholderPage />} />
-          <Route path="/teams/:id" element={<PlaceholderPage />} />
-          <Route path="/projects" element={<PlaceholderPage />} />
-          <Route path="/projects/:id" element={<PlaceholderPage />} />
-          <Route path="/tasks" element={<PlaceholderPage />} />
+          <Route path="/students" element={<StudentsPage />} />
+          <Route path="/students/:id" element={<StudentDetailPage />} />
+          <Route path="/attendance" element={<AttendancePage />} />
+          <Route path="/teams" element={<TeamsPage />} />
+          <Route path="/teams/:id" element={<TeamDetailPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/projects/:id" element={<ProjectDetailPage />} />
+          <Route path="/tasks" element={<TasksPage />} />
         </Route>
 
         <Route
