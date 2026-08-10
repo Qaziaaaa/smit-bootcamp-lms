@@ -1,6 +1,6 @@
 # Daily Progress Report — Day 4 (Mon Aug 10)
 
-Audit of Day 1–4 work for **all 4 members**, verified against code on `dev`, not just commit messages.
+Audit of Day 1–4 work for **all 4 members**, verified against code on `dev` (HEAD `1adfb86`, after merges of PR #74 + #83), not just commit messages.
 
 Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 
@@ -33,7 +33,7 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 - All routes guarded by `authenticate + authorize('admin')`.
 
 ### Day 4 — Student portal APIs ✅ (PR #72 merged)
-- Student-scoped endpoints: `/student/profile`, `/student/attendance`, `/student/team`, `/student/tasks` — present (`student.routes.js`, `student.controller.js`).
+- Student-scoped endpoints: `/student/profile`, `/student/attendance`, `/student/team`, `/student/tasks` — present (`studentPortal.routes.js`, `studentPortal.controller.js`).
 - Row-level security: queries scoped to the logged-in student, not by arbitrary `:id` params.
 - Guards: `authenticate + authorize('student')`; admin-role users denied.
 
@@ -41,7 +41,7 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 
 ---
 
-## Shafqatullah (Backend) — ✅ COMPLETE Day 1–3, ❌ Day 4 NOT done
+## Shafqatullah (Backend) — ✅ COMPLETE Day 1–4 (Day 4 merged via PR #74)
 
 ### Day 1 — Models + error handling ✅
 - All 6 Mongoose models (`users`, `students`, `attendance`, `teams`, `projects`, `tasks`).
@@ -58,11 +58,11 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 - Projects: list (status/search filters + pagination), create, get-by-id (w/ team + tasks), update, delete.
 - All admin-guarded.
 
-### Day 4 — Task APIs + Dashboard API ❌ NOT DONE
-- `task.routes.js`, `task.controller.js`, `task.service.js` — **do not exist** (verified: zero matches).
-- `GET /dashboard` endpoint — **does not exist** (zero matches across route files).
-- `PUT /student/tasks/:id/progress` — **does not exist** (no task progress route).
-- **Blocker:** Abdullah's Day 3 (live dashboard) and Day 4 (student portal) both wait on this.
+### Day 4 — Task APIs + Dashboard API ✅ (PR #74 merged)
+- Task CRUD `GET/POST/PUT/DELETE /tasks`, `GET /tasks/:id` with `projectId/status/assignedTo/search` filters — present (`task.routes.js`, `task.controller.js`, `task.service.js`).
+- `GET /dashboard` (counts + recent activity) — present (`dashboard.routes.js`, `dashboard.controller.js`, `dashboard.service.js`).
+- `PUT /student/tasks/:id/progress` — present (`studentPortal.controller.js`).
+- Guards verified: `/tasks` + `/dashboard` → `authenticate + authorize('admin')`; `/student/*` → `authenticate + authorize('student')` (admin blocked). Progress route has `validateTaskProgress`. **No missing guard found.**
 
 ---
 
@@ -77,31 +77,34 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 ### Day 3 — ❌ "Admin Dashboard wired to `GET /dashboard`" — NOT DONE
 - `DashboardPage.jsx` uses **hardcoded** STAT_CARDS (`'2,450'`, `'92.4%'`), chart placeholders, fake activity feed.
 - No API call / no `dashboardService`.
-- **Backend has no `/dashboard` endpoint at all** (see Shafqatullah Day 4 ❌).
+- **Backend now ready** (Shafqatullah's `/dashboard` merged in PR #74) — can be wired immediately.
 
 ### Day 4 — ❌ "Student portal pages (dashboard, attendance, team, tasks)" — NOT DONE
-- `/student/dashboard`, `/student/attendance`, `/student/team`, `/student/tasks` still render `<PlaceholderPage />`.
+- `/student/dashboard`, `/student/attendance`, `/student/team`, `/student/tasks` still render `<PlaceholderPage />` (`AppRoutes.jsx`).
 - **Backend is ready** (Hakimullah's Day 4 PR #72 merged) — pages can be built against the live contract now.
+
+**Team-wide note:** the frontend has **zero API integration** — no page calls axios/fetch; only `services/apiClient.js` + `authService.js` exist. Everything renders mock data.
 
 ---
 
-## Shahzad (Frontend) — ❌ Code written, but NOT functional / NOT done (Days 1–4)
+## Shahzad (Frontend) — ⚠️ Day 4 UI merged (PR #83), but build is BROKEN — missing deps
 
-### Day 1 — Shared components ⚠️ (files exist, unusable as-is)
+### Day 1 — Shared components ⚠️ (files exist, still unbuildable)
 - Created: `DataTable`, `SearchBar`, `FilterBar`, `Pagination`, `Modal`, `ConfirmDialog`, `FormField`, `Badge`, `Avatar`, `LoadingState/EmptyState/ErrorState`, `Toast`.
-- **Blocker:** imports `@tanstack/react-table` (DataTable), `sonner` (Toast), `react-hook-form` + `zod` (FormField/StudentForm) — **not in `package.json` or `node_modules`**. Would fail to build if imported.
+- **Blocker (STILL ACTIVE):** imports `@tanstack/react-table` (DataTable), `sonner` (Toast), `react-hook-form` + `zod` (forms) — **not in `package.json` and not in `node_modules`** (verified). `npm run dev` / `npm run build` **will fail**.
 
-### Day 2 — Students module ⚠️ (files exist, not wired)
+### Day 2 — Students module ⚠️ (routed now, mock data)
 - `StudentsPage.jsx` (SearchBar, FilterBar, DataTable, Pagination) + `StudentForm.jsx` modal with validation — dummy data only.
-- **Blocker:** `/students` route still renders `<PlaceholderPage />` — page never imported.
+- `/students` + `/students/:id` now render `StudentsPage` / `StudentDetailPage` (wired via PR #83).
 
-### Day 3 — Attendance + Teams ⚠️ (files exist, not wired)
+### Day 3 — Attendance + Teams ⚠️ (routed now, mock data)
 - `AttendancePage.jsx` (date/batch filters + present/absent toggle) ✅ logic.
 - `TeamsPage.jsx` + `TeamDetailPage.jsx` (list, detail, assign-students picker) ✅ logic.
-- **Blocker:** `/attendance`, `/teams`, `/teams/:id` routes still render `<PlaceholderPage />` — never imported.
+- `/attendance`, `/teams`, `/teams/:id` now render the real pages (wired via PR #83).
 
-### Day 4 — Projects + Tasks UI ❌ NOT DONE
-- No projects or tasks pages exist; no `ProjectsPage`, `TasksPage`, or task-form files found.
+### Day 4 — Projects + Tasks UI ✅ MERGED (PR #83), but not buildable yet
+- `ProjectsPage.jsx`, `ProjectDetailPage.jsx`, `TasksPage.jsx` + `ProjectForm.jsx` / `TaskForm.jsx` (1275 additions) — all routed in `AppRoutes.jsx`.
+- **Blocker:** depends on the same missing deps (`sonner`, `react-hook-form`, `zod`) — cannot build or run until installed.
 
 ---
 
@@ -109,16 +112,16 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 
 | Member | Day 1 | Day 2 | Day 3 | Day 4 | Notes |
 |---|---|---|---|---|---|
-| Hakimullah | ✅* | ✅ | ✅ | ✅ | Auth, attendance, student portal all verified |
-| Shafqatullah | ✅ | ✅ | ✅ | ❌ | Tasks + dashboard APIs missing — blocks Abdullah |
+| Hakimullah | ✅* | ✅ | ✅ | ✅ | Backend complete (auth, students, attendance, student portal) |
+| Shafqatullah | ✅ | ✅ | ✅ | ✅ | Backend complete (teams, projects, tasks, dashboard) — PR #74 merged |
 | Abdullah | ✅ | ✅ | ❌ | ❌ | Dashboard hardcoded; student portal pages not built |
-| Shahzad | ⚠️ | ⚠️ | ⚠️ | ❌ | Pages + components exist but not routed; missing deps |
+| Shahzad | ⚠️ | ⚠️ | ⚠️ | ⚠️ | All UI written + routed (PR #83) but **build broken — deps missing** |
 
 \* Day 1 deliverables present on `dev`, but authored by the lead's Sprint-0 scaffold rather than Hakim's own commits.
 
 ## Required next steps
-1. **Shafqatullah (Day 4):** add Task APIs, `GET /dashboard` (counts + recent activity), `PUT /student/tasks/:id/progress` — top priority, blocks two members.
-2. **Abdullah (Day 3, reopen):** wire DashboardPage to the real `/dashboard` API once the endpoint exists.
-3. **Abdullah (Day 4):** build student portal pages against Hakimullah's merged student APIs (no dependency left).
-4. **Shahzad:** install missing deps (`sonner`, `react-hook-form`, `zod`, `@tanstack/react-table`) and wire pages into `AppRoutes.jsx`; then do Day 4 projects/tasks UI.
-5. **Lead:** security review — confirm a student token cannot reach any admin endpoint (403 test), then merge Day 4 PRs before Day 5 integration/QA.
+1. **CRITICAL — fix build:** add `sonner`, `react-hook-form`, `zod`, `@tanstack/react-table` to `frontend/package.json` and install. Frontend cannot run until this is done.
+2. **Abdullah (Day 3):** wire DashboardPage to the now-merged `GET /dashboard` API (no dependency left).
+3. **Abdullah (Day 4):** build the 4 student portal pages against Hakimullah's merged student APIs (no dependency left).
+4. **All (Day 5):** connect every Shahzad page to real APIs — currently all mock data.
+5. **Security fixes (lead + backend):** lock CORS to the frontend origin (`app.js:12`), make `JWT_SECRET` fail closed (`env.js:6`), and confirm a student token cannot reach any admin endpoint (403 test) before Day 5 integration/QA.
