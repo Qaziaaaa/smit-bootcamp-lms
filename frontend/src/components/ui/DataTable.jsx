@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  useReactTable,
-  getCoreRowModel,
+  useTable,
+  createCoreRowModel,
   flexRender,
 } from '@tanstack/react-table';
 import {
@@ -22,10 +22,10 @@ export const DataTable = ({
   isLoading = false,
   emptyMessage = "No data found",
 }) => {
-  const table = useReactTable({
+  const table = useTable({
     data: data || [],
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    getCoreRowModel: createCoreRowModel(),
   });
 
   if (isLoading) {
@@ -72,7 +72,7 @@ export const DataTable = ({
               key={row.id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 }, '&:hover': { backgroundColor: 'action.hover' } }}
             >
-              {row.getVisibleCells().map((cell) => (
+              {row.getAllCells().map((cell) => (
                 <TableCell key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>

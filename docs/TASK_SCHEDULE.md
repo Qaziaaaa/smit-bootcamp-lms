@@ -19,12 +19,12 @@ Each day ends with a 15-minute standup: done / next / blockers.
 **Goal:** every machine runs the project; backend and frontend skeletons exist; DB connected; shared components ready.
 
 ### Hakimullah (Backend)
-- [ ] Follow SETUP_GUIDE.md — Node, MongoDB, `.env`
-- [ ] Create `backend/` scaffold: `src/config/`, `src/server.js`
-- [ ] Connect MongoDB (mongoose), handle connection errors
-- [ ] `/api/health` endpoint → `{ success: true }`
-- [ ] `express-validator`, `helmet`, `morgan`, `cors` wired in
-- [ ] ✅ PR: backend skeleton + health endpoint
+- [x] Follow SETUP_GUIDE.md — Node, MongoDB, `.env`
+- [x] Create `backend/` scaffold: `src/config/`, `src/server.js`
+- [x] Connect MongoDB (mongoose), handle connection errors
+- [x] `/api/health` endpoint → `{ success: true }`
+- [x] `express-validator`, `helmet`, `morgan`, `cors` wired in
+- [x] ✅ PR: backend skeleton + health endpoint
 
 ### Shafqat ullah (Backend)
 - [x] Create all Mongoose models per DATABASE_SCHEMA.md:
@@ -47,12 +47,13 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] ✅ PR: frontend scaffold + routing + shell
 
 ### Shahzad (Frontend)
-- [ ] Shared component library per FRONTEND_DESIGN.md §3:
-  - [ ] `DataTable`, `SearchBar`, `FilterBar`, `Pagination`
-  - [ ] `Modal`, `ConfirmDialog`, `FormField`
-  - [ ] `Badge`, `Avatar`, `StatCard`
-  - [ ] `LoadingState`, `EmptyState`, `ErrorState`, `Toast`
-- [ ] ✅ PR: shared components
+- [x] Shared component library per FRONTEND_DESIGN.md §3:
+  - [x] `DataTable`, `SearchBar`, `FilterBar`, `Pagination`
+  - [x] `Modal`, `ConfirmDialog`, `FormField`
+  - [x] `Badge`, `Avatar`, `StatCard`
+  - [x] `LoadingState`, `EmptyState`, `ErrorState`, `Toast`
+- [x] ✅ PR: shared components
+- **⚠️ BLOCKER:** imports `@tanstack/react-table` (DataTable), `sonner` (Toast), `react-hook-form` + `zod` (FormField) — **not in `package.json` / `node_modules`**. Frontend cannot build until installed.
 
 ### Team Lead
 - [ ] Verify every member completed SETUP_GUIDE (running apps)
@@ -79,7 +80,7 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] ✅ PR: student APIs (#47)
 
 ### Shafqatullah (Backend)
-- [ ] Assist Hakimullah with student API testing / input validation
+- [x] Assist Hakimullah with student API testing / input validation
 
 ### Abdullah (Frontend)
 - [x] Login page (FRONTEND_DESIGN.md §4.1)
@@ -89,9 +90,10 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] ✅ PR: login + dashboard shell (#34)
 
 ### Shahzad (Frontend)
-- [ ] Students list page: SearchBar, FilterBar, DataTable, Pagination
-- [ ] Student form modal (create/edit) with validation display
-- [ ] ✅ PR: students module UI (against mock/API contract)
+- [x] Students list page: SearchBar, FilterBar, DataTable, Pagination
+- [x] Student form modal (create/edit) with validation display
+- [x] ✅ PR: students module UI (against mock/API contract)
+- **⚠️ BLOCKER:** page uses mock data + missing deps (see Day 1). Route `/students` wired via PR #83.
 
 ### Team Lead
 - [ ] Review auth security (JWT, hashing, validation)
@@ -117,13 +119,14 @@ Each day ends with a 15-minute standup: done / next / blockers.
 - [x] ✅ PR: team + project APIs (#58)
 
 ### Abdullah (Frontend)
-- [ ] Admin Dashboard wired to `GET /dashboard`
-- [ ] ✅ PR: live dashboard
+- [x] Admin Dashboard wired to `GET /dashboard`
+- [x] ✅ PR: live dashboard (#94)
 
 ### Shahzad (Frontend)
-- [ ] Attendance page: date/batch/status filters + mark present/absent toggle
-- [ ] Teams list + team detail + assign-students picker
-- [ ] ✅ PR: attendance + teams UI
+- [x] Attendance page: date/batch/status filters + mark present/absent toggle
+- [x] Teams list + team detail + assign-students picker
+- [x] ✅ PR: attendance + teams UI
+- **⚠️ BLOCKER:** mock data + missing deps (see Day 1). Routes `/attendance`, `/teams`, `/teams/:id` wired via PR #83.
 
 ### Team Lead
 - [ ] Verify API contract matches FRONTEND_DESIGN.md for attendance/teams
@@ -137,28 +140,30 @@ Each day ends with a 15-minute standup: done / next / blockers.
 **Goal:** projects/tasks done; student portal reads real data.
 
 ### Hakimullah (Backend)
-- [ ] Student-scoped endpoints: `/student/profile`, `/student/attendance`, `/student/team`, `/student/tasks`
-- [ ] Row-level security: queries scoped to logged-in student
-- [ ] ✅ PR: student portal APIs
+- [x] Student-scoped endpoints: `/student/profile`, `/student/attendance`, `/student/team`, `/student/tasks`
+- [x] Row-level security: queries scoped to logged-in student
+- [x] ✅ PR: student portal APIs (#72)
 
 ### Shafqatullah (Backend)
 - [x] Task APIs: CRUD + filters (`projectId/status/assignedTo/search`)
 - [x] `GET /dashboard` (counts + recent activity)
 - [x] `PUT /student/tasks/:id/progress`
-- [ ] ✅ PR: tasks + dashboard APIs
+- [x] ✅ PR: tasks + dashboard APIs (#74)
 
 ### Abdullah (Frontend)
-- [ ] Student portal pages: dashboard, attendance, team, tasks (read-only)
-- [ ] ✅ PR: student portal UI
+- [x] Student portal pages: dashboard, attendance, team, tasks (read-only)
+- [x] ✅ PR: student portal UI (#100)
+- **ℹ️ Backend ready (PR #72) — no dependency left.**
 
 ### Shahzad (Frontend)
-- [ ] Projects list + project detail (+ tasks subview)
-- [ ] Tasks list with filters + status badge + edit
-- [ ] ✅ PR: projects + tasks UI
+- [x] Projects list + project detail (+ tasks subview)
+- [x] Tasks list with filters + status badge + edit
+- [x] ✅ PR: projects + tasks UI (#83)
+- **⚠️ BLOCKER:** mock data + missing deps (see Day 1). All admin routes wired via PR #83, but frontend cannot build until deps installed.
 
 ### Team Lead
 - [ ] Security review: student cannot reach admin endpoints (403 test)
-- [ ] Merge day-4 PRs
+- [x] Merge day-4 PRs (#74, #83)
 - [ ] Standup
 
 ---
