@@ -1,9 +1,10 @@
 import React from 'react';
 import {
-  useTable,
-  createCoreRowModel,
+  useReactTable,
+  getCoreRowModel,
   flexRender,
 } from '@tanstack/react-table';
+
 import {
   Table,
   TableBody,
@@ -12,20 +13,20 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Box
 } from '@mui/material';
+
 import { EmptyState, LoadingState } from './StateComponents';
 
-export const DataTable = ({ 
-  data, 
-  columns, 
+export const DataTable = ({
+  data,
+  columns,
   isLoading = false,
   emptyMessage = "No data found",
 }) => {
-  const table = useTable({
+  const table = useReactTable({
     data: data || [],
     columns,
-    getCoreRowModel: createCoreRowModel(),
+    getCoreRowModel: getCoreRowModel(),
   });
 
   if (isLoading) {
