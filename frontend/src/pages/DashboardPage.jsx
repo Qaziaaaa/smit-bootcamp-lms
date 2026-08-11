@@ -1,4 +1,15 @@
-import { Box, Button, Paper, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material'
 import {
   ArrowUpRight,
   Award,
@@ -10,21 +21,13 @@ import {
   Users,
 } from 'lucide-react'
 import { StatCard } from '../components/ui/StatCard'
+import { Avatar } from '../components/ui/Avatar'
+import { StudentForm } from '../components/students/StudentForm'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getDashboard } from '../services/dashboardService'
 import { apiClient } from '../services/apiClient'
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { toast } from 'sonner'
 
 const TASK_STATUS_STYLE = {
   completed: { status: 'Completed', statusColor: '#22C55E', statusBg: '#ECFDF5', icon: Award, iconBg: '#ECFDF5', iconColor: '#22C55E' },
@@ -32,11 +35,18 @@ const TASK_STATUS_STYLE = {
   pending: { status: 'Pending', statusColor: '#D97706', statusBg: '#FFFBEB', icon: CheckSquare, iconBg: '#FFFBEB', iconColor: '#D97706' },
 }
 
+function formatDate(date) {
+  if (!date) return '—'
+  return new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
 export default function DashboardPage() {
+  const navigate = useNavigate()
   const [dashboard, setDashboard] = useState(null)
-  const [attendanceTrend, setAttendanceTrend] = useState([])
+  const [recentAttendance, setRecentAttendance] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isStudentFormOpen, setIsStudentFormOpen] = useState(false)
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -58,42 +68,21 @@ export default function DashboardPage() {
   }, [])
 
   useEffect(() => {
-    const loadAttendanceTrend = async () => {
+    const loadRecentAttendance = async () => {
       try {
-        const response = await apiClient.get('/attendance', { params: { limit: 100 } })
-        const records = response.data?.data?.records ?? []
-        const byDate = {}
-        for (const record of records) {
-          const day = new Date(record.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
-          byDate[day] = byDate[day] ?? { present: 0, total: 0 }
-          byDate[day].total += 1
-          if (record.status === 'present') byDate[day].present += 1
-        }
-        const trend = Object.entries(byDate)
-          .map(([date, value]) => ({ date, rate: Math.round((value.present / value.total) * 100) }))
-          .sort((a, b) => new Date(a.date) - new Date(b.date))
-        setAttendanceTrend(trend)
+        const response = await apiClient.get('/attendance', { params: { limit: 5 } })
+        setRecentAttendance(response.data?.data?.records ?? [])
       } catch (error) {
-        console.error('Attendance trend error:', error)
+        console.error('Recent attendance error:', error)
       }
     }
 
-    loadAttendanceTrend()
+    loadRecentAttendance()
   }, [])
 
   const counts = dashboard?.counts ?? {}
   const taskStatus = dashboard?.taskStatus ?? {}
   const todayAttendance = dashboard?.todayAttendance ?? {}
-
-  const avgRate = attendanceTrend.length
-    ? Math.round(attendanceTrend.reduce((sum, item) => sum + item.rate, 0) / attendanceTrend.length)
-    : null
-
-  const pieData = [
-    { name: 'Completed', value: taskStatus.completed ?? 0, color: '#22C55E' },
-    { name: 'Active', value: taskStatus.inProgress ?? 0, color: '#2D69EB' },
-    { name: 'On-Hold', value: taskStatus.pending ?? 0, color: '#828283' },
-  ]
 
   const STAT_CARDS = [
     {
@@ -106,9 +95,9 @@ export default function DashboardPage() {
       iconColor: '#2D69EB',
     },
     {
-      label: 'Attendance Rate',
-      value: todayAttendance.present ?? '0',
-      trend: '+2.1% vs last week',
+      label: 'Attendance',
+      value: `${todayAttendance.present ?? 0}/${counts.students ?? 0}`,
+      subtitle: 'Present / Total Students',
       icon: CalendarCheck,
       iconBg: '#ECFDF5',
       iconBorder: 'rgba(34, 197, 94, 0.25)',
@@ -133,12 +122,6 @@ export default function DashboardPage() {
       iconBorder: 'rgba(217, 119, 6, 0.25)',
       iconColor: '#D97706',
     },
-  ]
-
-  const PROJECT_STATUS = [
-    { label: 'Completed', value: `${taskStatus.completed ?? 0} Projects`, color: '#22C55E' },
-    { label: 'Active', value: `${taskStatus.inProgress ?? 0} Projects`, color: '#2D69EB' },
-    { label: 'On-Hold', value: `${taskStatus.pending ?? 0} Projects`, color: '#828283' },
   ]
 
   const ACTIVITY_ITEMS = (dashboard?.recentTasks ?? []).map((task) => {
@@ -172,10 +155,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <Box sx={{ display: 'grid', gap: 3 }}>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'flex-start' }, justifyContent: 'space-between', gap: 2 }}>
+    <Box sx={{ display: 'grid', gap: 3, mt: { xs: 0, sm: -1, md: -2 }, mb: { xs: -1, sm: -2, md: -3 } }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'flex-start' }, justifyContent: 'space-between', gap: 2, mb: -1 }}>
         <Box>
-          <Typography
+          {/* <Typography
             component="span"
             sx={{
               display: 'inline-flex',
@@ -190,7 +173,7 @@ export default function DashboardPage() {
             }}
           >
             Saylani Mass IT Training (SMIT)
-          </Typography>
+          </Typography> */}
           <Typography variant="h5" sx={{ fontWeight: 500, color: '#0A0A0A', letterSpacing: '-0.02em' }}>
             SMIT Bootcamp Overview
           </Typography>
@@ -199,10 +182,16 @@ export default function DashboardPage() {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Button variant="contained" size="small" startIcon={<Plus size={16} />} sx={{ height: 36 }}>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<Plus size={16} />}
+            sx={{ height: 36 }}
+            onClick={() => setIsStudentFormOpen(true)}
+          >
             Add Student
           </Button>
-          <Button variant="outlined" size="small" sx={{ height: 36 }}>
+          <Button variant="outlined" size="small" sx={{ height: 36 }} onClick={() => navigate('/attendance')}>
             Mark Attendance
           </Button>
         </Box>
@@ -221,154 +210,212 @@ export default function DashboardPage() {
       </Box>
 
       <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' } }}>
-        <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff' }}>
+        <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', minWidth: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, p: 3 }}>
             <Box>
               <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>
-                Attendance Trend (This Week)
+                Recent Attendance
               </Typography>
               <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
-                Average daily attendance rate percentage
+                Latest student attendance records
               </Typography>
             </Box>
-            <Typography
-              component="span"
-              sx={{
-                display: 'inline-flex',
-                px: 1.25,
-                py: 0.25,
-                borderRadius: 9999,
-                fontSize: 12,
-                fontWeight: 600,
-                bgcolor: '#D1FAE5',
-                color: '#22C55E',
-              }}
-            >
-              {avgRate != null ? `${avgRate}% Avg` : '—'}
-            </Typography>
+            <Button size="small" color="primary" sx={{ fontSize: 12, gap: 0.5, '&:hover': { backgroundColor: '#F0F5FF' } }}>
+              View All <ArrowUpRight size={14} />
+            </Button>
           </Box>
-          <Box sx={{ p: 3, pt: 0 }}>
-            <ResponsiveContainer width="100%" height={256}>
-              <AreaChart data={attendanceTrend}>
-                <defs>
-                  <linearGradient id="attendanceFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2D69EB" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#2D69EB" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#828283' }} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#828283' }} />
-                <Tooltip />
-                <Area type="monotone" dataKey="rate" name="Attendance %" stroke="#2D69EB" fill="url(#attendanceFill)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </Box>
+          <TableContainer sx={{ borderTop: 1, borderColor: 'divider' }}>
+            <Table sx={{ minWidth: 560 }} aria-label="recent attendance table">
+              <TableHead>
+                <TableRow>
+                  <TableCell
+                    sx={{
+                      py: 1.5,
+                      fontSize: 11,
+                      fontWeight: 500,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: '#828283',
+                    }}
+                  >
+                    Student
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      py: 1.5,
+                      fontSize: 11,
+                      fontWeight: 500,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: '#828283',
+                    }}
+                  >
+                    Batch
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      py: 1.5,
+                      fontSize: 11,
+                      fontWeight: 500,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: '#828283',
+                    }}
+                  >
+                    Date
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{
+                      py: 1.5,
+                      fontSize: 11,
+                      fontWeight: 500,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      color: '#828283',
+                    }}
+                  >
+                    Status
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {recentAttendance.map((record) => (
+                  <TableRow
+                    key={record.studentId ?? record._id}
+                    sx={{
+                      '&:last-child td, &:last-child th': { border: 0 },
+                      '&:hover': { bgcolor: '#F8FAFA' },
+                    }}
+                  >
+                    <TableCell sx={{ py: 1.25 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                        <Avatar name={record.studentName} sx={{ width: 32, height: 32, fontSize: 12 }} />
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }} noWrap>
+                            {record.studentName}
+                          </Typography>
+                          <Typography sx={{ fontSize: 10, color: '#828283' }} noWrap>
+                            {record.studentEmail}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell sx={{ py: 1.25 }}>
+                      <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{record.batch}</Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 1.25 }}>
+                      <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{formatDate(record.date)}</Typography>
+                    </TableCell>
+                    <TableCell align="right" sx={{ py: 1.25 }}>
+                      <Typography
+                        component="span"
+                        sx={{
+                          display: 'inline-flex',
+                          px: 1.25,
+                          py: 0.25,
+                          borderRadius: 9999,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          textTransform: 'capitalize',
+                          bgcolor: record.status === 'present' ? '#ECFDF5' : '#FEF2F2',
+                          color: record.status === 'present' ? '#22C55E' : '#DC2626',
+                        }}
+                      >
+                        {record.status}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Paper>
 
-        <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff' }}>
-          <Box sx={{ p: 3 }}>
-            <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>Project Status</Typography>
-            <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
-              Overall bootcamp deliverables
-            </Typography>
-          </Box>
-          <Box sx={{ px: 3, pb: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <ResponsiveContainer width="100%" height={192}>
-              <PieChart>
-                <Pie data={pieData} dataKey="value" nameKey="name" innerRadius={55} outerRadius={75} paddingAngle={3}>
-                  {pieData.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <Box sx={{ width: '100%', display: 'grid', gap: 1 }}>
-              {PROJECT_STATUS.map((item) => (
-                <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: item.color }} />
-                    <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }}>{item.label}</Typography>
-                  </Box>
-                  <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#828283' }}>{item.value}</Typography>
-                </Box>
-              ))}
+        <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', minWidth: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, p: 3 }}>
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>Recent Bootcamp Activity</Typography>
+              <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
+                Latest task completions and team submissions
+              </Typography>
             </Box>
+            <Button size="small" color="primary" sx={{ fontSize: 12, gap: 0.5, '&:hover': { backgroundColor: '#F0F5FF' } }}>
+              View All Tasks <ArrowUpRight size={14} />
+            </Button>
+          </Box>
+          <Box sx={{ borderTop: 1, borderColor: 'divider' }}>
+            {ACTIVITY_ITEMS.map((item, index) => (
+              <Box
+                key={index}
+                sx={{
+                  px: 3,
+                  py: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 2,
+                  borderBottom: index < ACTIVITY_ITEMS.length - 1 ? 1 : 0,
+                  borderColor: 'divider',
+                  '&:hover': { bgcolor: '#F8FAFA' },
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      bgcolor: item.iconBg,
+                      color: item.iconColor,
+                    }}
+                  >
+                    <item.icon size={16} strokeWidth={1.75} />
+                  </Box>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }} noWrap>
+                      {item.text}
+                    </Typography>
+                    <Typography sx={{ fontSize: 10, color: '#828283' }} noWrap>
+                      {item.meta}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Typography
+                  component="span"
+                  sx={{
+                    px: 1.25,
+                    py: 0.25,
+                    borderRadius: 9999,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    bgcolor: item.statusBg,
+                    color: item.statusColor,
+                  }}
+                >
+                  {item.status}
+                </Typography>
+              </Box>
+            ))}
           </Box>
         </Paper>
       </Box>
 
-      <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff' }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, p: 3 }}>
-          <Box>
-            <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>Recent Bootcamp Activity</Typography>
-            <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
-              Latest task completions and team submissions
-            </Typography>
-          </Box>
-          <Button size="small" color="primary" sx={{ fontSize: 12, gap: 0.5 }}>
-            View All Tasks <ArrowUpRight size={14} />
-          </Button>
-        </Box>
-        <Box sx={{ borderTop: 1, borderColor: 'divider' }}>
-          {ACTIVITY_ITEMS.map((item, index) => (
-            <Box
-              key={index}
-              sx={{
-                px: 3,
-                py: 2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 2,
-                borderBottom: index < ACTIVITY_ITEMS.length - 1 ? 1 : 0,
-                borderColor: 'divider',
-                '&:hover': { bgcolor: '#F8FAFA' },
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-                <Box
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    bgcolor: item.iconBg,
-                    color: item.iconColor,
-                  }}
-                >
-                  <item.icon size={16} strokeWidth={1.75} />
-                </Box>
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }} noWrap>
-                    {item.text}
-                  </Typography>
-                  <Typography sx={{ fontSize: 10, color: '#828283' }}>{item.meta}</Typography>
-                </Box>
-              </Box>
-              <Typography
-                component="span"
-                sx={{
-                  px: 1.25,
-                  py: 0.25,
-                  borderRadius: 9999,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap',
-                  bgcolor: item.statusBg,
-                  color: item.statusColor,
-                }}
-              >
-                {item.status}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      </Paper>
+      <StudentForm
+        open={isStudentFormOpen}
+        onClose={() => setIsStudentFormOpen(false)}
+        onSubmit={async () => {
+          await new Promise((resolve) => setTimeout(resolve, 500))
+          toast.success('Student created successfully')
+          setIsStudentFormOpen(false)
+        }}
+      />
     </Box>
   )
 }
