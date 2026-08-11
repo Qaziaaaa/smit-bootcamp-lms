@@ -20,14 +20,7 @@ const STATUS_OPTIONS = [
   { label: 'On Hold', value: 'on-hold' },
 ];
 
-// Dummy teams list — swap for real API data on Day 5 integration
-const DUMMY_TEAMS = [
-  { id: 't1', name: 'Team Alpha' },
-  { id: 't2', name: 'Team Beta' },
-  { id: 't3', name: 'Team Gamma' },
-];
-
-export const ProjectForm = ({ open, onClose, onSubmit, initialData = null }) => {
+export const ProjectForm = ({ open, onClose, onSubmit, initialData = null, teams = [] }) => {
   const isEditing = !!initialData;
 
   const { control, handleSubmit, reset, formState: { isSubmitting } } = useForm({
@@ -50,7 +43,12 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null }) => 
   }, [open, initialData, reset]);
 
   const onFormSubmit = async (data) => {
-    await onSubmit(data);
+    const { teamId, deadline, ...rest } = data;
+    await onSubmit({
+      ...rest,
+      teamId: teamId || undefined,
+      deadline: deadline || undefined,
+    });
     onClose();
   };
 
@@ -93,7 +91,6 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null }) => 
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            {/* Team selector */}
             <Controller
               name="teamId"
               control={control}
@@ -102,8 +99,8 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null }) => 
                   <InputLabel shrink>Team (Optional)</InputLabel>
                   <Select {...field} label="Team (Optional)" notched displayEmpty>
                     <MenuItem value=""><em>None</em></MenuItem>
-                    {DUMMY_TEAMS.map((t) => (
-                      <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+                    {teams.map((t) => (
+                      <MenuItem key={t._id || t.id} value={t._id || t.id}>{t.name}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -111,7 +108,6 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null }) => 
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            {/* Status selector */}
             <Controller
               name="status"
               control={control}

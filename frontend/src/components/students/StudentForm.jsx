@@ -1,8 +1,8 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button, Grid } from '@mui/material';
+import { Button, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Modal } from '../ui/Modal';
 import { FormField } from '../ui/FormField';
 
@@ -11,13 +11,13 @@ const studentSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number is required"),
   batch: z.string().min(1, "Batch is required"),
-  team: z.string().optional(),
-  password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal('')),
+  teamId: z.string().optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").optional().or(z.literal('')),
 });
 
-export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => {
+export const StudentForm = ({ open, onClose, onSubmit, initialData = null, teams = [] }) => {
   const isEditing = !!initialData;
-  
+
   const { control, handleSubmit, reset, formState: { isSubmitting } } = useForm({
     resolver: zodResolver(studentSchema),
     defaultValues: initialData || {
@@ -25,7 +25,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
       email: '',
       phone: '',
       batch: '',
-      team: '',
+      teamId: '',
       password: '',
     },
   });
@@ -34,13 +34,16 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
   React.useEffect(() => {
     if (open) {
       reset(initialData || {
-        name: '', email: '', phone: '', batch: '', team: '', password: '',
+        name: '', email: '', phone: '', batch: '', teamId: '', password: '',
       });
     }
   }, [open, initialData, reset]);
 
   const onFormSubmit = async (data) => {
-    await onSubmit(data);
+    const { password, ...rest } = data;
+    const payload = { ...rest, teamId: rest.teamId || undefined };
+    if (!isEditing) payload.password = password;
+    await onSubmit(payload);
     onClose();
   };
 
@@ -49,10 +52,10 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
       <Button onClick={onClose} color="inherit" disabled={isSubmitting}>
         Cancel
       </Button>
-      <Button 
-        onClick={handleSubmit(onFormSubmit)} 
-        color="primary" 
-        variant="contained" 
+      <Button
+        onClick={handleSubmit(onFormSubmit)}
+        color="primary"
+        variant="contained"
         disabled={isSubmitting}
         disableElevation
       >
@@ -62,10 +65,10 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
   );
 
   return (
-    <Modal 
-      open={open} 
-      onClose={onClose} 
-      title={isEditing ? "Edit Student" : "Add Student"} 
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={isEditing ? "Edit Student" : "Add Student"}
       actions={actions}
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -83,7 +86,21 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
             <FormField name="batch" control={control} label="Batch" />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <FormField name="team" control={control} label="Team (Optional)" />
+            <Controller
+              name="teamId"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <FormControl fullWidth size="small" error={!!error}>
+                  <InputLabel shrink>Team (Optional)</InputLabel>
+                  <Select {...field} label="Team (Optional)" notched displayEmpty>
+                    <MenuItem value=""><em>Unassigned</em></MenuItem>
+                    {teams.map((t) => (
+                      <MenuItem key={t._id || t.id} value={t._id || t.id}>{t.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            />
           </Grid>
           {!isEditing && (
             <Grid item xs={12} sm={6}>

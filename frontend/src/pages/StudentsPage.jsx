@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Typography, Button, IconButton } from '@mui/material';
 import { UserPlus, Edit2, Trash2, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -12,35 +12,59 @@ import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { StudentForm } from '../components/students/StudentForm';
-
-// Dummy data to simulate backend response until API is integrated
-const DUMMY_STUDENTS = [
-  { id: '1', name: 'Maya Lin', email: 'maya.lin@student.dev', batch: 'Batch 12 - Web Dev', team: 'Team Alpha', status: 'Active', attendance: 95 },
-  { id: '2', name: 'John Doe', email: 'john.d@student.dev', batch: 'Batch 12 - Web Dev', team: 'Unassigned', status: 'Inactive', attendance: 78 },
-  { id: '3', name: 'Sarah Smith', email: 'sarah@smit.edu', batch: 'Batch 11 - Full Stack', team: 'Team Beta', status: 'Active', attendance: 100 },
-];
+import {
+  getStudents,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+} from '../services/studentsService';
+import { getTeams } from '../services/teamsService';
 
 export default function StudentsPage() {
   const navigate = useNavigate();
-  
-  // State for search and filters
+
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [batchFilter, setBatchFilter] = useState('');
   const [page, setPage] = useState(1);
-  
-  // Modals state
+
+  const [students, setStudents] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
 
-  // Filter dummy data
-  const filteredStudents = DUMMY_STUDENTS.filter(s => {
-    if (statusFilter && s.status.toLowerCase() !== statusFilter.toLowerCase()) return false;
-    if (batchFilter && s.batch !== batchFilter) return false;
-    if (search && !s.name.toLowerCase().includes(search.toLowerCase()) && !s.email.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+  const fetchStudents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = { page, limit: 10 };
+      if (search) params.search = search;
+      if (statusFilter) params.status = statusFilter;
+      if (batchFilter) params.batch = batchFilter;
+      const result = await getStudents(params);
+      setStudents(result.students || []);
+      setPagination(result.pagination || { page: 1, pages: 1, total: 0 });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load students');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, statusFilter, batchFilter]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  useEffect(() => {
+    getTeams()
+      .then((result) => setTeams(result.teams || []))
+      .catch(() => setTeams([]));
+  }, []);
+
+  const batchOptions = [...new Set(students.map((s) => s.batch).filter(Boolean))];
 
   const columns = [
     {
@@ -59,12 +83,14 @@ export default function StudentsPage() {
     {
       accessorKey: 'batch',
       header: 'BATCH',
-      cell: ({ getValue }) => <Typography variant="body2" sx={{ fontWeight: 600 }}>{getValue()}</Typography>,
+      cell: ({ getValue }) => <Typography variant="body2" sx={{ fontWeight: 600 }}>{getValue() || '—'}</Typography>,
     },
     {
-      accessorKey: 'team',
+      accessorKey: 'teamId',
       header: 'TEAM',
-      cell: ({ getValue }) => <Typography variant="body2" color="text.secondary">{getValue()}</Typography>,
+      cell: ({ getValue }) => (
+        <Typography variant="body2" color="text.secondary">{getValue()?.name || 'Unassigned'}</Typography>
+      ),
     },
     {
       accessorKey: 'status',
@@ -72,27 +98,15 @@ export default function StudentsPage() {
       cell: ({ getValue }) => <Badge status={getValue()} />,
     },
     {
-      accessorKey: 'attendance',
-      header: 'ATTENDANCE',
-      cell: ({ getValue }) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Box sx={{ w: '64px', h: '8px', bgcolor: 'grey.200', borderRadius: '4px', overflow: 'hidden', minWidth: 64 }}>
-            <Box sx={{ width: `${getValue()}%`, height: '100%', bgcolor: getValue() >= 80 ? 'success.main' : 'warning.main' }} />
-          </Box>
-          <Typography variant="caption" sx={{ fontWeight: 600 }}>{getValue()}%</Typography>
-        </Box>
-      ),
-    },
-    {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton size="small" onClick={() => navigate(`/students/${row.original.id}`)}>
+          <IconButton size="small" onClick={() => navigate(`/students/${row.original._id}`)}>
             <Eye size={18} />
           </IconButton>
-          <IconButton 
-            size="small" 
+          <IconButton
+            size="small"
             color="primary"
             onClick={() => {
               setEditingStudent(row.original);
@@ -101,10 +115,10 @@ export default function StudentsPage() {
           >
             <Edit2 size={18} />
           </IconButton>
-          <IconButton 
-            size="small" 
+          <IconButton
+            size="small"
             color="error"
-            onClick={() => setDeleteId(row.original.id)}
+            onClick={() => setDeleteId(row.original._id)}
           >
             <Trash2 size={18} />
           </IconButton>
@@ -114,33 +128,46 @@ export default function StudentsPage() {
   ];
 
   const handleSaveStudent = async (data) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    toast.success(editingStudent ? "Student updated successfully" : "Student created successfully");
+    try {
+      if (editingStudent) {
+        await updateStudent(editingStudent._id, data);
+        toast.success('Student updated successfully');
+      } else {
+        await createStudent(data);
+        toast.success('Student created successfully');
+      }
+      await fetchStudents();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to save student');
+      throw error;
+    }
   };
 
   const handleDeleteStudent = async () => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    toast.success("Student deleted successfully");
-    setDeleteId(null);
+    try {
+      await deleteStudent(deleteId);
+      toast.success('Student deleted successfully');
+      setDeleteId(null);
+      await fetchStudents();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete student');
+    }
   };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
-      
-      {/* Header */}
+
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', letterSpacing: '-0.5px' }}>
             Student Roster
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Manage student enrollments, status, attendance ratings, and team assignments.
+            Manage student enrollments, status, and team assignments.
           </Typography>
         </Box>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           startIcon={<UserPlus size={18} />}
           disableElevation
           onClick={() => {
@@ -152,14 +179,13 @@ export default function StudentsPage() {
         </Button>
       </Box>
 
-      {/* Toolbar */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        flexWrap: 'wrap', 
-        gap: 2, 
-        p: 2, 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 2,
+        p: 2,
         bgcolor: 'background.paper',
         borderRadius: 2,
         border: '1px solid',
@@ -167,50 +193,50 @@ export default function StudentsPage() {
       }}>
         <SearchBar value={search} onChange={setSearch} placeholder="Search student by name or email..." />
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <FilterBar 
-            label="All Statuses" 
-            value={statusFilter} 
-            onChange={setStatusFilter} 
+          <FilterBar
+            label="All Statuses"
+            value={statusFilter}
+            onChange={setStatusFilter}
             options={[
-              { label: 'Active', value: 'Active' },
-              { label: 'Inactive', value: 'Inactive' }
-            ]} 
+              { label: 'Active', value: 'active' },
+              { label: 'Inactive', value: 'inactive' }
+            ]}
           />
-          <FilterBar 
-            label="All Batches" 
-            value={batchFilter} 
-            onChange={setBatchFilter} 
-            options={[
-              { label: 'Batch 12 - Web Dev', value: 'Batch 12 - Web Dev' },
-              { label: 'Batch 11 - Full Stack', value: 'Batch 11 - Full Stack' }
-            ]} 
-          />
+          {batchOptions.length > 0 && (
+            <FilterBar
+              label="All Batches"
+              value={batchFilter}
+              onChange={setBatchFilter}
+              options={batchOptions.map((b) => ({ label: b, value: b }))}
+            />
+          )}
         </Box>
       </Box>
 
-      {/* Data Table */}
-      <DataTable 
-        data={filteredStudents} 
-        columns={columns} 
+      <DataTable
+        data={students}
+        columns={columns}
+        isLoading={loading}
+        emptyMessage="No students found"
       />
 
-      <Pagination 
-        page={page} 
-        totalPages={Math.ceil(DUMMY_STUDENTS.length / 10)} 
-        totalItems={DUMMY_STUDENTS.length}
-        onChange={setPage} 
+      <Pagination
+        page={pagination.page}
+        totalPages={pagination.pages}
+        totalItems={pagination.total}
+        onChange={setPage}
       />
 
-      {/* Modals */}
-      <StudentForm 
-        open={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
+      <StudentForm
+        open={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
         onSubmit={handleSaveStudent}
         initialData={editingStudent}
+        teams={teams}
       />
 
-      <ConfirmDialog 
-        open={!!deleteId} 
+      <ConfirmDialog
+        open={!!deleteId}
         title="Delete Student"
         message="Are you sure you want to delete this student? This action cannot be undone."
         onConfirm={handleDeleteStudent}

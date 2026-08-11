@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Typography, Button, IconButton } from '@mui/material';
-import { FolderGit2, Eye, Edit2, Trash2, Plus } from 'lucide-react';
+import { Eye, Edit2, Trash2, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -11,55 +11,8 @@ import { Pagination } from '../components/ui/Pagination';
 import { Badge } from '../components/ui/Badge';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { ProjectForm } from '../components/projects/ProjectForm';
-
-// Dummy data — follows API contract: GET /projects?status=&search=
-// Fields per DATABASE_SCHEMA.md: title, description, teamId, status, deadline
-const DUMMY_PROJECTS = [
-  {
-    id: 'p1',
-    title: 'LMS Web App',
-    description: 'Full-stack learning management system for Saylani bootcamp.',
-    team: 'Team Alpha',
-    teamId: 't1',
-    status: 'active',
-    deadline: '2026-10-15',
-    taskCount: 5,
-    completedTasks: 2,
-  },
-  {
-    id: 'p2',
-    title: 'E-commerce API',
-    description: 'REST API backend for an online storefront with cart and payments.',
-    team: 'Team Beta',
-    teamId: 't2',
-    status: 'active',
-    deadline: '2026-09-30',
-    taskCount: 8,
-    completedTasks: 3,
-  },
-  {
-    id: 'p3',
-    title: 'Portfolio Generator',
-    description: 'Auto-generates developer portfolios from GitHub profiles.',
-    team: 'Team Gamma',
-    teamId: 't3',
-    status: 'completed',
-    deadline: '2026-08-01',
-    taskCount: 6,
-    completedTasks: 6,
-  },
-  {
-    id: 'p4',
-    title: 'AI Analytics Dashboard',
-    description: 'Business intelligence dashboard powered by ML analytics.',
-    team: 'Team Alpha',
-    teamId: 't1',
-    status: 'on-hold',
-    deadline: '2026-12-01',
-    taskCount: 4,
-    completedTasks: 0,
-  },
-];
+import { getProjects, createProject, updateProject, deleteProject } from '../services/projectsService';
+import { getTeams } from '../services/teamsService';
 
 const STATUS_OPTIONS = [
   { label: 'Active', value: 'active' },
@@ -74,21 +27,40 @@ export default function ProjectsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
 
+  const [projects, setProjects] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
 
-  // Client-side filter against dummy data (mirrors ?search=&status= query params)
-  const filtered = DUMMY_PROJECTS.filter((p) => {
-    if (statusFilter && p.status !== statusFilter) return false;
-    if (
-      search &&
-      !p.title.toLowerCase().includes(search.toLowerCase()) &&
-      !p.team.toLowerCase().includes(search.toLowerCase())
-    )
-      return false;
-    return true;
-  });
+  const fetchProjects = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = { page, limit: 10 };
+      if (search) params.search = search;
+      if (statusFilter) params.status = statusFilter;
+      const result = await getProjects(params);
+      setProjects(result.projects || []);
+      setPagination(result.pagination || { page: 1, pages: 1, total: 0 });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load projects');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, statusFilter]);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+
+  useEffect(() => {
+    getTeams()
+      .then((result) => setTeams(result.teams || []))
+      .catch(() => setTeams([]));
+  }, []);
 
   const columns = [
     {
@@ -100,17 +72,17 @@ export default function ProjectsPage() {
             {row.original.title}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {row.original.description}
+            {row.original.description || ''}
           </Typography>
         </Box>
       ),
     },
     {
-      accessorKey: 'team',
+      accessorKey: 'teamId',
       header: 'TEAM',
       cell: ({ getValue }) => (
         <Typography variant="body2" color="text.secondary">
-          {getValue() || '—'}
+          {getValue()?.name || '—'}
         </Typography>
       ),
     },
@@ -124,16 +96,7 @@ export default function ProjectsPage() {
       header: 'DEADLINE',
       cell: ({ getValue }) => (
         <Typography variant="body2" color="text.secondary">
-          {getValue() || '—'}
-        </Typography>
-      ),
-    },
-    {
-      id: 'tasks',
-      header: 'TASKS',
-      cell: ({ row }) => (
-        <Typography variant="body2" color="text.secondary">
-          {row.original.completedTasks} / {row.original.taskCount}
+          {getValue() ? String(getValue()).slice(0, 10) : '—'}
         </Typography>
       ),
     },
@@ -145,7 +108,7 @@ export default function ProjectsPage() {
           <IconButton
             size="small"
             title="View project"
-            onClick={() => navigate(`/projects/${row.original.id}`)}
+            onClick={() => navigate(`/projects/${row.original._id}`)}
           >
             <Eye size={18} />
           </IconButton>
@@ -164,7 +127,7 @@ export default function ProjectsPage() {
             size="small"
             color="error"
             title="Delete project"
-            onClick={() => setDeleteId(row.original.id)}
+            onClick={() => setDeleteId(row.original._id)}
           >
             <Trash2 size={18} />
           </IconButton>
@@ -174,19 +137,31 @@ export default function ProjectsPage() {
   ];
 
   const handleSave = async (data) => {
-    // Stub — will be replaced with POST /projects or PUT /projects/:id on Day 5
-    await new Promise((r) => setTimeout(r, 400));
-    toast.success(editingProject ? 'Project updated successfully' : 'Project created successfully');
+    try {
+      if (editingProject) {
+        await updateProject(editingProject._id, data);
+        toast.success('Project updated successfully');
+      } else {
+        await createProject(data);
+        toast.success('Project created successfully');
+      }
+      await fetchProjects();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to save project');
+      throw error;
+    }
   };
 
   const handleDelete = async () => {
-    // Stub — will be replaced with DELETE /projects/:id on Day 5
-    await new Promise((r) => setTimeout(r, 400));
-    toast.success('Project deleted successfully');
-    setDeleteId(null);
+    try {
+      await deleteProject(deleteId);
+      toast.success('Project deleted successfully');
+      setDeleteId(null);
+      await fetchProjects();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete project');
+    }
   };
-
-  const totalPages = Math.ceil(filtered.length / 10);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
@@ -229,7 +204,7 @@ export default function ProjectsPage() {
           borderColor: 'divider',
         }}
       >
-        <SearchBar value={search} onChange={setSearch} placeholder="Search project or team..." />
+        <SearchBar value={search} onChange={setSearch} placeholder="Search project..." />
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <FilterBar
             label="All Statuses"
@@ -242,15 +217,16 @@ export default function ProjectsPage() {
 
       {/* Data Table */}
       <DataTable
-        data={filtered}
+        data={projects}
         columns={columns}
+        isLoading={loading}
         emptyMessage="No projects found"
       />
 
       <Pagination
-        page={page}
-        totalPages={totalPages}
-        totalItems={filtered.length}
+        page={pagination.page}
+        totalPages={pagination.pages}
+        totalItems={pagination.total}
         onChange={setPage}
       />
 
@@ -260,6 +236,7 @@ export default function ProjectsPage() {
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleSave}
         initialData={editingProject}
+        teams={teams}
       />
 
       {/* Delete Confirmation */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Paper, Grid, IconButton } from '@mui/material';
 import { ArrowLeft, Edit2, Plus, Trash2 } from 'lucide-react';
@@ -9,80 +9,52 @@ import { DataTable } from '../components/ui/DataTable';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { TaskForm } from '../components/tasks/TaskForm';
-
-// Dummy project data — mirrors GET /projects/:id response
-// Fields per API: title, description, teamId (populated), status, deadline
-const DUMMY_PROJECTS = {
-  p1: {
-    id: 'p1',
-    title: 'LMS Web App',
-    description: 'Full-stack learning management system for Saylani bootcamp students and administrators.',
-    team: 'Team Alpha',
-    teamId: 't1',
-    status: 'active',
-    deadline: '2026-10-15',
-  },
-  p2: {
-    id: 'p2',
-    title: 'E-commerce API',
-    description: 'REST API backend for an online storefront with cart and payments.',
-    team: 'Team Beta',
-    teamId: 't2',
-    status: 'active',
-    deadline: '2026-09-30',
-  },
-  p3: {
-    id: 'p3',
-    title: 'Portfolio Generator',
-    description: 'Auto-generates developer portfolios from GitHub profiles.',
-    team: 'Team Gamma',
-    teamId: 't3',
-    status: 'completed',
-    deadline: '2026-08-01',
-  },
-  p4: {
-    id: 'p4',
-    title: 'AI Analytics Dashboard',
-    description: 'Business intelligence dashboard powered by ML analytics.',
-    team: 'Team Alpha',
-    teamId: 't1',
-    status: 'on-hold',
-    deadline: '2026-12-01',
-  },
-};
-
-// Dummy tasks for this project — mirrors GET /tasks?projectId=
-// Fields per DATABASE_SCHEMA.md: title, status, priority, assignedTo, deadline
-const DUMMY_TASKS = {
-  p1: [
-    { id: 'tk1', title: 'Design Heatmap Component', status: 'pending', priority: 'high', assignedTo: 'Maya Lin', deadline: '2026-08-15' },
-    { id: 'tk2', title: 'Setup TanStack Query Cache', status: 'completed', priority: 'medium', assignedTo: 'John Doe', deadline: '2026-08-10' },
-    { id: 'tk3', title: 'Build Auth Middleware', status: 'in-progress', priority: 'high', assignedTo: 'Sarah Smith', deadline: '2026-08-12' },
-    { id: 'tk4', title: 'Implement Student CRUD', status: 'completed', priority: 'medium', assignedTo: 'Maya Lin', deadline: '2026-08-08' },
-    { id: 'tk5', title: 'Write API documentation', status: 'pending', priority: 'low', assignedTo: null, deadline: '2026-09-01' },
-  ],
-  p2: [
-    { id: 'tk6', title: 'Cart API endpoints', status: 'pending', priority: 'high', assignedTo: null, deadline: '2026-09-15' },
-    { id: 'tk7', title: 'Payment integration', status: 'pending', priority: 'high', assignedTo: null, deadline: '2026-09-20' },
-  ],
-  p3: [],
-  p4: [],
-};
+import { getProjectById, updateProject } from '../services/projectsService';
+import { createTask, updateTask, deleteTask } from '../services/tasksService';
+import { getTeams } from '../services/teamsService';
+import { getStudents } from '../services/studentsService';
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Fallback for unknown IDs during dummy data phase
-  const [project, setProject] = useState(DUMMY_PROJECTS[id] || DUMMY_PROJECTS['p1']);
-  const [tasks, setTasks] = useState(DUMMY_TASKS[id] || []);
+  const [project, setProject] = useState(null);
+  const [teams, setTeams] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [isEditProjectOpen, setIsEditProjectOpen] = useState(false);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [deleteTaskId, setDeleteTaskId] = useState(null);
 
-  // Task table columns — matches 4.10 tasks subview: status, priority, assigned, deadline, actions
+  const fetchProject = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await getProjectById(id);
+      setProject(result);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load project');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
+
+  useEffect(() => {
+    getTeams()
+      .then((result) => setTeams(result.teams || []))
+      .catch(() => setTeams([]));
+    getStudents({ limit: 500 })
+      .then((result) => setStudents(result.students || []))
+      .catch(() => setStudents([]));
+  }, []);
+
+  const tasks = project?.tasks || [];
+
   const taskColumns = [
     {
       accessorKey: 'title',
@@ -101,17 +73,14 @@ export default function ProjectDetailPage() {
     {
       accessorKey: 'priority',
       header: 'PRIORITY',
-      cell: ({ getValue }) => {
-        const colorMap = { high: 'error', medium: 'warning', low: 'info' };
-        return <Badge status={getValue()} label={getValue()} />;
-      },
+      cell: ({ getValue }) => <Badge status={getValue()} label={getValue()} />,
     },
     {
       accessorKey: 'assignedTo',
       header: 'ASSIGNED TO',
       cell: ({ getValue }) => (
         <Typography variant="body2" color="text.secondary">
-          {getValue() || '—'}
+          {getValue()?.name || '—'}
         </Typography>
       ),
     },
@@ -120,7 +89,7 @@ export default function ProjectDetailPage() {
       header: 'DEADLINE',
       cell: ({ getValue }) => (
         <Typography variant="body2" color="text.secondary">
-          {getValue() || '—'}
+          {getValue() ? String(getValue()).slice(0, 10) : '—'}
         </Typography>
       ),
     },
@@ -144,7 +113,7 @@ export default function ProjectDetailPage() {
             size="small"
             color="error"
             title="Delete task"
-            onClick={() => setDeleteTaskId(row.original.id)}
+            onClick={() => setDeleteTaskId(row.original._id)}
           >
             <Trash2 size={18} />
           </IconButton>
@@ -154,37 +123,60 @@ export default function ProjectDetailPage() {
   ];
 
   const handleSaveProject = async (data) => {
-    await new Promise((r) => setTimeout(r, 400));
-    setProject((prev) => ({ ...prev, ...data }));
-    toast.success('Project updated successfully');
+    try {
+      await updateProject(id, data);
+      toast.success('Project updated successfully');
+      await fetchProject();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update project');
+      throw error;
+    }
   };
 
   const handleSaveTask = async (data) => {
-    await new Promise((r) => setTimeout(r, 400));
-    if (editingTask) {
-      setTasks((prev) => prev.map((t) => (t.id === editingTask.id ? { ...t, ...data } : t)));
-      toast.success('Task updated successfully');
-    } else {
-      const newTask = { id: `tk-${Date.now()}`, assignedTo: null, ...data };
-      setTasks((prev) => [...prev, newTask]);
-      toast.success('Task created successfully');
+    try {
+      if (editingTask) {
+        await updateTask(editingTask._id, data);
+        toast.success('Task updated successfully');
+      } else {
+        await createTask(data);
+        toast.success('Task created successfully');
+      }
+      await fetchProject();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to save task');
+      throw error;
     }
   };
 
   const handleDeleteTask = async () => {
-    await new Promise((r) => setTimeout(r, 400));
-    setTasks((prev) => prev.filter((t) => t.id !== deleteTaskId));
-    toast.success('Task deleted');
-    setDeleteTaskId(null);
+    try {
+      await deleteTask(deleteTaskId);
+      toast.success('Task deleted');
+      setDeleteTaskId(null);
+      await fetchProject();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete task');
+    }
   };
 
-  if (!project) {
+  if (loading) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Typography color="text.secondary">Project not found.</Typography>
+      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+        <Typography variant="body2" color="text.secondary">Loading project...</Typography>
       </Box>
     );
   }
+
+  if (!project) {
+    return (
+      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+        <Typography variant="body2" color="text.secondary">Project not found.</Typography>
+      </Box>
+    );
+  }
+
+  const completedTasks = tasks.filter((t) => t.status === 'completed').length;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
@@ -211,7 +203,7 @@ export default function ProjectDetailPage() {
       {/* Two-column layout: Info card | Tasks subview */}
       <Grid container spacing={3}>
 
-        {/* Info card — matches blueprint 4.10 left column */}
+        {/* Info card */}
         <Grid item xs={12} md={4}>
           <Paper
             elevation={0}
@@ -239,7 +231,7 @@ export default function ProjectDetailPage() {
               )}
               <Box>
                 <Typography variant="caption" color="text.secondary">Assigned Team</Typography>
-                <Typography variant="body2">{project.team || '—'}</Typography>
+                <Typography variant="body2">{project.teamId?.name || '—'}</Typography>
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Status</Typography>
@@ -249,12 +241,12 @@ export default function ProjectDetailPage() {
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Deadline</Typography>
-                <Typography variant="body2">{project.deadline || '—'}</Typography>
+                <Typography variant="body2">{project.deadline ? String(project.deadline).slice(0, 10) : '—'}</Typography>
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Task Progress</Typography>
                 <Typography variant="body2">
-                  {tasks.filter((t) => t.status === 'completed').length} / {tasks.length} completed
+                  {completedTasks} / {tasks.length} completed
                 </Typography>
                 {tasks.length > 0 && (
                   <Box
@@ -268,7 +260,7 @@ export default function ProjectDetailPage() {
                   >
                     <Box
                       sx={{
-                        width: `${(tasks.filter((t) => t.status === 'completed').length / tasks.length) * 100}%`,
+                        width: `${(completedTasks / tasks.length) * 100}%`,
                         height: '100%',
                         bgcolor: 'success.main',
                         transition: 'width 0.3s ease',
@@ -281,7 +273,7 @@ export default function ProjectDetailPage() {
           </Paper>
         </Grid>
 
-        {/* Tasks subview — matches blueprint 4.10 right column */}
+        {/* Tasks subview */}
         <Grid item xs={12} md={8}>
           <Paper
             elevation={0}
@@ -332,6 +324,7 @@ export default function ProjectDetailPage() {
         onClose={() => setIsEditProjectOpen(false)}
         onSubmit={handleSaveProject}
         initialData={project}
+        teams={teams}
       />
 
       {/* Add / Edit Task Modal (locked to this project) */}
@@ -344,6 +337,8 @@ export default function ProjectDetailPage() {
         onSubmit={handleSaveTask}
         initialData={editingTask}
         lockedProjectId={id}
+        projects={[project]}
+        students={students}
       />
 
       {/* Delete Task Confirm */}

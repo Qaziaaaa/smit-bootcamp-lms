@@ -11,8 +11,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Box
+  Paper
 } from '@mui/material';
 import { EmptyState, LoadingState } from './StateComponents';
 

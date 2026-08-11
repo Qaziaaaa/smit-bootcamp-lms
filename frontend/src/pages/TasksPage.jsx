@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Typography, Button, IconButton } from '@mui/material';
-import { CheckSquare, Edit2, Trash2, Plus } from 'lucide-react';
+import { Edit2, Trash2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { DataTable } from '../components/ui/DataTable';
@@ -10,35 +10,14 @@ import { Pagination } from '../components/ui/Pagination';
 import { Badge } from '../components/ui/Badge';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { TaskForm } from '../components/tasks/TaskForm';
-
-// Dummy data — follows API contract: GET /tasks?projectId=&status=&assignedTo=&search=
-// Fields per DATABASE_SCHEMA.md: title, projectId, status, priority, assignedTo, deadline
-const DUMMY_TASKS = [
-  { id: 'tk1', title: 'Design Heatmap Component', project: 'LMS Web App', projectId: 'p1', status: 'pending', priority: 'high', assignedTo: 'Maya Lin', deadline: '2026-08-15' },
-  { id: 'tk2', title: 'Setup TanStack Query Cache', project: 'LMS Web App', projectId: 'p1', status: 'completed', priority: 'medium', assignedTo: 'John Doe', deadline: '2026-08-10' },
-  { id: 'tk3', title: 'Build Auth Middleware', project: 'LMS Web App', projectId: 'p1', status: 'in-progress', priority: 'high', assignedTo: 'Sarah Smith', deadline: '2026-08-12' },
-  { id: 'tk4', title: 'Implement Student CRUD', project: 'LMS Web App', projectId: 'p1', status: 'completed', priority: 'medium', assignedTo: 'Maya Lin', deadline: '2026-08-08' },
-  { id: 'tk5', title: 'Write API documentation', project: 'LMS Web App', projectId: 'p1', status: 'pending', priority: 'low', assignedTo: null, deadline: '2026-09-01' },
-  { id: 'tk6', title: 'Cart API endpoints', project: 'E-commerce API', projectId: 'p2', status: 'pending', priority: 'high', assignedTo: null, deadline: '2026-09-15' },
-  { id: 'tk7', title: 'Payment integration', project: 'E-commerce API', projectId: 'p2', status: 'pending', priority: 'high', assignedTo: null, deadline: '2026-09-20' },
-];
-
-const PROJECT_OPTIONS = [
-  { label: 'LMS Web App', value: 'p1' },
-  { label: 'E-commerce API', value: 'p2' },
-  { label: 'Portfolio Generator', value: 'p3' },
-];
+import { getTasks, createTask, updateTask, deleteTask } from '../services/tasksService';
+import { getProjects } from '../services/projectsService';
+import { getStudents } from '../services/studentsService';
 
 const STATUS_OPTIONS = [
   { label: 'Pending', value: 'pending' },
   { label: 'In Progress', value: 'in-progress' },
   { label: 'Completed', value: 'completed' },
-];
-
-const ASSIGNED_OPTIONS = [
-  { label: 'Maya Lin', value: 'Maya Lin' },
-  { label: 'John Doe', value: 'John Doe' },
-  { label: 'Sarah Smith', value: 'Sarah Smith' },
 ];
 
 export default function TasksPage() {
@@ -48,24 +27,53 @@ export default function TasksPage() {
   const [assignedFilter, setAssignedFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  const [tasks, setTasks] = useState(DUMMY_TASKS);
+  const [tasks, setTasks] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [projects, setProjects] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
 
-  // Client-side filter — mirrors ?projectId=&status=&assignedTo=&search= query params
-  const filtered = tasks.filter((t) => {
-    if (projectFilter && t.projectId !== projectFilter) return false;
-    if (statusFilter && t.status !== statusFilter) return false;
-    if (assignedFilter && t.assignedTo !== assignedFilter) return false;
-    if (
-      search &&
-      !t.title.toLowerCase().includes(search.toLowerCase()) &&
-      !(t.assignedTo || '').toLowerCase().includes(search.toLowerCase())
-    )
-      return false;
-    return true;
-  });
+  const fetchTasks = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = { page, limit: 10 };
+      if (search) params.search = search;
+      if (projectFilter) params.projectId = projectFilter;
+      if (statusFilter) params.status = statusFilter;
+      if (assignedFilter) params.assignedTo = assignedFilter;
+      const result = await getTasks(params);
+      setTasks(result.tasks || []);
+      setPagination(result.pagination || { page: 1, pages: 1, total: 0 });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load tasks');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, projectFilter, statusFilter, assignedFilter]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  useEffect(() => {
+    getProjects({ limit: 500 })
+      .then((result) => setProjects(result.projects || []))
+      .catch(() => setProjects([]));
+    getStudents({ limit: 500 })
+      .then((result) => setStudents(result.students || []))
+      .catch(() => setStudents([]));
+  }, []);
+
+  const assignedOptions = [...new Map(
+    (tasks || [])
+      .map((t) => t.assignedTo)
+      .filter(Boolean)
+      .map((a) => [a._id, { label: a.name, value: a._id }])
+  ).values()];
 
   const columns = [
     {
@@ -78,11 +86,11 @@ export default function TasksPage() {
       ),
     },
     {
-      accessorKey: 'project',
+      accessorKey: 'projectId',
       header: 'PROJECT',
       cell: ({ getValue }) => (
         <Typography variant="body2" color="text.secondary">
-          {getValue() || '—'}
+          {getValue()?.title || '—'}
         </Typography>
       ),
     },
@@ -91,20 +99,14 @@ export default function TasksPage() {
       header: 'ASSIGNED TO',
       cell: ({ getValue }) => (
         <Typography variant="body2" color="text.secondary">
-          {getValue() || '—'}
+          {getValue()?.name || '—'}
         </Typography>
       ),
     },
     {
       accessorKey: 'priority',
       header: 'PRIORITY',
-      // Priority uses Badge — the statusColorMap handles high/medium/low via mapped fallbacks
-      cell: ({ getValue }) => {
-        const v = getValue();
-        // Map priority to badge-compatible values
-        const priorityMap = { high: 'absent', medium: 'pending', low: 'in-progress' };
-        return <Badge status={priorityMap[v] || 'default'} label={v} />;
-      },
+      cell: ({ getValue }) => <Badge status={getValue()} label={getValue()} />,
     },
     {
       accessorKey: 'status',
@@ -116,7 +118,7 @@ export default function TasksPage() {
       header: 'DEADLINE',
       cell: ({ getValue }) => (
         <Typography variant="body2" color="text.secondary">
-          {getValue() || '—'}
+          {getValue() ? String(getValue()).slice(0, 10) : '—'}
         </Typography>
       ),
     },
@@ -140,7 +142,7 @@ export default function TasksPage() {
             size="small"
             color="error"
             title="Delete task"
-            onClick={() => setDeleteId(row.original.id)}
+            onClick={() => setDeleteId(row.original._id)}
           >
             <Trash2 size={18} />
           </IconButton>
@@ -150,34 +152,31 @@ export default function TasksPage() {
   ];
 
   const handleSave = async (data) => {
-    // Stub — will call POST /tasks or PUT /tasks/:id on Day 5
-    await new Promise((r) => setTimeout(r, 400));
-    if (editingTask) {
-      setTasks((prev) =>
-        prev.map((t) => (t.id === editingTask.id ? { ...t, ...data } : t))
-      );
-      toast.success('Task updated successfully');
-    } else {
-      const newTask = {
-        id: `tk-${Date.now()}`,
-        project: PROJECT_OPTIONS.find((p) => p.value === data.projectId)?.label || '',
-        assignedTo: data.assignedTo || null,
-        ...data,
-      };
-      setTasks((prev) => [...prev, newTask]);
-      toast.success('Task created successfully');
+    try {
+      if (editingTask) {
+        await updateTask(editingTask._id, data);
+        toast.success('Task updated successfully');
+      } else {
+        await createTask(data);
+        toast.success('Task created successfully');
+      }
+      await fetchTasks();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to save task');
+      throw error;
     }
   };
 
   const handleDelete = async () => {
-    // Stub — will call DELETE /tasks/:id on Day 5
-    await new Promise((r) => setTimeout(r, 400));
-    setTasks((prev) => prev.filter((t) => t.id !== deleteId));
-    toast.success('Task deleted successfully');
-    setDeleteId(null);
+    try {
+      await deleteTask(deleteId);
+      toast.success('Task deleted successfully');
+      setDeleteId(null);
+      await fetchTasks();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete task');
+    }
   };
-
-  const totalPages = Math.ceil(filtered.length / 10);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
@@ -205,7 +204,7 @@ export default function TasksPage() {
         </Button>
       </Box>
 
-      {/* Toolbar — Search + Project / Status / Assigned filters */}
+      {/* Toolbar */}
       <Box
         sx={{
           display: 'flex',
@@ -220,13 +219,13 @@ export default function TasksPage() {
           borderColor: 'divider',
         }}
       >
-        <SearchBar value={search} onChange={setSearch} placeholder="Search task or assignee..." />
+        <SearchBar value={search} onChange={setSearch} placeholder="Search task..." />
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <FilterBar
             label="All Projects"
             value={projectFilter}
             onChange={setProjectFilter}
-            options={PROJECT_OPTIONS}
+            options={projects.map((p) => ({ label: p.title, value: p._id }))}
           />
           <FilterBar
             label="All Statuses"
@@ -234,26 +233,29 @@ export default function TasksPage() {
             onChange={setStatusFilter}
             options={STATUS_OPTIONS}
           />
-          <FilterBar
-            label="All Assignees"
-            value={assignedFilter}
-            onChange={setAssignedFilter}
-            options={ASSIGNED_OPTIONS}
-          />
+          {assignedOptions.length > 0 && (
+            <FilterBar
+              label="All Assignees"
+              value={assignedFilter}
+              onChange={setAssignedFilter}
+              options={assignedOptions}
+            />
+          )}
         </Box>
       </Box>
 
       {/* Data Table */}
       <DataTable
-        data={filtered}
+        data={tasks}
         columns={columns}
+        isLoading={loading}
         emptyMessage="No tasks found"
       />
 
       <Pagination
-        page={page}
-        totalPages={totalPages}
-        totalItems={filtered.length}
+        page={pagination.page}
+        totalPages={pagination.pages}
+        totalItems={pagination.total}
         onChange={setPage}
       />
 
@@ -266,6 +268,8 @@ export default function TasksPage() {
         }}
         onSubmit={handleSave}
         initialData={editingTask}
+        projects={projects}
+        students={students}
       />
 
       {/* Delete Confirmation */}

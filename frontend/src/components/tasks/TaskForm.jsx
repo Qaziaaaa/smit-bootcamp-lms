@@ -28,31 +28,30 @@ const STATUS_OPTIONS = [
   { label: 'Completed', value: 'completed' },
 ];
 
-// Dummy data — swap with real API responses on Day 5 integration
-const DUMMY_PROJECTS = [
-  { id: 'p1', title: 'LMS Web App' },
-  { id: 'p2', title: 'E-commerce API' },
-  { id: 'p3', title: 'Portfolio Generator' },
-];
-
-const DUMMY_STUDENTS = [
-  { id: 's1', name: 'Maya Lin' },
-  { id: 's2', name: 'John Doe' },
-  { id: 's3', name: 'Sarah Smith' },
-];
+function toFormValue(initialData) {
+  if (!initialData) return null;
+  return {
+    ...initialData,
+    projectId: initialData.projectId?._id || initialData.projectId || '',
+    assignedTo: initialData.assignedTo?._id || initialData.assignedTo || '',
+    deadline: initialData.deadline ? String(initialData.deadline).slice(0, 10) : '',
+  };
+}
 
 export const TaskForm = ({
   open,
   onClose,
   onSubmit,
   initialData = null,
-  lockedProjectId = null, // When opened from ProjectDetail, project is pre-selected & locked
+  lockedProjectId = null,
+  projects = [],
+  students = [],
 }) => {
   const isEditing = !!initialData;
 
   const { control, handleSubmit, reset, formState: { isSubmitting } } = useForm({
     resolver: zodResolver(taskSchema),
-    defaultValues: initialData || {
+    defaultValues: {
       title: '',
       description: '',
       projectId: lockedProjectId || '',
@@ -66,7 +65,7 @@ export const TaskForm = ({
   React.useEffect(() => {
     if (open) {
       reset(
-        initialData || {
+        toFormValue(initialData) || {
           title: '',
           description: '',
           projectId: lockedProjectId || '',
@@ -80,7 +79,12 @@ export const TaskForm = ({
   }, [open, initialData, lockedProjectId, reset]);
 
   const onFormSubmit = async (data) => {
-    await onSubmit(data);
+    const { assignedTo, deadline, ...rest } = data;
+    await onSubmit({
+      ...rest,
+      assignedTo: assignedTo || undefined,
+      deadline: deadline || undefined,
+    });
     onClose();
   };
 
@@ -123,7 +127,6 @@ export const TaskForm = ({
             />
           </Grid>
 
-          {/* Project selector — locked when opened from a project detail */}
           <Grid item xs={12} sm={6}>
             <Controller
               name="projectId"
@@ -133,8 +136,8 @@ export const TaskForm = ({
                   <InputLabel shrink>Project *</InputLabel>
                   <Select {...field} label="Project *" notched displayEmpty>
                     <MenuItem value=""><em>Select project</em></MenuItem>
-                    {DUMMY_PROJECTS.map((p) => (
-                      <MenuItem key={p.id} value={p.id}>{p.title}</MenuItem>
+                    {projects.map((p) => (
+                      <MenuItem key={p._id || p.id} value={p._id || p.id}>{p.title}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -142,7 +145,6 @@ export const TaskForm = ({
             />
           </Grid>
 
-          {/* Assigned student */}
           <Grid item xs={12} sm={6}>
             <Controller
               name="assignedTo"
@@ -152,8 +154,8 @@ export const TaskForm = ({
                   <InputLabel shrink>Assign To (Optional)</InputLabel>
                   <Select {...field} label="Assign To (Optional)" notched displayEmpty>
                     <MenuItem value=""><em>Unassigned</em></MenuItem>
-                    {DUMMY_STUDENTS.map((s) => (
-                      <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>
+                    {students.map((s) => (
+                      <MenuItem key={s._id || s.id} value={s._id || s.id}>{s.name}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -161,7 +163,6 @@ export const TaskForm = ({
             />
           </Grid>
 
-          {/* Priority */}
           <Grid item xs={12} sm={6}>
             <Controller
               name="priority"
@@ -179,7 +180,6 @@ export const TaskForm = ({
             />
           </Grid>
 
-          {/* Status */}
           <Grid item xs={12} sm={6}>
             <Controller
               name="status"

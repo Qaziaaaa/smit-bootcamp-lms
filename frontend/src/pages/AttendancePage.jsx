@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Box, Typography, Button, IconButton, Paper, Switch } from '@mui/material';
-import { FileDown, CalendarCheck } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Box, Typography, Paper, Switch, TextField } from '@mui/material';
+import { CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { DataTable } from '../components/ui/DataTable';
@@ -8,44 +8,96 @@ import { SearchBar } from '../components/ui/SearchBar';
 import { FilterBar } from '../components/ui/FilterBar';
 import { Pagination } from '../components/ui/Pagination';
 import { Avatar } from '../components/ui/Avatar';
+import { getAttendance, markAttendance, updateAttendance } from '../services/attendanceService';
+import { getStudents } from '../services/studentsService';
 
-// Dummy data
-const DUMMY_ATTENDANCE = [
-  { id: '1', studentId: 's1', name: 'Maya Lin', email: 'maya.lin@student.dev', batch: 'Batch 12 - Web Dev', date: '2026-08-09', status: 'present' },
-  { id: '2', studentId: 's2', name: 'John Doe', email: 'john.d@student.dev', batch: 'Batch 12 - Web Dev', date: '2026-08-09', status: 'absent' },
-  { id: '3', studentId: 's3', name: 'Sarah Smith', email: 'sarah@smit.edu', batch: 'Batch 11 - Full Stack', date: '2026-08-09', status: 'present' },
-];
+function todayStr() {
+  const d = new Date();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${month}-${day}`;
+}
 
 export default function AttendancePage() {
   const [search, setSearch] = useState('');
   const [batchFilter, setBatchFilter] = useState('');
-  const [dateFilter, setDateFilter] = useState('2026-08-09');
+  const [dateFilter, setDateFilter] = useState(todayStr());
   const [page, setPage] = useState(1);
-  const [records, setRecords] = useState(DUMMY_ATTENDANCE);
 
-  const filteredRecords = records.filter(r => {
-    if (batchFilter && r.batch !== batchFilter) return false;
-    if (dateFilter && r.date !== dateFilter) return false;
-    if (search && !r.name.toLowerCase().includes(search.toLowerCase())) return false;
+  const [records, setRecords] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [allStudents, setAllStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
+
+  const fetchRecords = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = { date: dateFilter, page, limit: 10 };
+      if (batchFilter) params.batch = batchFilter;
+      const result = await getAttendance(params);
+      setRecords(result.records || []);
+      setPagination(result.pagination || { page: 1, pages: 1, total: 0 });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load attendance');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateFilter, batchFilter, page]);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
+
+  useEffect(() => {
+    getStudents({ limit: 500 })
+      .then((result) => setAllStudents(result.students || []))
+      .catch(() => setAllStudents([]));
+  }, []);
+
+  const batchOptions = [...new Set(allStudents.map((s) => s.batch).filter(Boolean))];
+
+  const filteredRecords = records.filter((r) => {
+    if (search) {
+      const q = search.toLowerCase();
+      if (!r.studentName?.toLowerCase().includes(q) && !r.studentEmail?.toLowerCase().includes(q)) {
+        return false;
+      }
+    }
     return true;
   });
 
-  const handleToggle = async (id, currentStatus) => {
+  const presentCount = records.filter((r) => r.status === 'present').length;
+  const absentCount = records.filter((r) => r.status === 'absent').length;
+
+  const handleToggle = async (record, currentStatus) => {
     const newStatus = currentStatus === 'present' ? 'absent' : 'present';
-    setRecords(records.map(r => r.id === id ? { ...r, status: newStatus } : r));
-    toast.success(`Marked as ${newStatus}`);
+    setTogglingId(record._id);
+    try {
+      if (record._id) {
+        await updateAttendance(record._id, { status: newStatus });
+      } else {
+        await markAttendance({ studentId: record.studentId, date: dateFilter, status: newStatus });
+      }
+      setRecords((prev) => prev.map((r) => (r._id === record._id ? { ...r, status: newStatus } : r)));
+      toast.success(`Marked as ${newStatus}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update attendance');
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   const columns = [
     {
-      accessorKey: 'name',
+      accessorKey: 'studentName',
       header: 'STUDENT',
       cell: ({ row }) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar name={row.original.name} />
+          <Avatar name={row.original.studentName} />
           <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.original.name}</Typography>
-            <Typography variant="caption" color="text.secondary">{row.original.email}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.original.studentName}</Typography>
+            <Typography variant="caption" color="text.secondary">{row.original.studentEmail}</Typography>
           </Box>
         </Box>
       ),
@@ -53,21 +105,21 @@ export default function AttendancePage() {
     {
       accessorKey: 'batch',
       header: 'BATCH',
-      cell: ({ getValue }) => <Typography variant="body2">{getValue()}</Typography>,
+      cell: ({ getValue }) => <Typography variant="body2">{getValue() || '—'}</Typography>,
     },
     {
       accessorKey: 'date',
       header: 'DATE',
-      cell: ({ getValue }) => <Typography variant="body2">{getValue()}</Typography>,
+      cell: ({ getValue }) => <Typography variant="body2">{String(getValue()).slice(0, 10)}</Typography>,
     },
     {
       accessorKey: 'status',
       header: 'STATUS',
       cell: ({ getValue }) => (
-        <Typography 
-          variant="body2" 
-          sx={{ 
-            fontWeight: 600, 
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
             textTransform: 'capitalize',
             color: getValue() === 'present' ? 'success.main' : 'error.main'
           }}
@@ -80,9 +132,10 @@ export default function AttendancePage() {
       id: 'actions',
       header: 'MARK PRESENT',
       cell: ({ row }) => (
-        <Switch 
-          checked={row.original.status === 'present'} 
-          onChange={() => handleToggle(row.original.id, row.original.status)}
+        <Switch
+          checked={row.original.status === 'present'}
+          disabled={togglingId === row.original._id}
+          onChange={() => handleToggle(row.original, row.original.status)}
           color="success"
         />
       ),
@@ -91,7 +144,7 @@ export default function AttendancePage() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
-      
+
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Box>
@@ -102,12 +155,6 @@ export default function AttendancePage() {
             Manage and track student attendance records.
           </Typography>
         </Box>
-        <Button 
-          variant="outlined" 
-          startIcon={<FileDown size={18} />}
-        >
-          Export Report
-        </Button>
       </Box>
 
       {/* Summary Cards */}
@@ -115,14 +162,14 @@ export default function AttendancePage() {
         <Paper elevation={0} sx={{ p: 3, flex: 1, border: '1px solid', borderColor: 'divider', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Total Present</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600, mt: 1 }}>{records.filter(r => r.status === 'present').length}</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 600, mt: 1 }}>{presentCount}</Typography>
           </Box>
           <CalendarCheck size={40} color="#22C55E" opacity={0.2} />
         </Paper>
         <Paper elevation={0} sx={{ p: 3, flex: 1, border: '1px solid', borderColor: 'divider', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Total Absent</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600, mt: 1 }}>{records.filter(r => r.status === 'absent').length}</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 600, mt: 1 }}>{absentCount}</Typography>
           </Box>
           <CalendarCheck size={40} color="#ef4444" opacity={0.2} />
         </Paper>
@@ -131,33 +178,39 @@ export default function AttendancePage() {
       {/* Toolbar */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, p: 2, bgcolor: 'background.paper', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
         <SearchBar value={search} onChange={setSearch} placeholder="Search student..." />
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <FilterBar 
-            label="Date" 
-            value={dateFilter} 
-            onChange={setDateFilter} 
-            options={[{ label: 'Today (Aug 9)', value: '2026-08-09' }]} 
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <TextField
+            type="date"
+            size="small"
+            label="Date"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
-          <FilterBar 
-            label="All Batches" 
-            value={batchFilter} 
-            onChange={setBatchFilter} 
-            options={[
-              { label: 'Batch 12 - Web Dev', value: 'Batch 12 - Web Dev' },
-              { label: 'Batch 11 - Full Stack', value: 'Batch 11 - Full Stack' }
-            ]} 
-          />
+          {batchOptions.length > 0 && (
+            <FilterBar
+              label="All Batches"
+              value={batchFilter}
+              onChange={setBatchFilter}
+              options={batchOptions.map((b) => ({ label: b, value: b }))}
+            />
+          )}
         </Box>
       </Box>
 
       {/* Data Table */}
-      <DataTable data={filteredRecords} columns={columns} />
+      <DataTable
+        data={filteredRecords}
+        columns={columns}
+        isLoading={loading}
+        emptyMessage="No attendance records for the selected date"
+      />
 
-      <Pagination 
-        page={page} 
-        totalPages={1} 
-        totalItems={filteredRecords.length}
-        onChange={setPage} 
+      <Pagination
+        page={pagination.page}
+        totalPages={pagination.pages}
+        totalItems={pagination.total}
+        onChange={setPage}
       />
     </Box>
   );

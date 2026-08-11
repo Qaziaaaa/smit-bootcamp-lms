@@ -1,64 +1,90 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, Paper, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction } from '@mui/material';
-import { ArrowLeft, UserPlus, Trash2 } from 'lucide-react';
+import { Box, Typography, Button, Paper, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
+import { ArrowLeft, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
 import { Avatar } from '../components/ui/Avatar';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
 import { FilterBar } from '../components/ui/FilterBar';
-import { toast } from 'sonner';
-
-const DUMMY_TEAM = {
-  id: '1',
-  name: 'Team Alpha',
-  project: 'LMS Web App',
-  status: 'active',
-  members: [
-    { id: 's1', name: 'Maya Lin', email: 'maya@student.dev', role: 'Lead' },
-    { id: 's3', name: 'Sarah Smith', email: 'sarah@smit.edu', role: 'Member' },
-  ]
-};
-
-const AVAILABLE_STUDENTS = [
-  { id: 's2', name: 'John Doe', email: 'john@student.dev' },
-  { id: 's4', name: 'Mike Ross', email: 'mike@smit.edu' },
-];
+import { getTeamById, assignStudentsToTeam } from '../services/teamsService';
+import { getStudents } from '../services/studentsService';
 
 export default function TeamDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [team, setTeam] = useState(DUMMY_TEAM);
+  const [team, setTeam] = useState(null);
+  const [availableStudents, setAvailableStudents] = useState([]);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  const fetchTeam = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await getTeamById(id);
+      setTeam(result);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load team');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchTeam();
+  }, [fetchTeam]);
+
+  const fetchAvailableStudents = useCallback(async () => {
+    try {
+      const result = await getStudents({ limit: 500 });
+      const memberIds = new Set((team?.members || []).map((m) => String(m._id)));
+      setAvailableStudents(
+        (result.students || []).filter((s) => !memberIds.has(String(s._id)))
+      );
+    } catch {
+      toast.error('Failed to load available students');
+    }
+  }, [team]);
+
+  useEffect(() => {
+    if (isAssignOpen) {
+      fetchAvailableStudents();
+      setSelectedStudent('');
+    }
+  }, [isAssignOpen, fetchAvailableStudents]);
 
   const handleAssign = async () => {
     if (!selectedStudent) return;
-    const student = AVAILABLE_STUDENTS.find(s => s.id === selectedStudent);
-    
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 500));
-    setTeam({
-      ...team,
-      members: [...team.members, { ...student, role: 'Member' }]
-    });
-    toast.success(`${student.name} assigned to team`);
-    setIsAssignOpen(false);
-    setSelectedStudent('');
+    try {
+      await assignStudentsToTeam(id, [selectedStudent]);
+      toast.success('Student assigned to team');
+      setIsAssignOpen(false);
+      await fetchTeam();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to assign student');
+    }
   };
 
-  const handleRemoveMember = async (memberId) => {
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 500));
-    setTeam({
-      ...team,
-      members: team.members.filter(m => m.id !== memberId)
-    });
-    toast.success("Member removed from team");
-  };
+  if (loading) {
+    return (
+      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+        <Typography variant="body2" color="text.secondary">Loading team...</Typography>
+      </Box>
+    );
+  }
+
+  if (!team) {
+    return (
+      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+        <Typography variant="body2" color="text.secondary">Team not found.</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
-      
+
       {/* Topbar */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -86,11 +112,17 @@ export default function TeamDetailPage() {
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Assigned Project</Typography>
-                <Typography variant="body2">{team.project || 'None'}</Typography>
+                <Typography variant="body2">{team.project?.title || 'None'}</Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">Status</Typography>
-                <Box sx={{ mt: 0.5 }}><Badge status={team.status} /></Box>
+                <Typography variant="caption" color="text.secondary">Project Status</Typography>
+                <Box sx={{ mt: 0.5 }}>
+                  {team.project ? <Badge status={team.project.status} /> : <Typography variant="body2" color="text.secondary">—</Typography>}
+                </Box>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary">Members</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>{team.members.length}</Typography>
               </Box>
             </Box>
           </Paper>
@@ -104,26 +136,19 @@ export default function TeamDetailPage() {
             </Box>
             <List disablePadding>
               {team.members.map((member, index) => (
-                <ListItem 
-                  key={member.id} 
+                <ListItem
+                  key={member._id}
                   divider={index < team.members.length - 1}
                   sx={{ py: 2 }}
                 >
                   <ListItemAvatar>
                     <Avatar name={member.name} />
                   </ListItemAvatar>
-                  <ListItemText 
+                  <ListItemText
                     primary={<Typography variant="body2" sx={{ fontWeight: 600 }}>{member.name}</Typography>}
                     secondary={member.email}
                   />
-                  <ListItemSecondaryAction sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Typography variant="caption" sx={{ bgcolor: 'primary.50', color: 'primary.main', px: 1, py: 0.5, borderRadius: 1, fontWeight: 600 }}>
-                      {member.role}
-                    </Typography>
-                    <IconButton edge="end" size="small" color="error" onClick={() => handleRemoveMember(member.id)}>
-                      <Trash2 size={16} />
-                    </IconButton>
-                  </ListItemSecondaryAction>
+                  <Badge status={member.status} />
                 </ListItem>
               ))}
               {team.members.length === 0 && (
@@ -137,9 +162,9 @@ export default function TeamDetailPage() {
       </Grid>
 
       {/* Assign Modal */}
-      <Modal 
-        open={isAssignOpen} 
-        onClose={() => setIsAssignOpen(false)} 
+      <Modal
+        open={isAssignOpen}
+        onClose={() => setIsAssignOpen(false)}
         title="Assign Student to Team"
         actions={
           <>
@@ -149,13 +174,17 @@ export default function TeamDetailPage() {
         }
       >
         <Box sx={{ pt: 1 }}>
-          <FilterBar 
-            label="Select Student" 
-            value={selectedStudent} 
-            onChange={setSelectedStudent}
-            minWidth="100%"
-            options={AVAILABLE_STUDENTS.map(s => ({ label: `${s.name} (${s.email})`, value: s.id }))}
-          />
+          {availableStudents.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">No unassigned students available.</Typography>
+          ) : (
+            <FilterBar
+              label="Select Student"
+              value={selectedStudent}
+              onChange={setSelectedStudent}
+              minWidth="100%"
+              options={availableStudents.map((s) => ({ label: `${s.name} (${s.email})`, value: s._id }))}
+            />
+          )}
         </Box>
       </Modal>
 

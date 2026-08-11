@@ -5,8 +5,7 @@ import {
   DialogContent, 
   DialogActions,
   IconButton,
-  Typography,
-  Box
+  Typography
 } from '@mui/material';
 import { X } from 'lucide-react';
 
