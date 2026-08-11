@@ -4,6 +4,33 @@ Complete step-by-step guide to test every backend API in Postman (or Thunder Cli
 
 ---
 
+> ## What's new in this update — Student Portal (Aug 10, 2026)
+>
+> Everything below was added in the latest change. Each item names the exact file **and line** so you can jump straight to it.
+>
+> **1. NEW endpoint — `PUT /api/student/tasks/:id/progress`** (student updates own task status)
+> | Where | Location |
+> |---|---|
+> | Route | `backend/src/routes/studentPortal.routes.js:15` |
+> | Controller | `backend/src/controllers/studentPortal.controller.js:25` (`updateTaskProgress`) |
+> | Service logic | `backend/src/services/studentPortal.service.js:71` (`TASK_FLOW`) and `:77` (`updateTaskProgress`) |
+> | Validation | `backend/src/middlewares/validate.js:89` (`validateTaskStatusUpdate`) |
+>
+> Allowed transitions (enforced server-side): `pending → in-progress | completed`, `in-progress → completed`, `completed → (no further updates)`. Any other move returns **400**.
+>
+> **2. CHANGED response shape — `GET /api/student/team`** (`backend/src/services/studentPortal.service.js:40`, `getStudentTeam`)
+> - **Before:** returned the bare team object (or `null`).
+> - **After:** returns `{ "team": { ... }, "members": [...] }`. `team` now also includes the populated `projectId` (title, description, status, deadline); `members` is every student in the team (name, email, phone, batch). Still `null` if the student has no team.
+>
+> **3. Seed now creates demo student data** (`backend/src/seed.js:22`, `seedDemoStudent`)
+> - Login: `student@lms.com` / `password123` (Ali Ahmed, Batch 2026)
+> - Team **Alpha**, Project **Bootcamp LMS Web App**, **5 tasks**, **14 attendance records** (~85.7%)
+> - The seeded student can be used for every Student Portal test below (skip the admin "create student" steps if you just want to test the portal).
+>
+> **4. Bug fix** — `backend/src/services/studentPortal.service.js:5` now imports the `Project` model so `projectId` populates on `/student/team` and `/student/tasks` (previously threw `MissingSchemaError` if the models index wasn't imported first).
+
+---
+
 ## Table of Contents
 
 1. [Setup](#1-setup)
@@ -33,6 +60,9 @@ npm run dev
 MongoDB connected at ...
 API server running at http://localhost:5000 (development)
 ```
+
+**NEW:** `npm run seed` now also creates a ready-made demo student:
+`student@lms.com` / `password123` (Ali Ahmed — team Alpha, 5 tasks, attendance records). Use it for all Student Portal tests below.
 
 Keep this terminal window open while testing.
 
@@ -319,10 +349,10 @@ Mark Sara present too (for summary tests):
 ### STEP 16 — Student Login (POST, no auth)
 
 - **URL:** `http://localhost:5000/api/auth/login`
-- **Body (raw → JSON):**
+- **Body (raw → JSON):** use the student you created in Step 4 **OR** the seeded demo student:
   ```json
   {
-    "email": "ali@example.com",
+    "email": "student@lms.com",
     "password": "password123"
   }
   ```
@@ -350,18 +380,45 @@ Mark Sara present too (for summary tests):
 - **URL:** `http://localhost:5000/api/student/team`
 - **Method:** GET
 
-**Working if:** `200`. Returns `null` if no team assigned yet (expected until Teams module adds one).
+**NEW response shape** (`studentPortal.service.js:40`): returns `{ "team": {...}, "members": [...] }`.
+- `team` = team name + populated `projectId` (title, description, status, deadline).
+- `members` = every student in the team (name, email, phone, batch).
+- Returns `null` if the student has no team.
+
+**Working if (demo student):** `200`, `data.team.name` = `"Alpha"`, `data.team.projectId.title` = `"Bootcamp LMS Web App"`, `data.members` is an array.
 
 ### STEP 20 — Student Tasks (GET, student token)
 
 - **URL:** `http://localhost:5000/api/student/tasks`
 - **Method:** GET
 
-**Working if:** `200` and `data` is an array (empty `[]` until Tasks module adds tasks).
+**Working if:** `200` and `data` is an array. **NEW:** the demo student has **5 seeded tasks** (mixed pending / in-progress / completed). Each task includes a populated `projectId` with the project title.
 
 ---
 
-### STEP 21 — Logout (POST, any token)
+### STEP 21 — Student Task Progress Update (PUT, student token) — NEW ENDPOINT
+
+- **URL:** `http://localhost:5000/api/student/tasks/REPLACE_WITH_TASK_ID`
+- **Method:** PUT
+- **Body (raw → JSON):**
+  ```json
+  { "status": "in-progress" }
+  ```
+*(Get a task `_id` from the Step 20 response.)*
+
+**Working if:** `200` + `data.status` = `"in-progress"`.
+
+**Allowed transitions:** `pending → in-progress | completed`, `in-progress → completed`, `completed → none`.
+
+**Try the guard rails too:**
+- Completed task → set `pending` → expect **400** (invalid transition).
+- `"status": "done"` → expect **400** (invalid value, `validate.js:89`).
+- `/api/student/tasks/123/progress` → expect **400** (bad task ID).
+- Valid Mongo ID that is **not** assigned to you → expect **404**.
+
+---
+
+### STEP 22 — Logout (POST, any token)
 
 - **URL:** `http://localhost:5000/api/auth/logout`
 - **Method:** POST
@@ -393,6 +450,8 @@ Mark Sara present too (for summary tests):
 | 16 | GET | `/api/student/attendance` | Bearer + student | |
 | 17 | GET | `/api/student/team` | Bearer + student | |
 | 18 | GET | `/api/student/tasks` | Bearer + student | |
+| 19 | **PUT** | `/api/student/tasks/:id/progress` | Bearer + student | **NEW** |
+| 20 | **PUT** | `/api/student/tasks/:id/progress` → invalid transition | Bearer + student → 400 | **NEW** |
 
 ---
 
@@ -406,12 +465,14 @@ Mark Sara present too (for summary tests):
 | Student hits attendance | `GET /api/attendance` | **403** |
 | Student marks attendance | `POST /api/attendance` | **403** |
 | Student deletes student | `DELETE /api/students/:id` | **403** |
+| Student updates someone else's task | `PUT /api/student/tasks/:id/progress` (task not assigned to them) | **404** — **NEW** |
 
 **With the ADMIN token active:**
 
 | Test | URL | Expected |
 |------|-----|----------|
 | Admin hits student portal | `GET /api/student/profile` | **403** |
+| Admin updates task progress | `PUT /api/student/tasks/:id/progress` | **403** — **NEW** |
 
 **With NO token:**
 
@@ -442,6 +503,10 @@ Mark Sara present too (for summary tests):
 | Missing status | PUT `/api/attendance/:id` → `{}` | 400 |
 | Update unknown student | PUT `/api/students/000000000000000000000000` | 404 |
 | Delete unknown student | DELETE `/api/students/000000000000000000000000` | 404 |
+| Invalid task status value | PUT `/api/student/tasks/:id/progress` → `"status":"done"` | 400 — **NEW** |
+| Invalid task status transition | PUT `/api/student/tasks/:id/progress` on a `completed` task → `"status":"pending"` | 400 — **NEW** |
+| Bad task ID | PUT `/api/student/tasks/123/progress` | 400 — **NEW** |
+| Task not assigned to you | PUT `/api/student/tasks/000000000000000000000000/progress` | 404 — **NEW** |
 
 ---
 
@@ -455,3 +520,6 @@ Mark Sara present too (for summary tests):
 | Always getting `403` | Using admin token on student route (or vice-versa). Use the correct role's token. |
 | `404 Route not found` | URL typo. Endpoints are under `/api/` (e.g., `/api/students`, not `/students`). |
 | Duplicate email `409` | That email already exists. Use a new email. |
+
+
+

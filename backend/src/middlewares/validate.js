@@ -86,6 +86,12 @@ const validateAttendanceSummaryQuery = [
   handleValidationErrors,
 ];
 
+const validateTaskStatusUpdate = [
+  param('id').isMongoId().withMessage('Invalid task ID.'),
+  body('status').isIn(['pending', 'in-progress', 'completed']).withMessage('Status must be pending, in-progress, or completed.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -97,4 +103,5 @@ export {
   validateStudentsQuery,
   validateMongoId,
   validateAttendanceSummaryQuery,
+  validateTaskStatusUpdate,
 };
