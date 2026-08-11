@@ -4,6 +4,7 @@ import {
   createCoreRowModel,
   flexRender,
 } from '@tanstack/react-table';
+
 import {
   Table,
   TableBody,
@@ -11,13 +12,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper
+  Paper,
 } from '@mui/material';
+
 import { EmptyState, LoadingState } from './StateComponents';
 
-export const DataTable = ({ 
-  data, 
-  columns, 
+export const DataTable = ({
+  data,
+  columns,
   isLoading = false,
   emptyMessage = "No data found",
 }) => {

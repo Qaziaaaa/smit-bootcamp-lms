@@ -19,7 +19,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  ShieldCheck,
   Users,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -67,8 +66,6 @@ function SidebarContent({ pathname, profile, onNavigate }) {
         sx={{
           px: 2,
           py: 2,
-          borderBottom: 1,
-          borderColor: 'divider',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -125,7 +122,7 @@ function SidebarContent({ pathname, profile, onNavigate }) {
       </List>
 
       {/* Bottom profile card + logout */}
-      <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', bgcolor: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
+      <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
         <Box
           sx={{
             p: 1.5,
@@ -268,14 +265,6 @@ export function StudentLayout() {
                 {title}
               </Typography>
             </Box>
-
-            {/* Batch badge (from the student profile) */}
-            {profile?.batch && (
-              <Box sx={{ display: { xs: 'none', sm: 'inline-flex' }, alignItems: 'center', gap: 0.5, px: 1.25, py: 0.25, borderRadius: 1, fontSize: 12, fontWeight: 600, bgcolor: '#E8F5E9', color: '#22C55E', mr: 1.5 }}>
-                <ShieldCheck size={14} />
-                Batch {profile.batch}
-              </Box>
-            )}
 
             {/* Today's date */}
             <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#828283', display: { xs: 'none', md: 'block' } }}>
