@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Paper, Grid, IconButton } from '@mui/material';
-import { ArrowLeft, Edit2, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit2, Plus, Trash2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Badge } from '../components/ui/Badge';
@@ -27,6 +27,8 @@ export default function ProjectDetailPage() {
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [deleteTaskId, setDeleteTaskId] = useState(null);
+  const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const fetchProject = useCallback(async () => {
     setLoading(true);
@@ -157,6 +159,33 @@ export default function ProjectDetailPage() {
       await fetchProject();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete task');
+    }
+  };
+
+  const handleMarkAllCompleted = async () => {
+    setBulkLoading(true);
+    try {
+      const pending = tasks.filter((t) => t.status !== 'completed');
+      if (pending.length === 0) {
+        toast.info('All tasks are already completed');
+      } else {
+        let marked = 0;
+        for (const task of pending) {
+          try {
+            await updateTask(task._id, { status: 'completed' });
+            marked += 1;
+          } catch {
+            // continue marking the rest; failures reported below
+          }
+        }
+        toast.success(`${marked} of ${pending.length} task(s) marked as completed`);
+      }
+      setBulkConfirm(false);
+      await fetchProject();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to mark tasks completed');
+    } finally {
+      setBulkLoading(false);
     }
   };
 
@@ -293,18 +322,28 @@ export default function ProjectDetailPage() {
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Tasks ({tasks.length})
               </Typography>
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={<Plus size={16} />}
-                disableElevation
-                onClick={() => {
-                  setEditingTask(null);
-                  setIsTaskFormOpen(true);
-                }}
-              >
-                Add Task
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<CheckCircle size={16} />}
+                  onClick={() => setBulkConfirm(true)}
+                >
+                  Mark All Done
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<Plus size={16} />}
+                  disableElevation
+                  onClick={() => {
+                    setEditingTask(null);
+                    setIsTaskFormOpen(true);
+                  }}
+                >
+                  Add Task
+                </Button>
+              </Box>
             </Box>
 
             <Box sx={{ p: 2 }}>
@@ -348,6 +387,18 @@ export default function ProjectDetailPage() {
         message="Are you sure you want to delete this task? This action cannot be undone."
         onConfirm={handleDeleteTask}
         onCancel={() => setDeleteTaskId(null)}
+      />
+
+      {/* Bulk Complete Confirm */}
+      <ConfirmDialog
+        open={bulkConfirm}
+        title="Mark All Tasks Completed"
+        message="This will mark every task in this project as completed. This action cannot be undone. Continue?"
+        confirmText="Mark All Done"
+        confirmColor="success"
+        loading={bulkLoading}
+        onConfirm={handleMarkAllCompleted}
+        onCancel={() => setBulkConfirm(false)}
       />
     </Box>
   );
