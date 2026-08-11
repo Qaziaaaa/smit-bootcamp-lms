@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import Attendance from '../models/attendance.model.js';
 import Student from '../models/student.model.js';
 import ApiError from '../utils/ApiError.js';
@@ -21,13 +22,13 @@ const markAttendance = async ({ studentId, date, status, markedBy }) => {
 };
 
 const getAttendance = async (filters = {}, pagination = {}) => {
-  const { date, batch, status, studentId } = filters;
+  const { date, batch, status, studentId, search } = filters;
   const { page = 1, limit = 10 } = pagination;
 
   let matchStage = {};
 
   if (studentId) {
-    matchStage.studentId = studentId;
+    matchStage.studentId = new Types.ObjectId(studentId);
   }
 
   if (date) {
@@ -45,6 +46,13 @@ const getAttendance = async (filters = {}, pagination = {}) => {
   const studentMatch = {};
   if (batch) {
     studentMatch['student.batch'] = batch;
+  }
+  if (search) {
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    studentMatch.$or = [
+      { 'student.name': { $regex: escaped, $options: 'i' } },
+      { 'student.email': { $regex: escaped, $options: 'i' } },
+    ];
   }
 
   const skip = (page - 1) * limit;

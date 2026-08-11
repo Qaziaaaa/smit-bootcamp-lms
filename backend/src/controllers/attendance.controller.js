@@ -14,9 +14,9 @@ const markAttendance = asyncHandler(async (req, res) => {
 });
 
 const getAttendance = asyncHandler(async (req, res) => {
-  const { date, batch, status, studentId, page, limit } = req.query;
+  const { date, batch, status, studentId, search, page, limit } = req.query;
   const result = await attendanceService.getAttendance(
-    { date, batch, status, studentId },
+    { date, batch, status, studentId, search },
     { page: Number(page) || 1, limit: Number(limit) || 10 }
   );
   sendSuccess(res, 200, result, 'Attendance retrieved successfully');

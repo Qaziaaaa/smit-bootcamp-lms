@@ -35,6 +35,7 @@ export default function AttendancePage() {
     try {
       const params = { date: dateFilter, page, limit: 10 };
       if (batchFilter) params.batch = batchFilter;
+      if (search) params.search = search;
       const result = await getAttendance(params);
       setRecords(result.records || []);
       setPagination(result.pagination || { page: 1, pages: 1, total: 0 });
@@ -43,7 +44,7 @@ export default function AttendancePage() {
     } finally {
       setLoading(false);
     }
-  }, [dateFilter, batchFilter, page]);
+  }, [dateFilter, batchFilter, search, page]);
 
   useEffect(() => {
     fetchRecords();

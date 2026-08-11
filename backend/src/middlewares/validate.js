@@ -23,7 +23,11 @@ const validateStudentCreate = [
   body('name').trim().notEmpty().withMessage('Name is required.').isLength({ max: 100 }).withMessage('Name must be at most 100 characters.'),
   body('email').isEmail().withMessage('Valid email is required.').normalizeEmail(),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters.'),
-  body('phone').optional().trim().isMobilePhone('any').withMessage('Valid phone number is required.'),
+  body('phone')
+    .optional()
+    .trim()
+    .custom((value) => /^[+\d][\d\s-]{9,14}$/.test(value))
+    .withMessage('Valid phone number is required.'),
   body('batch').optional().trim().isLength({ max: 100 }).withMessage('Batch must be at most 100 characters.'),
   body('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
   handleValidationErrors,
@@ -33,7 +37,11 @@ const validateStudentUpdate = [
   param('id').isMongoId().withMessage('Invalid student ID.'),
   body('name').optional().trim().notEmpty().withMessage('Name cannot be empty.').isLength({ max: 100 }).withMessage('Name must be at most 100 characters.'),
   body('email').optional().isEmail().withMessage('Valid email is required.').normalizeEmail(),
-  body('phone').optional().trim().isMobilePhone('any').withMessage('Valid phone number is required.'),
+  body('phone')
+    .optional()
+    .trim()
+    .custom((value) => /^[+\d][\d\s-]{9,14}$/.test(value))
+    .withMessage('Valid phone number is required.'),
   body('batch').optional().trim().isLength({ max: 100 }).withMessage('Batch must be at most 100 characters.'),
   body('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
   body('status').optional().isIn(['active', 'inactive']).withMessage('Invalid status.'),
@@ -63,8 +71,9 @@ const validateAttendanceQuery = [
   query('batch').optional().trim().isLength({ max: 100 }).withMessage('Batch must be at most 100 characters.'),
   query('status').optional().isIn(['present', 'absent']).withMessage('Status must be present or absent.'),
   query('studentId').optional().isMongoId().withMessage('Invalid student ID.'),
+  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
-  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100.').toInt(),
+  query('limit').optional().isInt({ min: 1, max: 500 }).withMessage('Limit must be between 1 and 500.').toInt(),
   handleValidationErrors,
 ];
 
@@ -74,7 +83,7 @@ const validateStudentsQuery = [
   query('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
   query('status').optional().isIn(['active', 'inactive']).withMessage('Invalid status.'),
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
-  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100.').toInt(),
+  query('limit').optional().isInt({ min: 1, max: 500 }).withMessage('Limit must be between 1 and 500.').toInt(),
   handleValidationErrors,
 ];
 
@@ -123,7 +132,7 @@ const validateProjectsQuery = [
   query('status').optional().isIn(['active', 'completed', 'on-hold']).withMessage('Invalid status.'),
   query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
-  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100.').toInt(),
+  query('limit').optional().isInt({ min: 1, max: 500 }).withMessage('Limit must be between 1 and 500.').toInt(),
   handleValidationErrors,
 ];
 
@@ -157,7 +166,7 @@ const validateTasksQuery = [
   query('assignedTo').optional().isMongoId().withMessage('Invalid assignedTo ID.'),
   query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
-  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100.').toInt(),
+  query('limit').optional().isInt({ min: 1, max: 500 }).withMessage('Limit must be between 1 and 500.').toInt(),
   handleValidationErrors,
 ];
 

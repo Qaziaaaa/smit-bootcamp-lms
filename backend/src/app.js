@@ -12,7 +12,7 @@ const app = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: env.clientUrl,
+    origin: env.clientOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
