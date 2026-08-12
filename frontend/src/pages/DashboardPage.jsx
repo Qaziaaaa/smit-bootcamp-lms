@@ -224,8 +224,8 @@ export default function DashboardPage() {
               View All <ArrowUpRight size={14} />
             </Button>
           </Box>
-          <TableContainer sx={{ borderTop: 1, borderColor: 'divider' }}>
-            <Table sx={{ minWidth: 560 }} aria-label="recent attendance table">
+          <TableContainer sx={{ borderTop: 1, borderColor: 'divider', maxWidth: '100%', width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <Table sx={{ minWidth: { xs: 450, md: 560 } }} aria-label="recent attendance table">
               <TableHead>
                 <TableRow>
                   <TableCell
