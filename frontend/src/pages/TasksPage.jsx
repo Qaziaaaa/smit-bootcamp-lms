@@ -17,6 +17,7 @@ import { getStudents } from '../services/studentsService';
 const STATUS_OPTIONS = [
   { label: 'Pending', value: 'pending' },
   { label: 'In Progress', value: 'in-progress' },
+  { label: 'Review Requested', value: 'review_requested' },
   { label: 'Completed', value: 'completed' },
 ];
 
@@ -129,6 +130,24 @@ export default function TasksPage() {
       header: 'ACTIONS',
       cell: ({ row }) => (
         <Box sx={{ display: 'flex', gap: 1 }}>
+          {row.original.status !== 'completed' && (
+            <IconButton
+              size="small"
+              color="success"
+              title="Mark as Completed"
+              onClick={async () => {
+                try {
+                  await updateTask(row.original._id, { status: 'completed' });
+                  toast.success('Task marked as completed');
+                  fetchTasks();
+                } catch (error) {
+                  toast.error('Failed to complete task');
+                }
+              }}
+            >
+              <CheckCircle size={18} />
+            </IconButton>
+          )}
           <IconButton
             size="small"
             color="primary"

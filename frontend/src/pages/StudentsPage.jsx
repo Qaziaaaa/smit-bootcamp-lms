@@ -232,7 +232,7 @@ export default function StudentsPage() {
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleSaveStudent}
         initialData={editingStudent}
-        teams={teams}
+        batchOptions={batchOptions}
       />
 
       <ConfirmDialog

@@ -6,7 +6,7 @@ import {
   CalendarCheck,
   CheckCircle2,
   CheckSquare,
-  Clock,
+  CalendarDays,
   GraduationCap,
   Play,
   Users,
@@ -21,25 +21,33 @@ const TASK_STYLE = {
   completed: { label: 'Completed', color: '#166534', bg: '#DCFCE7' },
 }
 
-// Builds the current week (Mon-Sun); class days Wed & Thu are highlighted in the schedule widget
-function currentWeek() {
+// Builds the current week (Sun-Sat) and marks specific days as active based on student schedule
+function currentWeek(activeDays = []) {
   const today = new Date()
-  const mondayOffset = today.getDay() === 0 ? -6 : 1 - today.getDay()
-  const monday = new Date(today)
-  monday.setDate(today.getDate() + mondayOffset)
+  const sundayOffset = -today.getDay()
+  const sunday = new Date(today)
+  sunday.setDate(today.getDate() + sundayOffset)
 
-  const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return names.map((name, index) => {
-    const day = new Date(monday)
-    day.setDate(monday.getDate() + index)
+    const day = new Date(sunday)
+    day.setDate(sunday.getDate() + index)
 
     return {
       name,
       date: day.getDate(),
-      active: name !== 'Sun',
+      active: activeDays.includes(name),
     }
   })
+}
+
+// Mock schedule data mapping student emails to their active class days.
+// This will be replaced by backend API data in the future.
+const MOCK_SCHEDULE_DATA = {
+  'student@example.com': ['Fri', 'Sat'],
+  'qari@gmail.com': ['Mon', 'Wed', 'Fri'],
+  'default': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
 }
 // Renders a small rounded pill showing the task status
 function StatusPill({ status }) {
@@ -144,7 +152,9 @@ export default function StudentDashboardPage() {
   const activeCount = tasks.length - completedCount
 
   // Week days used by the class schedule widget
-  const week = currentWeek()
+  const studentEmail = profile?.email || 'default'
+  const activeDays = MOCK_SCHEDULE_DATA[studentEmail] || MOCK_SCHEDULE_DATA['default']
+  const week = currentWeek(activeDays)
 
   return (
     <Box sx={{ display: 'grid', gap: 3 }}>
@@ -320,41 +330,35 @@ export default function StudentDashboardPage() {
           </Paper>
         </Box>
 
-        {/* Schedule widget: current week grid, class days (Wed & Thu) highlighted */}
+        {/* Schedule widget: current week grid, class days highlighted */}
         <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', overflow: 'hidden' }}>
-          <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1, color: '#0A0A0A' }}>
-              <Clock size={16} color="#22C55E" /> Class Schedule
+          <Box sx={{ p: 2, pb: 1.5 }}>
+            <Typography sx={{ fontSize: 16, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1, color: '#0A0A0A' }}>
+              <CalendarDays size={18} color="#0A0A0A" /> Class Schedule
             </Typography>
           </Box>
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.5 }}>
+          <Box sx={{ px: 2, pb: 2 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.75 }}>
               {week.map((day) => (
                 <Box
                   key={day.name}
                   sx={{
-                    p: 0.5,
-                    borderRadius: 1,
+                    p: 1,
+                    borderRadius: 1.5,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     ...(day.active
-                      ? { bgcolor: '#22C55E', color: '#ffffff' }
-                      : { bgcolor: '#F8FAFA', color: '#828283', border: 1, borderColor: '#E2E8F0' }),
+                      ? { bgcolor: '#22C55E', color: '#ffffff', border: 1, borderColor: '#22C55E' }
+                      : { bgcolor: '#ffffff', color: '#828283', border: 1, borderColor: '#E2E8F0' }),
                   }}
                 >
-                  <Typography sx={{ fontSize: 10, textTransform: 'uppercase' }}>{day.name}</Typography>
-                  <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{day.date}</Typography>
+                  <Typography sx={{ fontSize: 11, fontWeight: day.active ? 600 : 500 }}>{day.name}</Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: day.active ? 700 : 500, mt: 0.25 }}>{day.date}</Typography>
                 </Box>
               ))}
             </Box>
-            <Typography sx={{ fontSize: 11, color: '#828283', mt: 1.5 }}>
-              Active Class Days:{' '}
-              <Box component="span" sx={{ fontWeight: 500, color: '#22C55E' }}>
-                MON TO SAT (09:00 AM - 02:00 PM)
-              </Box>
-            </Typography>
           </Box>
         </Paper>
       </Box>
