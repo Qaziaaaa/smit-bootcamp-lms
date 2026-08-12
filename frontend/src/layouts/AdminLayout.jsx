@@ -1,14 +1,15 @@
-import { useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   AppBar,
   Box,
+  BottomNavigation,
+  BottomNavigationAction,
   Drawer,
-  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Paper,
   Toolbar,
   Typography,
 } from '@mui/material'
@@ -20,7 +21,6 @@ import {
   LayoutDashboard,
   Layers,
   LogOut,
-  Menu,
   Users,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -179,13 +179,24 @@ function SidebarContent({ pathname, onNavigate }) {
 
 export function AdminLayout() {
   const { pathname } = useLocation()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const navigate = useNavigate()
 
   const current = NAV_ITEMS.find((item) => isPathActive(pathname, item.to))
   const title = current?.label || 'Dashboard'
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F8FAFA' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        height: '100vh',
+        width: '100%',
+        maxWidth: '100%',
+        overflow: 'hidden',
+        bgcolor: '#F8FAFA',
+      }}
+    >
+      {/* Desktop Sidebar */}
       <Drawer
         variant="permanent"
         open
@@ -199,34 +210,37 @@ export function AdminLayout() {
         <SidebarContent pathname={pathname} />
       </Drawer>
 
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
+      {/* Main Layout Column */}
+      <Box
+        component="main"
         sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH, borderColor: '#E2E8F0' },
+          flex: 1,
+          minWidth: 0,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          bgcolor: '#F7F9FA',
+          overflow: 'hidden',
         }}
       >
-        <SidebarContent pathname={pathname} onNavigate={() => setMobileOpen(false)} />
-      </Drawer>
-
-      <Box component="main" sx={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column', bgcolor: '#F7F9FA' }}>
+        {/* Topbar Header */}
         <AppBar
-          position="sticky"
+          position="static"
           elevation={0}
           color="inherit"
-          sx={{ height: 64, justifyContent: 'center', bgcolor: '#ffffff', borderBottom: 1, borderColor: 'divider' }}
+          sx={{
+            height: 64,
+            flexShrink: 0,
+            justifyContent: 'center',
+            bgcolor: '#ffffff',
+            borderBottom: 1,
+            borderColor: 'divider',
+          }}
         >
           <Toolbar sx={{ px: { xs: 2, md: 3 }, minHeight: '64px !important' }}>
-            <IconButton
-              edge="start"
-              sx={{ mr: 1, display: { md: 'none' }, color: '#0A0A0A', '&:hover': { bgcolor: '#F0F5FF' } }}
-              onClick={() => setMobileOpen(true)}
-              aria-label="Toggle navigation menu"
-            >
-              <Menu size={20} />
-            </IconButton>
+            <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 1.5, alignItems: 'center' }}>
+              <Logo />
+            </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0, flex: 1 }}>
               <Typography sx={{ fontSize: { xs: 12, sm: 14 }, fontWeight: 500, color: '#0A0A0A', whiteSpace: 'nowrap' }}>
@@ -244,11 +258,74 @@ export function AdminLayout() {
           </Toolbar>
         </AppBar>
 
-        <Box sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 4 } }}>
-          <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
+        {/* Scrollable Center Content */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            p: { xs: 2, sm: 3, md: 4 },
+            width: '100%',
+            boxSizing: 'border-box',
+          }}
+        >
+          <Box sx={{ maxWidth: 1200, mx: 'auto', width: '100%' }}>
             <Outlet />
           </Box>
         </Box>
+
+        {/* Fixed Mobile Bottom Navigation Bar */}
+        <Paper
+          elevation={6}
+          sx={{
+            flexShrink: 0,
+            display: { xs: 'block', md: 'none' },
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            bgcolor: '#ffffff',
+            boxShadow: '0 -2px 10px rgba(0,0,0,0.08)',
+            zIndex: 1100,
+          }}
+        >
+          <BottomNavigation
+            showLabels
+            value={NAV_ITEMS.find((item) => isPathActive(pathname, item.to))?.to || false}
+            onChange={(event, newValue) => {
+              if (newValue) navigate(newValue)
+            }}
+            sx={{
+              height: 60,
+              '& .MuiBottomNavigationAction-root': {
+                minWidth: 'auto',
+                px: 0.5,
+                py: 0.5,
+                color: '#828283',
+                '&.Mui-selected': {
+                  color: '#2D69EB',
+                  fontWeight: 600,
+                },
+                '& .MuiBottomNavigationAction-label': {
+                  fontSize: 10,
+                  '&.Mui-selected': {
+                    fontSize: 10,
+                  },
+                },
+              },
+            }}
+          >
+            {NAV_ITEMS.map((item) => {
+              const Icon = item.icon
+              return (
+                <BottomNavigationAction
+                  key={item.to}
+                  label={item.label}
+                  value={item.to}
+                  icon={<Icon size={18} />}
+                />
+              )
+            })}
+          </BottomNavigation>
+        </Paper>
       </Box>
     </Box>
   )
