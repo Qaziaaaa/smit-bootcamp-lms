@@ -1,6 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-<<<<<<< Updated upstream
-=======
 
 *, *::before, *::after {
   box-sizing: border-box !important;
@@ -58,5 +56,3 @@ img, video, canvas, svg {
   transform: translateZ(0) !important;
   -webkit-transform: translateZ(0) !important;
 }
-
->>>>>>> Stashed changes

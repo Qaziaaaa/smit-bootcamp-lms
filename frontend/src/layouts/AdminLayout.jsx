@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   AppBar,
@@ -6,13 +5,11 @@ import {
   BottomNavigation,
   BottomNavigationAction,
   Drawer,
-  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Paper,
-  Portal,
   Toolbar,
   Typography,
 } from '@mui/material'
@@ -24,7 +21,6 @@ import {
   LayoutDashboard,
   Layers,
   LogOut,
-  Menu,
   Users,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -189,9 +185,6 @@ export function AdminLayout() {
   const title = current?.label || 'Dashboard'
 
   return (
-<<<<<<< Updated upstream
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#F8FAFA' }}>
-=======
     <Box
       sx={{
         display: 'flex',
@@ -204,7 +197,6 @@ export function AdminLayout() {
       }}
     >
       {/* Desktop Sidebar */}
->>>>>>> Stashed changes
       <Drawer
         variant="permanent"
         open
@@ -218,16 +210,9 @@ export function AdminLayout() {
         <SidebarContent pathname={pathname} />
       </Drawer>
 
-<<<<<<< Updated upstream
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-=======
       {/* Main Layout Column */}
       <Box
         component="main"
->>>>>>> Stashed changes
         sx={{
           flex: 1,
           minWidth: 0,
@@ -238,31 +223,11 @@ export function AdminLayout() {
           overflow: 'hidden',
         }}
       >
-<<<<<<< Updated upstream
-        <SidebarContent pathname={pathname} onNavigate={() => setMobileOpen(false)} />
-      </Drawer>
-
-      <Box component="main" sx={{ flexGrow: 1, minWidth: 0, display: 'flex', flexDirection: 'column', bgcolor: '#F7F9FA' }}>
-=======
         {/* Topbar Header */}
->>>>>>> Stashed changes
         <AppBar
           position="static"
           elevation={0}
           color="inherit"
-<<<<<<< Updated upstream
-          sx={{ height: 64, justifyContent: 'center', bgcolor: '#ffffff', borderBottom: 1, borderColor: 'divider' }}
-        >
-          <Toolbar sx={{ px: { xs: 2, md: 3 }, minHeight: '64px !important' }}>
-            <IconButton
-              edge="start"
-              sx={{ mr: 1, display: { md: 'none' }, color: '#0A0A0A', '&:hover': { bgcolor: '#F0F5FF' } }}
-              onClick={() => setMobileOpen(true)}
-              aria-label="Toggle navigation menu"
-            >
-              <Menu size={20} />
-            </IconButton>
-=======
           sx={{
             height: 64,
             flexShrink: 0,
@@ -276,7 +241,6 @@ export function AdminLayout() {
             <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 1.5, alignItems: 'center' }}>
               <Logo />
             </Box>
->>>>>>> Stashed changes
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0, flex: 1 }}>
               <Typography sx={{ fontSize: { xs: 12, sm: 14 }, fontWeight: 500, color: '#0A0A0A', whiteSpace: 'nowrap' }}>
@@ -294,10 +258,6 @@ export function AdminLayout() {
           </Toolbar>
         </AppBar>
 
-<<<<<<< Updated upstream
-        <Box sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 4 } }}>
-          <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-=======
         {/* Scrollable Center Content */}
         <Box
           sx={{
@@ -310,7 +270,6 @@ export function AdminLayout() {
           }}
         >
           <Box sx={{ maxWidth: 1200, mx: 'auto', width: '100%' }}>
->>>>>>> Stashed changes
             <Outlet />
           </Box>
         </Box>
