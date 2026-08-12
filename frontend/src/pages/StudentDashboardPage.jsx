@@ -27,14 +27,20 @@ function currentWeek() {
   const mondayOffset = today.getDay() === 0 ? -6 : 1 - today.getDay()
   const monday = new Date(today)
   monday.setDate(today.getDate() + mondayOffset)
+
   const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
   return names.map((name, index) => {
     const day = new Date(monday)
     day.setDate(monday.getDate() + index)
-    return { name, date: day.getDate(), active: name === 'Wed' || name === 'Thu' }
+
+    return {
+      name,
+      date: day.getDate(),
+      active: name !== 'Sun',
+    }
   })
 }
-
 // Renders a small rounded pill showing the task status
 function StatusPill({ status }) {
   const style = TASK_STYLE[status] ?? TASK_STYLE.pending
@@ -227,7 +233,7 @@ export default function StudentDashboardPage() {
                   borderRadius: 9999,
                   fontSize: 12,
                   fontWeight: 600,
-                  bgcolor: '#E8F5E9',
+                  // bgcolor: '#E8F5E9',
                   color: '#22C55E',
                 }}
               >
@@ -346,7 +352,7 @@ export default function StudentDashboardPage() {
             <Typography sx={{ fontSize: 11, color: '#828283', mt: 1.5 }}>
               Active Class Days:{' '}
               <Box component="span" sx={{ fontWeight: 500, color: '#22C55E' }}>
-                Wed & Thu (04:00 PM - 06:00 PM)
+                MON TO SAT (09:00 AM - 02:00 PM)
               </Box>
             </Typography>
           </Box>
