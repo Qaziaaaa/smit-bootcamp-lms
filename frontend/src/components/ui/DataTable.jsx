@@ -42,8 +42,20 @@ export const DataTable = ({
   }
 
   return (
-    <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '12px' }}>
-      <Table sx={{ minWidth: 650 }} aria-label="data table">
+    <TableContainer 
+      component={Paper} 
+      elevation={0} 
+      sx={{ 
+        border: '1px solid', 
+        borderColor: 'divider', 
+        borderRadius: '12px',
+        maxWidth: '100%',
+        width: '100%',
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+      }}
+    >
+      <Table sx={{ minWidth: { xs: 500, md: 650 } }} aria-label="data table">
         <TableHead sx={{ backgroundColor: 'grey.50' }}>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
