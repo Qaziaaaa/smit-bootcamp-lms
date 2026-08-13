@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Button, IconButton } from '@mui/material';
+import { Box, Typography, Button, IconButton, Select, MenuItem, FormControl } from '@mui/material';
 import { UserPlus, Edit2, Trash2, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -74,8 +74,8 @@ export default function StudentsPage() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Avatar name={row.original.name} />
           <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.original.name}</Typography>
-            <Typography variant="caption" color="text.secondary">{row.original.email}</Typography>
+            <Typography sx={{ fontWeight: 600, color: '#0F172A', fontSize: '14px' }}>{row.original.name}</Typography>
+            <Typography sx={{ color: '#64748B', fontSize: '13px', mt: 0.25 }}>{row.original.email}</Typography>
           </Box>
         </Box>
       ),
@@ -83,19 +83,44 @@ export default function StudentsPage() {
     {
       accessorKey: 'batch',
       header: 'BATCH',
-      cell: ({ getValue }) => <Typography variant="body2" sx={{ fontWeight: 600 }}>{getValue() || '—'}</Typography>,
+      cell: ({ getValue }) => <Typography sx={{ fontWeight: 600, color: '#0F172A', fontSize: '13px' }}>{getValue() || '—'}</Typography>,
     },
     {
       accessorKey: 'teamId',
       header: 'TEAM',
       cell: ({ getValue }) => (
-        <Typography variant="body2" color="text.secondary">{getValue()?.name || 'Unassigned'}</Typography>
+        <Typography sx={{ color: '#64748B', fontSize: '13px' }}>{getValue()?.name || 'Unassigned'}</Typography>
       ),
     },
     {
       accessorKey: 'status',
       header: 'STATUS',
-      cell: ({ getValue }) => <Badge status={getValue()} />,
+      cell: ({ getValue }) => {
+        const status = getValue();
+        const isActive = status?.toLowerCase() === 'active';
+        return (
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              px: 1.5,
+              py: 0.35,
+              borderRadius: '9999px',
+              border: '1px solid',
+              borderColor: isActive ? '#4ADE80' : '#CBD5E1',
+              color: isActive ? '#22C55E' : '#64748B',
+              fontSize: '11px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              bgcolor: 'transparent',
+              letterSpacing: '0.05em'
+            }}
+          >
+            {status || 'Unknown'}
+          </Box>
+        );
+      },
     },
     {
       id: 'actions',
@@ -155,14 +180,13 @@ export default function StudentsPage() {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: { xs: 2, sm: 4 }, maxWidth: 1200, mx: 'auto' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 1 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', letterSpacing: '-0.5px' }}>
+          <Typography variant="h4" sx={{ fontWeight: 600, color: '#0F172A', letterSpacing: '-0.5px' }}>
             Student Roster
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: '#64748B', mt: 0.5 }}>
             Manage student enrollments, status, and team assignments.
           </Typography>
         </Box>
@@ -174,58 +198,145 @@ export default function StudentsPage() {
             setEditingStudent(null);
             setIsFormOpen(true);
           }}
+          sx={{
+            bgcolor: '#2D69EB',
+            borderRadius: '8px',
+            textTransform: 'none',
+            fontWeight: 600,
+            px: 3,
+            py: 1,
+            '&:hover': { bgcolor: '#1E40AF' }
+          }}
         >
           Add New Student
         </Button>
       </Box>
 
+      {/* Search & Filters Container */}
       <Box sx={{
+        bgcolor: '#ffffff',
+        borderRadius: '12px',
+        border: '1px solid #E2E8F0',
+        p: 2.5,
         display: 'flex',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        flexWrap: 'wrap',
         gap: 2,
-        p: 2,
-        bgcolor: 'background.paper',
-        borderRadius: 2,
-        border: '1px solid',
-        borderColor: 'divider'
+        '& .MuiTextField-root': {
+          flex: 1,
+          maxWidth: '380px',
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '8px',
+            bgcolor: '#ffffff',
+            height: '44px',
+          }
+        }
       }}>
         <SearchBar value={search} onChange={setSearch} placeholder="Search student by name or email..." />
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <FilterBar
-            label="All Statuses"
-            value={statusFilter}
-            onChange={setStatusFilter}
-            options={[
-              { label: 'Active', value: 'active' },
-              { label: 'Inactive', value: 'inactive' }
-            ]}
-          />
+        <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto', flexWrap: 'wrap' }}>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <Select
+              displayEmpty
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              sx={{
+                borderRadius: '8px',
+                bgcolor: '#ffffff',
+                height: '44px',
+                color: '#2D69EB',
+                fontWeight: 500,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#2D69EB',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#2D69EB',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#2D69EB',
+                },
+                '& .MuiSelect-icon': {
+                  color: '#64748B', // the dropdown icon color in template is greyish
+                }
+              }}
+            >
+              <MenuItem value="">All Statuses</MenuItem>
+              <MenuItem value="active">Active</MenuItem>
+              <MenuItem value="inactive">Inactive</MenuItem>
+              <MenuItem value="graduated">Graduated</MenuItem>
+            </Select>
+          </FormControl>
+          
           {batchOptions.length > 0 && (
-            <FilterBar
-              label="All Batches"
-              value={batchFilter}
-              onChange={setBatchFilter}
-              options={batchOptions.map((b) => ({ label: b, value: b }))}
-            />
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <Select
+                displayEmpty
+                value={batchFilter}
+                onChange={(e) => setBatchFilter(e.target.value)}
+                sx={{
+                  borderRadius: '8px',
+                  bgcolor: '#ffffff',
+                  height: '44px',
+                  '& .MuiSelect-icon': {
+                    color: '#64748B',
+                  }
+                }}
+              >
+                <MenuItem value="">All Batches</MenuItem>
+                {batchOptions.map((b) => (
+                  <MenuItem key={b} value={b}>{b}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           )}
         </Box>
       </Box>
 
-      <DataTable
-        data={students}
-        columns={columns}
-        isLoading={loading}
-        emptyMessage="No students found"
-      />
+      {/* Data Table Container */}
+      <Box sx={{
+        bgcolor: '#ffffff',
+        borderRadius: '12px',
+        border: '1px solid #E2E8F0',
+        overflow: 'hidden',
+        '& .MuiTableContainer-root': {
+          border: 'none',
+          borderRadius: 0,
+          boxShadow: 'none',
+        },
+        '& .MuiTableHead-root': {
+          bgcolor: '#F8FAFC',
+          '& .MuiTableCell-root': {
+            color: '#64748B',
+            fontSize: '11px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            py: 2,
+            borderBottom: '1px solid #E2E8F0',
+          }
+        },
+        '& .MuiTableBody-root': {
+          '& .MuiTableCell-root': {
+            py: 2.5,
+            borderBottom: '1px solid #E2E8F0',
+          }
+        }
+      }}>
+        <DataTable
+          data={students}
+          columns={columns}
+          isLoading={loading}
+          emptyMessage="No students found"
+        />
 
-      <Pagination
-        page={pagination.page}
-        totalPages={pagination.pages}
-        totalItems={pagination.total}
-        onChange={setPage}
-      />
+        {/* Pagination Wrapper */}
+        <Box sx={{ p: 2, borderTop: '1px solid #E2E8F0', bgcolor: '#ffffff' }}>
+          <Pagination
+            page={pagination.page}
+            totalPages={pagination.pages}
+            totalItems={pagination.total}
+            onChange={setPage}
+          />
+        </Box>
+      </Box>
 
       <StudentForm
         open={isFormOpen}

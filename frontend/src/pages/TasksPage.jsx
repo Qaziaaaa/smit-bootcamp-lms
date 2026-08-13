@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Button, IconButton } from '@mui/material';
+import { Box, Typography, Button, IconButton, Select, MenuItem, FormControl } from '@mui/material';
 import { Edit2, Trash2, Plus, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -269,41 +269,81 @@ export default function TasksPage() {
       </Box>
 
       {/* Toolbar */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 2,
-          p: 2,
-          bgcolor: 'background.paper',
-          borderRadius: 2,
-          border: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
+      <Box sx={{
+        bgcolor: '#ffffff',
+        borderRadius: '12px',
+        border: '1px solid #E2E8F0',
+        p: 2.5,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        '& .MuiTextField-root': {
+          flex: 1,
+          maxWidth: '380px',
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '8px',
+            bgcolor: '#ffffff',
+            height: '44px',
+          }
+        }
+      }}>
         <SearchBar value={search} onChange={setSearch} placeholder="Search task..." />
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <FilterBar
-            label="All Projects"
-            value={projectFilter}
-            onChange={setProjectFilter}
-            options={projects.map((p) => ({ label: p.title, value: p._id }))}
-          />
-          <FilterBar
-            label="All Statuses"
-            value={statusFilter}
-            onChange={setStatusFilter}
-            options={STATUS_OPTIONS}
-          />
+        <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto', flexWrap: 'wrap' }}>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <Select
+              displayEmpty
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+              sx={{
+                borderRadius: '8px',
+                bgcolor: '#ffffff',
+                height: '44px',
+                '& .MuiSelect-icon': { color: '#64748B' }
+              }}
+            >
+              <MenuItem value="">All Projects</MenuItem>
+              {projects.map((p) => (
+                <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <Select
+              displayEmpty
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              sx={{
+                borderRadius: '8px',
+                bgcolor: '#ffffff',
+                height: '44px',
+                '& .MuiSelect-icon': { color: '#64748B' }
+              }}
+            >
+              <MenuItem value="">All Statuses</MenuItem>
+              {STATUS_OPTIONS.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           {assignedOptions.length > 0 && (
-            <FilterBar
-              label="All Assignees"
-              value={assignedFilter}
-              onChange={setAssignedFilter}
-              options={assignedOptions}
-            />
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <Select
+                displayEmpty
+                value={assignedFilter}
+                onChange={(e) => setAssignedFilter(e.target.value)}
+                sx={{
+                  borderRadius: '8px',
+                  bgcolor: '#ffffff',
+                  height: '44px',
+                  '& .MuiSelect-icon': { color: '#64748B' }
+                }}
+              >
+                <MenuItem value="">All Assignees</MenuItem>
+                {assignedOptions.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           )}
         </Box>
       </Box>

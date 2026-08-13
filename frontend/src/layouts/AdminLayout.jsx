@@ -28,7 +28,6 @@ import {
   Users,
   User as UserIcon,
   Moon,
-  CalendarClock,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { Logo } from '../components/ui/Logo'
@@ -42,7 +41,6 @@ const NAV_ITEMS = [
   { to: '/teams', label: 'Teams', icon: Layers },
   { to: '/projects', label: 'Projects', icon: FolderGit2 },
   { to: '/tasks', label: 'Tasks', icon: CheckSquare },
-  { to: '/schedules', label: 'Schedules', icon: CalendarClock },
 ]
 
 function isPathActive(pathname, to) {

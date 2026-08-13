@@ -8,32 +8,18 @@ import { AdminForm } from '../components/admin/AdminForm';
 export default function AdminProfilePage() {
   const { user } = useAuth();
   
-  // Local state for mock admins. Initialize with the Super Admin.
+  // Local state for mock admins. Initialize with the Admin.
   const [admins, setAdmins] = useState([
     {
-      id: 'super-admin-1',
-      name: user?.name || 'Super Admin',
+      id: 'admin-1',
+      name: user?.name || 'Admin',
       email: user?.email || 'admin@saylani.org',
       phone: '0300 1234567',
-      role: 'Super Admin',
+      role: 'Admin',
       profileImage: ''
     }
   ]);
   
-  const [isFormOpen, setIsFormOpen] = useState(false);
-
-  const handleCreateAdmin = (data) => {
-    const newAdmin = {
-      id: `admin-${Date.now()}`,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      role: 'Admin',
-      profileImage: data.profileImage
-    };
-    setAdmins([...admins, newAdmin]);
-  };
-
   const superAdmin = admins[0];
 
   return (
@@ -96,24 +82,9 @@ export default function AdminProfilePage() {
             </Typography>
           </Box>
         </Box>
-        <Button
-          variant="contained"
-          onClick={() => setIsFormOpen(true)}
-          startIcon={<Plus size={18} />}
-          sx={{
-            bgcolor: '#2D69EB',
-            textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: 1.5,
-            px: 3,
-            '&:hover': { bgcolor: '#1E40AF' }
-          }}
-        >
-          Create Admin
-        </Button>
       </Box>
 
-      {/* Super Admin Info Card */}
+      {/* Admin Info Card */}
       <Paper variant="outlined" sx={{ borderRadius: 3, p: 3, bgcolor: '#ffffff', mt: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
           <Shield size={18} color="#2D69EB" />
@@ -156,7 +127,7 @@ export default function AdminProfilePage() {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
           {admins.map((adm) => (
             <Paper key={adm.id} variant="outlined" sx={{ p: 2.5, borderRadius: 3, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar src={adm.profileImage} sx={{ width: 48, height: 48, bgcolor: adm.role === 'Super Admin' ? '#1E40AF' : '#2D69EB' }}>
+              <Avatar src={adm.profileImage} sx={{ width: 48, height: 48, bgcolor: adm.role === 'Admin' ? '#1E40AF' : '#2D69EB' }}>
                 {adm.name.charAt(0).toUpperCase()}
               </Avatar>
               <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -173,8 +144,8 @@ export default function AdminProfilePage() {
                     height: 20, 
                     fontSize: 10, 
                     fontWeight: 600, 
-                    bgcolor: adm.role === 'Super Admin' ? '#DBEAFE' : '#F1F5F9',
-                    color: adm.role === 'Super Admin' ? '#1E40AF' : '#475569'
+                    bgcolor: adm.role === 'Admin' ? '#DBEAFE' : '#F1F5F9',
+                    color: adm.role === 'Admin' ? '#1E40AF' : '#475569'
                   }} 
                 />
               </Box>
@@ -182,12 +153,6 @@ export default function AdminProfilePage() {
           ))}
         </Box>
       </Box>
-
-      <AdminForm 
-        open={isFormOpen} 
-        onClose={() => setIsFormOpen(false)} 
-        onSubmit={handleCreateAdmin} 
-      />
     </Box>
   );
 }

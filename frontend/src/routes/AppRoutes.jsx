@@ -13,7 +13,6 @@ const StudentsPage = lazy(() => import('../pages/StudentsPage'))
 const StudentDetailPage = lazy(() => import('../pages/StudentDetailPage'))
 const AttendancePage = lazy(() => import('../pages/AttendancePage'))
 const AdminProfilePage = lazy(() => import('../pages/AdminProfilePage'))
-const SchedulesPage = lazy(() => import('../pages/SchedulesPage'))
 const TeamsPage = lazy(() => import('../pages/TeamsPage'))
 const TeamDetailPage = lazy(() => import('../pages/TeamDetailPage'))
 const ProjectsPage = lazy(() => import('../pages/ProjectsPage'))
@@ -59,7 +58,6 @@ export default function AppRoutes() {
           <Route path="/projects/:id" element={<ProjectDetailPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/profile" element={<AdminProfilePage />} />
-          <Route path="/schedules" element={<SchedulesPage />} />
         </Route>
 
         <Route

@@ -249,7 +249,24 @@ export default function TeamsPage() {
         </Button>
       </Box>
 
-      <Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{
+        bgcolor: '#ffffff',
+        borderRadius: '12px',
+        border: '1px solid #E2E8F0',
+        p: 2.5,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        '& .MuiTextField-root': {
+          flex: 1,
+          maxWidth: '380px',
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '8px',
+            bgcolor: '#ffffff',
+            height: '44px',
+          }
+        }
+      }}>
         <SearchBar value={search} onChange={setSearch} placeholder="Search teams..." />
       </Box>
 

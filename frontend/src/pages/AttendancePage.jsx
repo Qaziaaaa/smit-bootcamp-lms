@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Paper, Switch, TextField } from '@mui/material';
+import { Box, Typography, Paper, Switch, TextField, Select, MenuItem, FormControl } from '@mui/material';
 import { CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -177,9 +177,26 @@ export default function AttendancePage() {
       </Box>
 
       {/* Toolbar */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, p: 2, bgcolor: 'background.paper', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{
+        bgcolor: '#ffffff',
+        borderRadius: '12px',
+        border: '1px solid #E2E8F0',
+        p: 2.5,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        '& .MuiTextField-root': {
+          flex: 1,
+          maxWidth: '380px',
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '8px',
+            bgcolor: '#ffffff',
+            height: '44px',
+          }
+        }
+      }}>
         <SearchBar value={search} onChange={setSearch} placeholder="Search student..." />
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto', flexWrap: 'wrap' }}>
           <TextField
             type="date"
             size="small"
@@ -187,14 +204,36 @@ export default function AttendancePage() {
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
+            sx={{
+              minWidth: '160px',
+              maxWidth: '180px !important',
+              '& .MuiOutlinedInput-root': {
+                height: '44px !important',
+                borderRadius: '8px',
+              }
+            }}
           />
           {batchOptions.length > 0 && (
-            <FilterBar
-              label="All Batches"
-              value={batchFilter}
-              onChange={setBatchFilter}
-              options={batchOptions.map((b) => ({ label: b, value: b }))}
-            />
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <Select
+                displayEmpty
+                value={batchFilter}
+                onChange={(e) => setBatchFilter(e.target.value)}
+                sx={{
+                  borderRadius: '8px',
+                  bgcolor: '#ffffff',
+                  height: '44px',
+                  '& .MuiSelect-icon': {
+                    color: '#64748B',
+                  }
+                }}
+              >
+                <MenuItem value="">All Batches</MenuItem>
+                {batchOptions.map((b) => (
+                  <MenuItem key={b} value={b}>{b}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           )}
         </Box>
       </Box>
