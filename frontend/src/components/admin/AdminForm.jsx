@@ -1,54 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button, Box, Typography, OutlinedInput, Select, MenuItem, FormHelperText, IconButton, InputAdornment } from '@mui/material';
+import { Button, Box, Typography, OutlinedInput, FormHelperText, InputAdornment, IconButton } from '@mui/material';
 import { Modal } from '../ui/Modal';
 import { Eye, EyeOff } from 'lucide-react';
 
-const studentSchema = z.object({
+const adminSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
-  batch: z.string().min(1, "Batch is required"),
-  status: z.string().min(1, "Status is required"),
-  password: z.string().min(8, "Password must be at least 8 characters").optional().or(z.literal('')),
+  phone: z.string().min(1, "Phone is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  profileImage: z.string().url("Must be a valid URL").optional().or(z.literal('')),
 });
 
-export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batchOptions = [] }) => {
-  const isEditing = !!initialData;
-
+export const AdminForm = ({ open, onClose, onSubmit }) => {
   const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(studentSchema),
-    defaultValues: initialData || {
+    resolver: zodResolver(adminSchema),
+    defaultValues: {
       name: '',
       email: '',
-      batch: '',
-      status: 'active',
+      phone: '',
       password: '',
+      profileImage: '',
     },
   });
 
-  const [showPassword, setShowPassword] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
+  const handleMouseDownPassword = (event) => event.preventDefault();
 
   React.useEffect(() => {
     if (open) {
-      reset(initialData || {
-        name: '', email: '', batch: '', status: 'active', password: '',
+      reset({
+        name: '',
+        email: '',
+        phone: '',
+        password: '',
+        profileImage: '',
       });
+      setShowPassword(false);
     }
-  }, [open, initialData, reset]);
+  }, [open, reset]);
 
   const onFormSubmit = async (data) => {
-    const { password, ...rest } = data;
-    const payload = { ...rest };
-    if (password) {
-      payload.password = password;
-    }
-    await onSubmit(payload);
+    await onSubmit(data);
     onClose();
   };
 
@@ -88,7 +84,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
           },
         }}
       >
-        {isSubmitting ? 'Saving...' : 'Save Student'}
+        {isSubmitting ? 'Creating...' : 'Create Admin'}
       </Button>
     </>
   );
@@ -113,121 +109,78 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
   const inputStyles = {
     borderRadius: '8px',
     bgcolor: '#FFFFFF',
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#E2E8F0',
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#CBD5E1',
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#2D69EB',
-      borderWidth: '1px',
-    },
-    '& .MuiOutlinedInput-input': {
-      fontSize: '14px',
-      color: '#0A0A0A',
-    }
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2D69EB', borderWidth: '1px' },
+    '& .MuiOutlinedInput-input': { fontSize: '14px', color: '#0A0A0A' }
   };
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={isEditing ? "Edit Student" : "Add New Student"}
+      title="Create New Admin"
       actions={actions}
       hideDividers
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <Box sx={{ mb: 3 }}>
           <Typography sx={{ fontSize: '14px', color: '#828283' }}>
-            Enroll a new student into the bootcamp roster with explicit batch setup.
+            Add a new admin to the LMS platform. (Stored locally for now).
           </Typography>
         </Box>
         
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2.5 }}>
-          <Box sx={{ gridColumn: '1 / -1' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2.5 }}>
+          <Box>
             <Label>Full Name</Label>
             <Controller
               name="name"
               control={control}
               render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  fullWidth
-                  placeholder="e.g. Maya Lin"
-                  error={!!errors.name}
-                  sx={inputStyles}
-                />
+                <OutlinedInput {...field} fullWidth placeholder="e.g. John Doe" error={!!errors.name} sx={inputStyles} />
               )}
             />
             {errors.name && <FormHelperText error sx={{ ml: 0.5 }}>{errors.name.message}</FormHelperText>}
           </Box>
 
-          <Box sx={{ gridColumn: '1 / -1' }}>
+          <Box>
             <Label>Email Address</Label>
             <Controller
               name="email"
               control={control}
               render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  type="email"
-                  fullWidth
-                  placeholder="maya.lin@student.dev"
-                  error={!!errors.email}
-                  sx={inputStyles}
-                />
+                <OutlinedInput {...field} type="email" fullWidth placeholder="admin@saylani.org" error={!!errors.email} sx={inputStyles} />
               )}
             />
             {errors.email && <FormHelperText error sx={{ ml: 0.5 }}>{errors.email.message}</FormHelperText>}
           </Box>
 
           <Box>
-            <Label>Batch</Label>
+            <Label>Phone Number</Label>
             <Controller
-              name="batch"
+              name="phone"
               control={control}
               render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  displayEmpty
-                  error={!!errors.batch}
-                  sx={inputStyles}
-                >
-                  <MenuItem value="" disabled sx={{ color: '#828283', fontSize: '14px' }}>Select Batch</MenuItem>
-                  {batchOptions.map((b) => (
-                    <MenuItem key={b} value={b} sx={{ fontSize: '14px' }}>{b}</MenuItem>
-                  ))}
-                  {batchOptions.length === 0 && <MenuItem value="Batch 12 - Web Dev" sx={{ fontSize: '14px' }}>Batch 12 - Web Dev</MenuItem>}
-                </Select>
+                <OutlinedInput {...field} fullWidth placeholder="e.g. 0300 1234567" error={!!errors.phone} sx={inputStyles} />
               )}
             />
-            {errors.batch && <FormHelperText error sx={{ ml: 0.5 }}>{errors.batch.message}</FormHelperText>}
+            {errors.phone && <FormHelperText error sx={{ ml: 0.5 }}>{errors.phone.message}</FormHelperText>}
+          </Box>
+          
+          <Box>
+            <Label>Profile Picture URL</Label>
+            <Controller
+              name="profileImage"
+              control={control}
+              render={({ field }) => (
+                <OutlinedInput {...field} fullWidth placeholder="https://example.com/image.png" error={!!errors.profileImage} sx={inputStyles} />
+              )}
+            />
+            {errors.profileImage && <FormHelperText error sx={{ ml: 0.5 }}>{errors.profileImage.message}</FormHelperText>}
           </Box>
 
           <Box>
-            <Label>Status</Label>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  error={!!errors.status}
-                  sx={inputStyles}
-                >
-                  <MenuItem value="active" sx={{ fontSize: '14px' }}>Active</MenuItem>
-                  <MenuItem value="inactive" sx={{ fontSize: '14px' }}>Inactive</MenuItem>
-                </Select>
-              )}
-            />
-            {errors.status && <FormHelperText error sx={{ ml: 0.5 }}>{errors.status.message}</FormHelperText>}
-          </Box>
-
-          <Box sx={{ gridColumn: '1 / -1' }}>
-            <Label>{isEditing ? 'Update Password' : 'Initial Password'}</Label>
+            <Label>Password</Label>
             <Controller
               name="password"
               control={control}
@@ -236,13 +189,12 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
                   {...field}
                   type={showPassword ? 'text' : 'password'}
                   fullWidth
-                  placeholder={isEditing ? "Leave blank to keep current" : "Min. 8 characters"}
+                  placeholder="Min. 8 characters"
                   error={!!errors.password}
                   sx={inputStyles}
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label="toggle password visibility"
                         onClick={handleClickShowPassword}
                         onMouseDown={handleMouseDownPassword}
                         edge="end"
