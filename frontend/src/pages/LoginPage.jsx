@@ -42,7 +42,7 @@ export default function LoginPage() {
 
     setSubmitting(true)
     try {
-      const user = await login(email.trim(), password)
+      const user = await login(email.trim(), password, isStudent ? 'student' : 'admin')
       goHome(user)
     } catch (err) {
       const status = err.response?.status
