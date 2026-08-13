@@ -34,6 +34,7 @@ export default function StudentProfilePage() {
   // Fallback data since backend doesn't store all these fields yet
   const student = profile || {};
   const name = student.name || 'Student Name';
+  const rollNo = student.rollNo || 'Not provided';
   const email = student.email || 'student@example.com';
   const batch = student.batch || 'Batch Not Assigned';
   const phone = student.phone || 'Not provided';
@@ -152,6 +153,10 @@ export default function StudentProfilePage() {
           </Box>
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
+            <Box>
+              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Roll No</Typography>
+              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500, textTransform: 'uppercase' }}>{rollNo}</Typography>
+            </Box>
             <Box>
               <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Gender</Typography>
               <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{gender}</Typography>

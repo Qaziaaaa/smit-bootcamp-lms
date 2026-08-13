@@ -118,6 +118,10 @@ export default function StudentDetailPage() {
 
             <Box sx={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box>
+                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Roll No</Typography>
+                <Typography variant="body2" sx={{ textTransform: 'uppercase' }}>{student.rollNo || '—'}</Typography>
+              </Box>
+              <Box>
                 <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Phone</Typography>
                 <Typography variant="body2">{student.phone || '—'}</Typography>
               </Box>

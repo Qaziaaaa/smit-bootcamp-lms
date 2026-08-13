@@ -7,7 +7,7 @@ import env from '../config/env.js';
 import ApiError from '../utils/ApiError.js';
 
 const createStudent = async (data) => {
-  const { name, email, password, phone, batch, teamId } = data;
+  const { name, email, password, phone, batch, teamId, rollNo } = data;
 
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
@@ -17,6 +17,13 @@ const createStudent = async (data) => {
   const existingStudent = await Student.findOne({ email: email.toLowerCase() });
   if (existingStudent) {
     throw new ApiError(409, 'Email already exists.', ['A student with this email already exists.']);
+  }
+
+  if (rollNo) {
+    const existingRoll = await Student.findOne({ rollNo });
+    if (existingRoll) {
+      throw new ApiError(409, 'Roll No already exists.', ['A student with this Roll No already exists.']);
+    }
   }
 
   const passwordHash = await bcrypt.hash(password, env.bcryptRounds);
@@ -34,6 +41,7 @@ const createStudent = async (data) => {
           name,
           email: email.toLowerCase(),
           phone,
+          rollNo,
           batch,
           teamId,
         },
@@ -64,6 +72,7 @@ const getStudents = async (filters = {}, pagination = {}) => {
       { name: { $regex: escaped, $options: 'i' } },
       { email: { $regex: escaped, $options: 'i' } },
       { batch: { $regex: escaped, $options: 'i' } },
+      { rollNo: { $regex: escaped, $options: 'i' } },
     ];
   }
 
@@ -111,7 +120,7 @@ const getStudentById = async (id) => {
 };
 
 const updateStudent = async (id, data) => {
-  const { email, ...rest } = data;
+  const { email, rollNo, ...rest } = data;
   const student = await Student.findById(id);
   if (!student) {
     throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
@@ -135,9 +144,19 @@ const updateStudent = async (id, data) => {
     }
   }
 
+  if (rollNo) {
+    const existingRoll = await Student.findOne({
+      rollNo,
+      _id: { $ne: id },
+    });
+    if (existingRoll) {
+      throw new ApiError(409, 'Roll No already exists.', ['A student with this Roll No already exists.']);
+    }
+  }
+
   const updated = await Student.findByIdAndUpdate(
     id,
-    { ...rest, ...(email && { email: email.toLowerCase() }) },
+    { ...rest, ...(email && { email: email.toLowerCase() }), ...(rollNo && { rollNo }) },
     { new: true, runValidators: true }
   ).populate('teamId', 'name');
 

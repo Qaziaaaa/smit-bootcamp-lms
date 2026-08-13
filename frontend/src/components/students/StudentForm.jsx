@@ -9,6 +9,7 @@ import { Eye, EyeOff } from 'lucide-react';
 const studentSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
+  rollNo: z.string().min(1, "Roll No is required"),
   batch: z.string().min(1, "Batch is required"),
   status: z.string().min(1, "Status is required"),
   password: z.string().min(8, "Password must be at least 8 characters").optional().or(z.literal('')),
@@ -22,6 +23,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
     defaultValues: initialData || {
       name: '',
       email: '',
+      rollNo: '',
       batch: '',
       status: 'active',
       password: '',
@@ -37,7 +39,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
   React.useEffect(() => {
     if (open) {
       reset(initialData || {
-        name: '', email: '', batch: '', status: 'active', password: '',
+        name: '', email: '', rollNo: '', batch: '', status: 'active', password: '',
       });
     }
   }, [open, initialData, reset]);
@@ -163,7 +165,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
             {errors.name && <FormHelperText error sx={{ ml: 0.5 }}>{errors.name.message}</FormHelperText>}
           </Box>
 
-          <Box sx={{ gridColumn: '1 / -1' }}>
+          <Box>
             <Label>Email Address</Label>
             <Controller
               name="email"
@@ -180,6 +182,24 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
               )}
             />
             {errors.email && <FormHelperText error sx={{ ml: 0.5 }}>{errors.email.message}</FormHelperText>}
+          </Box>
+
+          <Box>
+            <Label>Roll No</Label>
+            <Controller
+              name="rollNo"
+              control={control}
+              render={({ field }) => (
+                <OutlinedInput
+                  {...field}
+                  fullWidth
+                  placeholder="e.g. WMA-12345"
+                  error={!!errors.rollNo}
+                  sx={inputStyles}
+                />
+              )}
+            />
+            {errors.rollNo && <FormHelperText error sx={{ ml: 0.5 }}>{errors.rollNo.message}</FormHelperText>}
           </Box>
 
           <Box>

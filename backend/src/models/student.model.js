@@ -23,6 +23,12 @@ const studentSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    rollNo: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     batch: {
       type: String,
       index: true,

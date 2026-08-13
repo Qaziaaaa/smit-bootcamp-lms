@@ -81,6 +81,11 @@ export default function StudentsPage() {
       ),
     },
     {
+      accessorKey: 'rollNo',
+      header: 'ROLL NO',
+      cell: ({ getValue }) => <Typography sx={{ fontWeight: 600, color: '#0F172A', fontSize: '13px', textTransform: 'uppercase' }}>{getValue() || '—'}</Typography>,
+    },
+    {
       accessorKey: 'batch',
       header: 'BATCH',
       cell: ({ getValue }) => <Typography sx={{ fontWeight: 600, color: '#0F172A', fontSize: '13px' }}>{getValue() || '—'}</Typography>,
