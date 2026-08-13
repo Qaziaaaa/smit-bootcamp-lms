@@ -46,7 +46,6 @@ export async function getStudentProjects() {
     throw error
   }
 }
-
 // Fetches the tasks assigned to the logged-in student
 export async function getStudentTasks() {
   const response = await apiClient.get('/student/tasks')

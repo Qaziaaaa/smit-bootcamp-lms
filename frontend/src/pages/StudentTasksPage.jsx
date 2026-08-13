@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Box, Button, Paper, Typography } from '@mui/material'
-import { CheckCircle2, CheckSquare, Play, Send } from 'lucide-react'
+import { CheckCircle2, CheckSquare, Play } from 'lucide-react'
 import { getStudentTasks, updateTaskProgress } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
 
@@ -8,7 +8,6 @@ import { EmptyState, ErrorState } from '../components/ui/StateComponents'
 const TASK_STYLE = {
   pending: { label: 'Pending', color: '#92400E', bg: '#FEF3C7' },
   'in-progress': { label: 'In Progress', color: '#1E40AF', bg: '#DBEAFE' },
-  'review_requested': { label: 'In Review', color: '#6B21A8', bg: '#F3E8FF' },
   completed: { label: 'Completed', color: '#166534', bg: '#DCFCE7' },
 }
 
@@ -128,8 +127,8 @@ export default function StudentTasksPage() {
 
   // Derived task counts by status for the summary cards
   const completedCount = tasks.filter((task) => task.status === 'completed').length
-  const inReviewCount = tasks.filter((task) => task.status === 'review_requested').length
-  const inProgressCount = tasks.filter((task) => task.status === 'in-progress' || task.status === 'pending').length
+  const inProgressCount = tasks.filter((task) => task.status === 'in-progress').length
+  const pendingCount = tasks.filter((task) => task.status === 'pending').length
 
   return (
     <Box sx={{ display: 'grid', gap: 3 }}>
@@ -143,18 +142,18 @@ export default function StudentTasksPage() {
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' } }}>
         <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff' }}>
           <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-            In Progress
+            Pending
           </Typography>
-          <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#1E40AF', fontVariantNumeric: 'tabular-nums' }}>
-            {inProgressCount}
+          <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#92400E', fontVariantNumeric: 'tabular-nums' }}>
+            {pendingCount}
           </Typography>
         </Paper>
         <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff' }}>
           <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-            In Review
+            In Progress
           </Typography>
-          <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#6B21A8', fontVariantNumeric: 'tabular-nums' }}>
-            {inReviewCount}
+          <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#1E40AF', fontVariantNumeric: 'tabular-nums' }}>
+            {inProgressCount}
           </Typography>
         </Paper>
         <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff' }}>
@@ -213,17 +212,38 @@ export default function StudentTasksPage() {
                   <Typography sx={{ fontSize: 11, color: '#828283' }}>Deadline: {formatDate(task.deadline)}</Typography>
                 </Box>
               </Box>
-              {/* Progress actions hidden once the task is completed or in review */}
-              {!['completed', 'review_requested'].includes(task.status) && (
+              {/* Progress actions hidden once the task is completed */}
+              {task.status !== 'completed' && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                  {/* Start Work: moves a pending task to in-progress */}
+                  {task.status === 'pending' && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Play size={14} />}
+                      disabled={updatingId === task._id}
+                      onClick={() => handleUpdateStatus(task, 'in-progress')}
+                      sx={{
+                        fontSize: 12,
+                        minHeight: 32,
+                        px: 1.5,
+                        color: '#2D69EB',
+                        borderColor: '#2D69EB',
+                        '&:hover': { bgcolor: '#F4F9FF', borderColor: '#2D69EB' },
+                      }}
+                    >
+                      Start Work
+                    </Button>
+                  )}
+                  {/* Mark Completed: finishes the task */}
                   <Button
                     size="small"
-                    startIcon={<Send size={14} />}
+                    startIcon={<CheckCircle2 size={14} />}
                     disabled={updatingId === task._id}
-                    onClick={() => handleUpdateStatus(task, 'review_requested')}
-                    sx={{ fontSize: 12, minHeight: 32, px: 1.5, bgcolor: '#2D69EB', color: '#ffffff', '&:hover': { bgcolor: '#1E40AF' } }}
+                    onClick={() => handleUpdateStatus(task, 'completed')}
+                    sx={{ fontSize: 12, minHeight: 32, px: 1.5, bgcolor: '#22C55E', color: '#ffffff', '&:hover': { bgcolor: '#16A34A' } }}
                   >
-                    Submit for Review
+                    Mark Completed
                   </Button>
                 </Box>
               )}

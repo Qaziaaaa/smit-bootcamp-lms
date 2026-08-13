@@ -2,8 +2,9 @@ import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button, Box, Typography, OutlinedInput, Select, MenuItem, FormHelperText } from '@mui/material';
+import { Button, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Modal } from '../ui/Modal';
+import { FormField } from '../ui/FormField';
 
 const taskSchema = z.object({
   title: z.string().min(2, 'Title is required'),
@@ -11,7 +12,7 @@ const taskSchema = z.object({
   projectId: z.string().min(1, 'Project is required'),
   assignedTo: z.string().optional(),
   priority: z.enum(['low', 'medium', 'high']).default('medium'),
-  status: z.enum(['pending', 'in-progress', 'review_requested', 'completed']).default('in-progress'),
+  status: z.enum(['pending', 'in-progress', 'completed']).default('pending'),
   deadline: z.string().optional(),
 });
 
@@ -24,37 +25,8 @@ const PRIORITY_OPTIONS = [
 const STATUS_OPTIONS = [
   { label: 'Pending', value: 'pending' },
   { label: 'In Progress', value: 'in-progress' },
-  { label: 'Review Requested', value: 'review_requested' },
   { label: 'Completed', value: 'completed' },
 ];
-
-const Label = ({ children }) => (
-  <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#828283', textTransform: 'uppercase', mb: 0.5 }}>
-    {children}
-  </Typography>
-);
-
-const inputStyles = {
-  borderRadius: '8px',
-  bgcolor: '#FFFFFF',
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#E2E8F0',
-  },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#CBD5E1',
-  },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#2D69EB',
-    borderWidth: '1px',
-  },
-  '& .MuiOutlinedInput-input': {
-    fontSize: '14px',
-    color: '#0A0A0A',
-  },
-  '&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#E2E8F0',
-  }
-};
 
 function toFormValue(initialData) {
   if (!initialData) return null;
@@ -77,7 +49,7 @@ export const TaskForm = ({
 }) => {
   const isEditing = !!initialData;
 
-  const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
+  const { control, handleSubmit, reset, formState: { isSubmitting } } = useForm({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: '',
@@ -85,7 +57,7 @@ export const TaskForm = ({
       projectId: lockedProjectId || '',
       assignedTo: '',
       priority: 'medium',
-      status: 'in-progress',
+      status: 'pending',
       deadline: '',
     },
   });
@@ -99,7 +71,7 @@ export const TaskForm = ({
           projectId: lockedProjectId || '',
           assignedTo: '',
           priority: 'medium',
-          status: 'in-progress',
+          status: 'pending',
           deadline: '',
         }
       );
@@ -128,7 +100,7 @@ export const TaskForm = ({
         disabled={isSubmitting}
         disableElevation
       >
-        {isSubmitting ? 'Saving...' : 'Save Task'}
+        {isSubmitting ? 'Saving...' : 'Save'}
       </Button>
     </>
   );
@@ -139,161 +111,96 @@ export const TaskForm = ({
       onClose={onClose}
       title={isEditing ? 'Edit Task' : 'Add Task'}
       actions={actions}
-      hideDividers
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <Box sx={{ mb: 3 }}>
-          <Typography sx={{ fontSize: '14px', color: '#828283' }}>
-            Assign a new task to a student and track its completion.
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2.5 }}>
-          <Box sx={{ gridColumn: '1 / -1' }}>
-            <Label>Task Title *</Label>
-            <Controller
-              name="title"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  fullWidth
-                  placeholder="e.g. Implement Login Page"
-                  error={!!errors.title}
-                  sx={inputStyles}
-                />
-              )}
-            />
-            {errors.title && <FormHelperText error sx={{ ml: 0.5 }}>{errors.title.message}</FormHelperText>}
-          </Box>
-
-          <Box sx={{ gridColumn: '1 / -1' }}>
-            <Label>Description</Label>
-            <Controller
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <FormField name="title" control={control} label="Task Title *" />
+          </Grid>
+          <Grid item xs={12}>
+            <FormField
               name="description"
               control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  fullWidth
-                  multiline
-                  rows={3}
-                  placeholder="Detailed task description..."
-                  error={!!errors.description}
-                  sx={inputStyles}
-                />
-              )}
+              label="Description"
+              multiline
+              rows={3}
             />
-            {errors.description && <FormHelperText error sx={{ ml: 0.5 }}>{errors.description.message}</FormHelperText>}
-          </Box>
+          </Grid>
 
-          <Box>
-            <Label>Project *</Label>
+          <Grid item xs={12} sm={6}>
             <Controller
               name="projectId"
               control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  displayEmpty
-                  disabled={!!lockedProjectId}
-                  error={!!errors.projectId}
-                  sx={inputStyles}
-                >
-                  <MenuItem value="" sx={{ fontSize: '14px', fontStyle: 'italic', color: '#828283' }}>Select project</MenuItem>
-                  {projects.map((p) => (
-                    <MenuItem key={p._id || p.id} value={p._id || p.id} sx={{ fontSize: '14px' }}>{p.title}</MenuItem>
-                  ))}
-                </Select>
+              render={({ field, fieldState: { error } }) => (
+                <FormControl fullWidth size="small" error={!!error} disabled={!!lockedProjectId}>
+                  <InputLabel shrink>Project *</InputLabel>
+                  <Select {...field} label="Project *" notched displayEmpty>
+                    <MenuItem value=""><em>Select project</em></MenuItem>
+                    {projects.map((p) => (
+                      <MenuItem key={p._id || p.id} value={p._id || p.id}>{p.title}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               )}
             />
-            {errors.projectId && <FormHelperText error sx={{ ml: 0.5 }}>{errors.projectId.message}</FormHelperText>}
-          </Box>
+          </Grid>
 
-          <Box>
-            <Label>Assign To (Optional)</Label>
+          <Grid item xs={12} sm={6}>
             <Controller
               name="assignedTo"
               control={control}
               render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  displayEmpty
-                  error={!!errors.assignedTo}
-                  sx={inputStyles}
-                >
-                  <MenuItem value="" sx={{ fontSize: '14px', fontStyle: 'italic', color: '#828283' }}>Unassigned</MenuItem>
-                  {students.map((s) => (
-                    <MenuItem key={s._id || s.id} value={s._id || s.id} sx={{ fontSize: '14px' }}>{s.name}</MenuItem>
-                  ))}
-                </Select>
+                <FormControl fullWidth size="small">
+                  <InputLabel shrink>Assign To (Optional)</InputLabel>
+                  <Select {...field} label="Assign To (Optional)" notched displayEmpty>
+                    <MenuItem value=""><em>Unassigned</em></MenuItem>
+                    {students.map((s) => (
+                      <MenuItem key={s._id || s.id} value={s._id || s.id}>{s.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               )}
             />
-            {errors.assignedTo && <FormHelperText error sx={{ ml: 0.5 }}>{errors.assignedTo.message}</FormHelperText>}
-          </Box>
+          </Grid>
 
-          <Box>
-            <Label>Priority</Label>
+          <Grid item xs={12} sm={6}>
             <Controller
               name="priority"
               control={control}
               render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  error={!!errors.priority}
-                  sx={inputStyles}
-                >
-                  {PRIORITY_OPTIONS.map((o) => (
-                    <MenuItem key={o.value} value={o.value} sx={{ fontSize: '14px' }}>{o.label}</MenuItem>
-                  ))}
-                </Select>
+                <FormControl fullWidth size="small">
+                  <InputLabel shrink>Priority</InputLabel>
+                  <Select {...field} label="Priority" notched>
+                    {PRIORITY_OPTIONS.map((o) => (
+                      <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               )}
             />
-            {errors.priority && <FormHelperText error sx={{ ml: 0.5 }}>{errors.priority.message}</FormHelperText>}
-          </Box>
+          </Grid>
 
-          <Box>
-            <Label>Status</Label>
+          <Grid item xs={12} sm={6}>
             <Controller
               name="status"
               control={control}
               render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  error={!!errors.status}
-                  sx={inputStyles}
-                >
-                  {STATUS_OPTIONS.map((o) => (
-                    <MenuItem key={o.value} value={o.value} sx={{ fontSize: '14px' }}>{o.label}</MenuItem>
-                  ))}
-                </Select>
+                <FormControl fullWidth size="small">
+                  <InputLabel shrink>Status</InputLabel>
+                  <Select {...field} label="Status" notched>
+                    {STATUS_OPTIONS.map((o) => (
+                      <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               )}
             />
-            {errors.status && <FormHelperText error sx={{ ml: 0.5 }}>{errors.status.message}</FormHelperText>}
-          </Box>
+          </Grid>
 
-          <Box>
-            <Label>Deadline (Optional)</Label>
-            <Controller
-              name="deadline"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  type="date"
-                  fullWidth
-                  error={!!errors.deadline}
-                  sx={inputStyles}
-                />
-              )}
-            />
-            {errors.deadline && <FormHelperText error sx={{ ml: 0.5 }}>{errors.deadline.message}</FormHelperText>}
-          </Box>
-        </Box>
+          <Grid item xs={12} sm={6}>
+            <FormField name="deadline" control={control} label="Deadline (Optional)" type="date" />
+          </Grid>
+        </Grid>
       </form>
     </Modal>
   );

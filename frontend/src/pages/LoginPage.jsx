@@ -87,7 +87,7 @@ export default function LoginPage() {
           <img
             src="/logo.png"
             alt="SMIT – Saylani Mass IT Training"
-            style={{ width: 'min(180px, 60vw)', height: 'auto', display: 'inline-block' }}
+            style={{ width: '130px', height: 'auto', display: 'inline-block' }}
           />
           <p style={{
             margin: '6px 0 0',

@@ -125,28 +125,16 @@ export default function StudentTeamPage() {
           >
             <Users size={24} strokeWidth={1.75} />
           </Box>
-          <Box sx={{ minWidth: 0, flex: 1 }}>
+          <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
               Team Name
             </Typography>
             <Typography sx={{ mt: 0.5, fontSize: 20, fontWeight: 600, color: '#0A0A0A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {team.name}
             </Typography>
-
-            <Box sx={{ mt: 2, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-              <Box>
-                <Typography sx={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', color: '#828283' }}>Batch</Typography>
-                <Typography sx={{ fontSize: 14, color: '#0A0A0A', mt: 0.25 }}>{team.batch || '—'}</Typography>
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', color: '#828283' }}>Team Leader</Typography>
-                <Typography sx={{ fontSize: 14, color: '#0A0A0A', mt: 0.25 }}>
-                  {team.leader 
-                    ? (members.find(m => String(m._id) === String(team.leader))?.name || 'Unknown') 
-                    : '—'}
-                </Typography>
-              </Box>
-            </Box>
+            <Typography sx={{ mt: 0.5, fontSize: 12, color: '#828283' }}>
+              {members.length} member{members.length === 1 ? '' : 's'}
+            </Typography>
           </Box>
         </Paper>
 
