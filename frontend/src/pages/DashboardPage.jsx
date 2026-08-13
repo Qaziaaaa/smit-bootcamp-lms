@@ -251,11 +251,12 @@ export default function DashboardPage() {
             />
           </Box>
           <TableContainer sx={{ borderTop: 1, borderColor: 'divider', maxWidth: '100%', width: '100%', overflowX: 'auto', height: 420, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <Table sx={{ minWidth: { xs: 450, md: 560 } }} aria-label="recent attendance table">
+            <Table sx={{ minWidth: { xs: 450, md: 560 }, tableLayout: 'fixed' }} aria-label="recent attendance table">
               <TableHead>
                 <TableRow>
                   <TableCell
                     sx={{
+                      width: '40%',
                       py: 1.5,
                       fontSize: 11,
                       fontWeight: 500,
@@ -268,6 +269,7 @@ export default function DashboardPage() {
                   </TableCell>
                   <TableCell
                     sx={{
+                      width: '14%',
                       py: 1.5,
                       fontSize: 11,
                       fontWeight: 500,
@@ -280,6 +282,7 @@ export default function DashboardPage() {
                   </TableCell>
                   <TableCell
                     sx={{
+                      width: '26%',
                       py: 1.5,
                       fontSize: 11,
                       fontWeight: 500,
@@ -293,6 +296,7 @@ export default function DashboardPage() {
                   <TableCell
                     align="right"
                     sx={{
+                      width: '20%',
                       py: 1.5,
                       fontSize: 11,
                       fontWeight: 500,
