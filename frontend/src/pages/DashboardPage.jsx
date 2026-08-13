@@ -321,11 +321,12 @@ export default function DashboardPage() {
                     <TableRow
                       key={record.studentId ?? record._id}
                       sx={{
+                        height: 56,
                         '&:last-child td, &:last-child th': { border: 0 },
                         '&:hover': { bgcolor: '#F8FAFA' },
                       }}
                     >
-                      <TableCell sx={{ py: 1.25 }}>
+                      <TableCell sx={{ py: 1.25, verticalAlign: 'middle' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
                           <Avatar name={record.studentName} sx={{ width: 32, height: 32, fontSize: 12 }} />
                           <Box sx={{ minWidth: 0 }}>
@@ -338,13 +339,13 @@ export default function DashboardPage() {
                           </Box>
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ py: 1.25 }}>
+                      <TableCell sx={{ py: 1.25, verticalAlign: 'middle' }}>
                         <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{record.batch}</Typography>
                       </TableCell>
-                      <TableCell sx={{ py: 1.25 }}>
+                      <TableCell sx={{ py: 1.25, verticalAlign: 'middle' }}>
                         <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{formatDate(record.date)}</Typography>
                       </TableCell>
-                      <TableCell align="right" sx={{ py: 1.25 }}>
+                      <TableCell align="right" sx={{ py: 1.25, verticalAlign: 'middle' }}>
                         <Typography
                           component="span"
                           sx={{
@@ -355,11 +356,11 @@ export default function DashboardPage() {
                             fontSize: 12,
                             fontWeight: 600,
                             textTransform: 'capitalize',
-                            bgcolor: record.status === 'present' ? '#ECFDF5' : '#FEF2F2',
-                            color: record.status === 'present' ? '#22C55E' : '#DC2626',
+                            bgcolor: record.status === 'present' ? '#ECFDF5' : record.status === 'absent' ? '#FEF2F2' : '#F1F5F9',
+                            color: record.status === 'present' ? '#22C55E' : record.status === 'absent' ? '#DC2626' : '#64748B',
                           }}
                         >
-                          {record.status}
+                          {record.status ?? 'Not Marked'}
                         </Typography>
                       </TableCell>
                     </TableRow>
