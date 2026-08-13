@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 
 import { DataTable } from '../components/ui/DataTable';
 import { SearchBar } from '../components/ui/SearchBar';
-import { FilterBar } from '../components/ui/FilterBar';
 import { Pagination } from '../components/ui/Pagination';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
@@ -236,7 +235,7 @@ export default function StudentsPage() {
           }
         }
       }}>
-        <SearchBar value={search} onChange={setSearch} placeholder="Search student by name or email..." />
+        <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." />
         <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto', flexWrap: 'wrap' }}>
           <FormControl size="small" sx={{ minWidth: 160 }}>
             <Select
