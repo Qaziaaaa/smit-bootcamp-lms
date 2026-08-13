@@ -340,10 +340,14 @@ export default function DashboardPage() {
                         </Box>
                       </TableCell>
                       <TableCell sx={{ py: 1.25, verticalAlign: 'middle' }}>
-                        <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{record.batch}</Typography>
+                        <Typography sx={{ fontSize: 12, color: '#0A0A0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {record.batch}
+                        </Typography>
                       </TableCell>
                       <TableCell sx={{ py: 1.25, verticalAlign: 'middle' }}>
-                        <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{formatDate(record.date)}</Typography>
+                        <Typography sx={{ fontSize: 12, color: '#0A0A0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {formatDate(record.date)}
+                        </Typography>
                       </TableCell>
                       <TableCell align="right" sx={{ py: 1.25, verticalAlign: 'middle' }}>
                         <Typography
