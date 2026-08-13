@@ -12,8 +12,6 @@ const DashboardPage = lazy(() => import('../pages/DashboardPage'))
 const StudentsPage = lazy(() => import('../pages/StudentsPage'))
 const StudentDetailPage = lazy(() => import('../pages/StudentDetailPage'))
 const AttendancePage = lazy(() => import('../pages/AttendancePage'))
-const AdminProfilePage = lazy(() => import('../pages/AdminProfilePage'))
-const SchedulesPage = lazy(() => import('../pages/SchedulesPage'))
 const TeamsPage = lazy(() => import('../pages/TeamsPage'))
 const TeamDetailPage = lazy(() => import('../pages/TeamDetailPage'))
 const ProjectsPage = lazy(() => import('../pages/ProjectsPage'))
@@ -22,9 +20,7 @@ const TasksPage = lazy(() => import('../pages/TasksPage'))
 const StudentDashboardPage = lazy(() => import('../pages/StudentDashboardPage'))
 const StudentAttendancePage = lazy(() => import('../pages/StudentAttendancePage'))
 const StudentTeamPage = lazy(() => import('../pages/StudentTeamPage'))
-const StudentProjectsPage = lazy(() => import('../pages/StudentProjectsPage'))
 const StudentTasksPage = lazy(() => import('../pages/StudentTasksPage'))
-const StudentProfilePage = lazy(() => import('../pages/StudentProfilePage'))
 
 function PageFallback() {
   return (
@@ -58,8 +54,6 @@ export default function AppRoutes() {
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/:id" element={<ProjectDetailPage />} />
           <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/profile" element={<AdminProfilePage />} />
-          <Route path="/schedules" element={<SchedulesPage />} />
         </Route>
 
         <Route
@@ -72,9 +66,7 @@ export default function AppRoutes() {
           <Route path="/student/dashboard" element={<StudentDashboardPage />} />
           <Route path="/student/attendance" element={<StudentAttendancePage />} />
           <Route path="/student/team" element={<StudentTeamPage />} />
-          <Route path="/student/projects" element={<StudentProjectsPage />} />
           <Route path="/student/tasks" element={<StudentTasksPage />} />
-          <Route path="/student/profile" element={<StudentProfilePage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -18,12 +18,6 @@ export async function getStudentTeam() {
   return response.data.data
 }
 
-// Fetches the projects assigned to the logged-in student
-export async function getStudentProjects() {
-  const response = await apiClient.get('/student/projects')
-  return response.data.data
-}
-
 // Fetches the tasks assigned to the logged-in student
 export async function getStudentTasks() {
   const response = await apiClient.get('/student/tasks')

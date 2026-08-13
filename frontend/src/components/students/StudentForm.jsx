@@ -2,74 +2,54 @@ import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Button, Box, Typography, OutlinedInput, Select, MenuItem, FormHelperText, IconButton, InputAdornment } from '@mui/material';
+import { Button, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Modal } from '../ui/Modal';
-import { Eye, EyeOff } from 'lucide-react';
+import { FormField } from '../ui/FormField';
 
 const studentSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone number is required"),
   batch: z.string().min(1, "Batch is required"),
-  status: z.string().min(1, "Status is required"),
+  teamId: z.string().optional(),
   password: z.string().min(8, "Password must be at least 8 characters").optional().or(z.literal('')),
 });
 
-export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batchOptions = [] }) => {
+export const StudentForm = ({ open, onClose, onSubmit, initialData = null, teams = [] }) => {
   const isEditing = !!initialData;
 
-  const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
+  const { control, handleSubmit, reset, formState: { isSubmitting } } = useForm({
     resolver: zodResolver(studentSchema),
     defaultValues: initialData || {
       name: '',
       email: '',
+      phone: '',
       batch: '',
-      status: 'active',
+      teamId: '',
       password: '',
     },
   });
 
-  const [showPassword, setShowPassword] = React.useState(false);
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
-
+  // Reset form when opened with new data
   React.useEffect(() => {
     if (open) {
       reset(initialData || {
-        name: '', email: '', batch: '', status: 'active', password: '',
+        name: '', email: '', phone: '', batch: '', teamId: '', password: '',
       });
     }
   }, [open, initialData, reset]);
 
   const onFormSubmit = async (data) => {
     const { password, ...rest } = data;
-    const payload = { ...rest };
-    if (password) {
-      payload.password = password;
-    }
+    const payload = { ...rest, teamId: rest.teamId || undefined };
+    if (!isEditing) payload.password = password;
     await onSubmit(payload);
     onClose();
   };
 
   const actions = (
     <>
-      <Button 
-        onClick={onClose} 
-        disabled={isSubmitting}
-        variant="outlined"
-        sx={{ 
-          color: '#0A0A0A', 
-          borderColor: '#E2E8F0', 
-          textTransform: 'none', 
-          fontWeight: 600,
-          px: 3,
-          '&:hover': {
-            borderColor: '#CBD5E1',
-            bgcolor: '#F8FAFA'
-          }
-        }}
-      >
+      <Button onClick={onClose} color="inherit" disabled={isSubmitting}>
         Cancel
       </Button>
       <Button
@@ -78,187 +58,56 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
         variant="contained"
         disabled={isSubmitting}
         disableElevation
-        sx={{ 
-          bgcolor: '#2D69EB', 
-          textTransform: 'none',
-          fontWeight: 600,
-          px: 3,
-          '&:hover': { 
-            bgcolor: '#0E3B9A' 
-          },
-        }}
       >
-        {isSubmitting ? 'Saving...' : 'Save Student'}
+        {isSubmitting ? 'Saving...' : 'Save'}
       </Button>
     </>
   );
-
-  const Label = ({ children }) => (
-    <Typography 
-      sx={{ 
-        display: 'block',
-        fontSize: '11px',
-        fontWeight: 600,
-        color: '#828283',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
-        mb: 0.75,
-        ml: 0.25
-      }}
-    >
-      {children}
-    </Typography>
-  );
-
-  const inputStyles = {
-    borderRadius: '8px',
-    bgcolor: '#FFFFFF',
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#E2E8F0',
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#CBD5E1',
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#2D69EB',
-      borderWidth: '1px',
-    },
-    '& .MuiOutlinedInput-input': {
-      fontSize: '14px',
-      color: '#0A0A0A',
-    }
-  };
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={isEditing ? "Edit Student" : "Add New Student"}
+      title={isEditing ? "Edit Student" : "Add Student"}
       actions={actions}
-      hideDividers
     >
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <Box sx={{ mb: 3 }}>
-          <Typography sx={{ fontSize: '14px', color: '#828283' }}>
-            Enroll a new student into the bootcamp roster with explicit batch setup.
-          </Typography>
-        </Box>
-        
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2.5 }}>
-          <Box sx={{ gridColumn: '1 / -1' }}>
-            <Label>Full Name</Label>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <FormField name="name" control={control} label="Full Name" />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormField name="email" control={control} label="Email Address" type="email" />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormField name="phone" control={control} label="Phone Number" />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormField name="batch" control={control} label="Batch" />
+          </Grid>
+          <Grid item xs={12} sm={6}>
             <Controller
-              name="name"
+              name="teamId"
               control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  fullWidth
-                  placeholder="e.g. Maya Lin"
-                  error={!!errors.name}
-                  sx={inputStyles}
-                />
+              render={({ field, fieldState: { error } }) => (
+                <FormControl fullWidth size="small" error={!!error}>
+                  <InputLabel shrink>Team (Optional)</InputLabel>
+                  <Select {...field} label="Team (Optional)" notched displayEmpty>
+                    <MenuItem value=""><em>Unassigned</em></MenuItem>
+                    {teams.map((t) => (
+                      <MenuItem key={t._id || t.id} value={t._id || t.id}>{t.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               )}
             />
-            {errors.name && <FormHelperText error sx={{ ml: 0.5 }}>{errors.name.message}</FormHelperText>}
-          </Box>
-
-          <Box sx={{ gridColumn: '1 / -1' }}>
-            <Label>Email Address</Label>
-            <Controller
-              name="email"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  type="email"
-                  fullWidth
-                  placeholder="maya.lin@student.dev"
-                  error={!!errors.email}
-                  sx={inputStyles}
-                />
-              )}
-            />
-            {errors.email && <FormHelperText error sx={{ ml: 0.5 }}>{errors.email.message}</FormHelperText>}
-          </Box>
-
-          <Box>
-            <Label>Batch</Label>
-            <Controller
-              name="batch"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  displayEmpty
-                  error={!!errors.batch}
-                  sx={inputStyles}
-                >
-                  <MenuItem value="" disabled sx={{ color: '#828283', fontSize: '14px' }}>Select Batch</MenuItem>
-                  {batchOptions.map((b) => (
-                    <MenuItem key={b} value={b} sx={{ fontSize: '14px' }}>{b}</MenuItem>
-                  ))}
-                  {batchOptions.length === 0 && <MenuItem value="Batch 12 - Web Dev" sx={{ fontSize: '14px' }}>Batch 12 - Web Dev</MenuItem>}
-                </Select>
-              )}
-            />
-            {errors.batch && <FormHelperText error sx={{ ml: 0.5 }}>{errors.batch.message}</FormHelperText>}
-          </Box>
-
-          <Box>
-            <Label>Status</Label>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  error={!!errors.status}
-                  sx={inputStyles}
-                >
-                  <MenuItem value="active" sx={{ fontSize: '14px' }}>Active</MenuItem>
-                  <MenuItem value="inactive" sx={{ fontSize: '14px' }}>Inactive</MenuItem>
-                </Select>
-              )}
-            />
-            {errors.status && <FormHelperText error sx={{ ml: 0.5 }}>{errors.status.message}</FormHelperText>}
-          </Box>
-
-          <Box sx={{ gridColumn: '1 / -1' }}>
-            <Label>{isEditing ? 'Update Password' : 'Initial Password'}</Label>
-            <Controller
-              name="password"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  type={showPassword ? 'text' : 'password'}
-                  fullWidth
-                  placeholder={isEditing ? "Leave blank to keep current" : "Min. 8 characters"}
-                  error={!!errors.password}
-                  sx={inputStyles}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                        size="small"
-                        sx={{ color: '#828283' }}
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-              )}
-            />
-            {errors.password && <FormHelperText error sx={{ ml: 0.5 }}>{errors.password.message}</FormHelperText>}
-          </Box>
-        </Box>
+          </Grid>
+          {!isEditing && (
+            <Grid item xs={12} sm={6}>
+              <FormField name="password" control={control} label="Initial Password" type="password" />
+            </Grid>
+          )}
+        </Grid>
       </form>
     </Modal>
   );

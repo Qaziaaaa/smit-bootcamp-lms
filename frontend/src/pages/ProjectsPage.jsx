@@ -13,7 +13,6 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { ProjectForm } from '../components/projects/ProjectForm';
 import { getProjects, createProject, updateProject, deleteProject } from '../services/projectsService';
 import { getTeams } from '../services/teamsService';
-import { getStudents } from '../services/studentsService';
 
 const STATUS_OPTIONS = [
   { label: 'Active', value: 'active' },
@@ -31,7 +30,6 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [teams, setTeams] = useState([]);
-  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -62,10 +60,6 @@ export default function ProjectsPage() {
     getTeams()
       .then((result) => setTeams(result.teams || []))
       .catch(() => setTeams([]));
-      
-    getStudents({ limit: 500 })
-      .then((result) => setStudents(result.students || []))
-      .catch(() => setStudents([]));
   }, []);
 
   const columns = [
@@ -243,7 +237,6 @@ export default function ProjectsPage() {
         onSubmit={handleSave}
         initialData={editingProject}
         teams={teams}
-        students={students}
       />
 
       {/* Delete Confirmation */}

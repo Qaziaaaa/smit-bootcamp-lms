@@ -1,20 +1,14 @@
 export function Logo({ compact = false }) {
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      width: '100%',
-    }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <img
         src="/logo.png"
         alt="SMIT – Saylani Mass IT Training"
         style={{
-          width: compact ? '110px' : '150px',
-          maxWidth: '100%',
-          height: 'auto',
+          height: compact ? '32px' : '40px',
+          width: 'auto',
           objectFit: 'contain',
           flexShrink: 0,
-          display: 'block',
         }}
       />
     </div>
