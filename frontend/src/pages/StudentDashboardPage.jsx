@@ -139,6 +139,17 @@ export default function StudentDashboardPage() {
   const totalDays = summary.totalDays ?? 0
   const percentage = Math.round(summary.percentage ?? 0)
 
+  // Dynamic standing status label & text color (background remains clean/unchanged)
+  let standingText = 'Good Standing'
+  let standingColor = '#22C55E' // Green for >= 75%
+  if (percentage < 50) {
+    standingText = 'Low Attendance'
+    standingColor = '#EF4444' // Red for < 50%
+  } else if (percentage < 75) {
+    standingText = 'Average Standing'
+    standingColor = '#F59E0B' // Orange for 50-74%
+  }
+
   // Derived task counts (active = not yet completed)
   const completedCount = tasks.filter((task) => task.status === 'completed').length
   const activeCount = tasks.length - completedCount
@@ -233,11 +244,10 @@ export default function StudentDashboardPage() {
                   borderRadius: 9999,
                   fontSize: 12,
                   fontWeight: 600,
-                  // bgcolor: '#E8F5E9',
-                  color: '#22C55E',
+                  color: standingColor,
                 }}
               >
-                {percentage}% Good Standing
+                {percentage}% {standingText}
               </Box>
             </Box>
             <Box
