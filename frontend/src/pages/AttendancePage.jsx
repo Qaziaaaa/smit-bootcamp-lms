@@ -244,11 +244,17 @@ export default function AttendancePage() {
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
           <TextField
             type="date"
-            size="small"
             label="Date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: 44,
+                borderRadius: 2,
+                fontSize: '0.9rem',
+              },
+            }}
           />
           {batchOptions.length > 0 && (
             <FilterBar

@@ -3,7 +3,18 @@ import { sendSuccess } from '../utils/response.js';
 import attendanceService from '../services/attendance.service.js';
 
 const markAttendance = asyncHandler(async (req, res) => {
-  const { studentId, date, status } = req.body;
+  const { records, studentId, date, status } = req.body;
+  if (records && Array.isArray(records)) {
+    const formattedRecords = records.map((r) => ({
+      studentId: r.studentId,
+      date: r.date,
+      status: r.status,
+      markedBy: req.user.userId,
+    }));
+    const results = await attendanceService.markAttendanceBulk(formattedRecords);
+    return sendSuccess(res, 200, results, 'Attendance marked successfully');
+  }
+
   const attendance = await attendanceService.markAttendance({
     studentId,
     date,

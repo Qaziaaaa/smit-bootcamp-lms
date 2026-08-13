@@ -60,7 +60,7 @@ const getStudents = async (filters = {}, pagination = {}) => {
 
   if (search) {
     const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    query.name = { $regex: `^${escaped}`, $options: 'i' };
+    query.name = { $regex: `(^|\\s)${escaped}`, $options: 'i' };
   }
 
   if (batch) {
@@ -77,17 +77,23 @@ const getStudents = async (filters = {}, pagination = {}) => {
 
   const skip = (page - 1) * limit;
 
-  const sortStage = search ? { name: 1 } : { createdAt: -1 };
+  let allStudents = await Student.find(query).populate('teamId', 'name').lean();
+  const total = allStudents.length;
 
-  const [students, total] = await Promise.all([
-    Student.find(query)
-      .populate('teamId', 'name')
-      .sort(sortStage)
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    Student.countDocuments(query),
-  ]);
+  if (search) {
+    const q = search.trim().toLowerCase();
+    allStudents.sort((a, b) => {
+      const aStarts = (a.name || '').toLowerCase().startsWith(q);
+      const bStarts = (b.name || '').toLowerCase().startsWith(q);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  } else {
+    allStudents.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  const students = allStudents.slice(skip, skip + limit);
 
   return {
     students,
