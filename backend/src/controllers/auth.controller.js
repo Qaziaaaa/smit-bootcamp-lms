@@ -3,8 +3,8 @@ import { sendSuccess } from '../utils/response.js';
 import authService from '../services/auth.service.js';
 
 const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-  const result = await authService.login(email, password);
+  const { email, password, role } = req.body;
+  const result = await authService.login(email, password, role);
   sendSuccess(res, 200, result, 'Login successful');
 });
 

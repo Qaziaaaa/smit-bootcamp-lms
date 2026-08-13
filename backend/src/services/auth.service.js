@@ -13,7 +13,7 @@ const generateToken = (user) => {
   );
 };
 
-const login = async (email, password) => {
+const login = async (email, password, expectedRole) => {
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user || !user.passwordHash) {
     throw new ApiError(401, 'Invalid credentials.', ['Invalid email or password.']);
@@ -22,6 +22,15 @@ const login = async (email, password) => {
   const isMatch = await bcrypt.compare(password, user.passwordHash);
   if (!isMatch) {
     throw new ApiError(401, 'Invalid credentials.', ['Invalid email or password.']);
+  }
+
+  if (expectedRole && user.role !== expectedRole) {
+    if (expectedRole === 'admin') {
+      throw new ApiError(403, 'Only admin can login with the admin login form or with admin portal.');
+    }
+    if (expectedRole === 'student') {
+      throw new ApiError(403, 'Only student can login with the student login form or with student portal.');
+    }
   }
 
   const token = generateToken(user);
