@@ -191,7 +191,7 @@ export default function StudentsPage() {
         border: '1px solid',
         borderColor: 'divider'
       }}>
-        <SearchBar value={search} onChange={setSearch} placeholder="Search student by name or email..." />
+        <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name..." />
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <FilterBar
             label="All Statuses"

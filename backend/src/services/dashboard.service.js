@@ -30,7 +30,7 @@ const getDashboardStats = async () => {
   ]);
 
   const todayPresent = todayAttendance.filter((a) => a.status === 'present').length;
-  const todayAbsent = todayAttendance.filter((a) => a.status === 'absent').length;
+  const todayAbsent = totalStudents - todayPresent;
 
   const [recentStudents, recentTasks] = await Promise.all([
     Student.find().sort({ createdAt: -1 }).limit(5).lean(),

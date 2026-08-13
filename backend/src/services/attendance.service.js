@@ -24,97 +24,221 @@ const markAttendance = async ({ studentId, date, status, markedBy }) => {
 const getAttendance = async (filters = {}, pagination = {}) => {
   const { date, batch, status, studentId, search } = filters;
   const { page = 1, limit = 10 } = pagination;
+  const skip = (page - 1) * limit;
 
-  let matchStage = {};
-
-  if (studentId) {
-    matchStage.studentId = new Types.ObjectId(studentId);
-  }
-
+  // 1. If a specific date is provided, return all active students with left-joined attendance status for that date.
   if (date) {
-    const attendanceDate = new Date(date);
+    let studentMatch = { status: 'active' };
+
+    if (studentId) {
+      studentMatch._id = new Types.ObjectId(studentId);
+    }
+
+    if (batch) {
+      studentMatch.batch = batch;
+    }
+
+    if (search) {
+      const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      studentMatch.name = { $regex: `^${escaped}`, $options: 'i' };
+    }
+
+    let attendanceDate = new Date(date);
     attendanceDate.setHours(0, 0, 0, 0);
     const nextDay = new Date(attendanceDate);
     nextDay.setDate(nextDay.getDate() + 1);
-    matchStage.date = { $gte: attendanceDate, $lt: nextDay };
+
+    const pipeline = [
+      { $match: studentMatch },
+      {
+        $lookup: {
+          from: 'attendance',
+          let: { studentId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$studentId', '$$studentId'] },
+                    { $gte: ['$date', attendanceDate] },
+                    { $lt: ['$date', nextDay] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'attendanceDoc',
+        },
+      },
+      {
+        $unwind: {
+          path: '$attendanceDoc',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ];
+
+    if (status) {
+      pipeline.push({
+        $match: { 'attendanceDoc.status': status },
+      });
+    }
+
+    const countPipeline = [...pipeline, { $count: 'total' }];
+
+    const summaryPipeline = [
+      { $match: { status: 'active', ...(batch ? { batch } : {}) } },
+      {
+        $lookup: {
+          from: 'attendance',
+          let: { studentId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$studentId', '$$studentId'] },
+                    { $gte: ['$date', attendanceDate] },
+                    { $lt: ['$date', nextDay] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'attendanceDoc',
+        },
+      },
+      {
+        $unwind: {
+          path: '$attendanceDoc',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          present: { $sum: { $cond: [{ $eq: ['$attendanceDoc.status', 'present'] }, 1, 0] } },
+          absent: { $sum: { $cond: [{ $ne: ['$attendanceDoc.status', 'present'] }, 1, 0] } },
+        },
+      },
+    ];
+
+    pipeline.push(
+      { $sort: { name: 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          _id: '$attendanceDoc._id',
+          studentId: '$_id',
+          studentName: '$name',
+          studentEmail: '$email',
+          batch: '$batch',
+          date: { $ifNull: ['$attendanceDoc.date', attendanceDate] },
+          status: { $ifNull: ['$attendanceDoc.status', null] },
+          markedBy: '$attendanceDoc.markedBy',
+          createdAt: '$attendanceDoc.createdAt',
+          updatedAt: '$attendanceDoc.updatedAt',
+        },
+      }
+    );
+
+    const [records, countResult, summaryResult] = await Promise.all([
+      Student.aggregate(pipeline),
+      Student.aggregate(countPipeline),
+      Student.aggregate(summaryPipeline),
+    ]);
+
+    const total = countResult.length > 0 ? countResult[0].total : 0;
+    const summary = summaryResult.length > 0
+      ? { present: summaryResult[0].present, absent: summaryResult[0].absent }
+      : { present: 0, absent: 0 };
+
+    return {
+      records,
+      summary,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / limit) || 1,
+      },
+    };
   }
 
-  if (status) {
-    matchStage.status = status;
-  }
+  // 2. If NO date parameter is passed (e.g., Recent Attendance on Dashboard or global student search), return students with their latest attendance status
+  let studentMatch = { status: 'active' };
 
-  const studentMatch = {};
+  if (studentId) {
+    studentMatch._id = new Types.ObjectId(studentId);
+  }
   if (batch) {
-    studentMatch['student.batch'] = batch;
+    studentMatch.batch = batch;
   }
   if (search) {
-    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    studentMatch.$or = [
-      { 'student.name': { $regex: escaped, $options: 'i' } },
-      { 'student.email': { $regex: escaped, $options: 'i' } },
-    ];
+    const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    studentMatch.name = { $regex: `^${escaped}`, $options: 'i' };
   }
-
-  const skip = (page - 1) * limit;
 
   const pipeline = [
-    { $match: matchStage },
+    { $match: studentMatch },
     {
       $lookup: {
-        from: 'students',
-        localField: 'studentId',
-        foreignField: '_id',
-        as: 'student',
+        from: 'attendance',
+        let: { studentId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$studentId', '$$studentId'] },
+            },
+          },
+          { $sort: { updatedAt: -1, date: -1 } },
+          { $limit: 1 },
+        ],
+        as: 'attendanceDoc',
       },
     },
-    { $unwind: '$student' },
+    {
+      $unwind: {
+        path: '$attendanceDoc',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
   ];
 
-  if (Object.keys(studentMatch).length > 0) {
-    pipeline.push({ $match: studentMatch });
+  if (status) {
+    pipeline.push({
+      $match: { 'attendanceDoc.status': status },
+    });
   }
 
+  const countPipeline = [...pipeline, { $count: 'total' }];
+
+  const sortStage = search ? { name: 1 } : { 'attendanceDoc.updatedAt': -1, name: 1 };
+
   pipeline.push(
-    { $sort: { date: -1 } },
+    { $sort: sortStage },
     { $skip: skip },
     { $limit: limit },
     {
       $project: {
-        studentId: '$student._id',
-        studentName: '$student.name',
-        studentEmail: '$student.email',
-        batch: '$student.batch',
-        date: 1,
-        status: 1,
-        markedBy: 1,
-        createdAt: 1,
-        updatedAt: 1,
+        _id: '$attendanceDoc._id',
+        studentId: '$_id',
+        studentName: '$name',
+        studentEmail: '$email',
+        batch: '$batch',
+        date: '$attendanceDoc.date',
+        status: '$attendanceDoc.status',
+        markedBy: '$attendanceDoc.markedBy',
+        createdAt: '$attendanceDoc.createdAt',
+        updatedAt: '$attendanceDoc.updatedAt',
       },
     }
   );
 
-  const countPipeline = [
-    { $match: matchStage },
-    {
-      $lookup: {
-        from: 'students',
-        localField: 'studentId',
-        foreignField: '_id',
-        as: 'student',
-      },
-    },
-    { $unwind: '$student' },
-  ];
-
-  if (Object.keys(studentMatch).length > 0) {
-    countPipeline.push({ $match: studentMatch });
-  }
-
-  countPipeline.push({ $count: 'total' });
-
   const [records, countResult] = await Promise.all([
-    Attendance.aggregate(pipeline),
-    Attendance.aggregate(countPipeline),
+    Student.aggregate(pipeline),
+    Student.aggregate(countPipeline),
   ]);
 
   const total = countResult.length > 0 ? countResult[0].total : 0;
@@ -125,7 +249,7 @@ const getAttendance = async (filters = {}, pagination = {}) => {
       page: Number(page),
       limit: Number(limit),
       total,
-      pages: Math.ceil(total / limit),
+      pages: Math.ceil(total / limit) || 1,
     },
   };
 };

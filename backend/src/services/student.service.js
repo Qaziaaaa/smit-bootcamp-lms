@@ -59,12 +59,8 @@ const getStudents = async (filters = {}, pagination = {}) => {
   const query = {};
 
   if (search) {
-    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    query.$or = [
-      { name: { $regex: escaped, $options: 'i' } },
-      { email: { $regex: escaped, $options: 'i' } },
-      { batch: { $regex: escaped, $options: 'i' } },
-    ];
+    const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    query.name = { $regex: `^${escaped}`, $options: 'i' };
   }
 
   if (batch) {
@@ -81,10 +77,12 @@ const getStudents = async (filters = {}, pagination = {}) => {
 
   const skip = (page - 1) * limit;
 
+  const sortStage = search ? { name: 1 } : { createdAt: -1 };
+
   const [students, total] = await Promise.all([
     Student.find(query)
       .populate('teamId', 'name')
-      .sort({ createdAt: -1 })
+      .sort(sortStage)
       .skip(skip)
       .limit(limit)
       .lean(),

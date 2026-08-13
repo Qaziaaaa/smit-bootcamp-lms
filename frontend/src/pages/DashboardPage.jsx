@@ -9,6 +9,8 @@ import {
   TableHead,
   TableRow,
   Typography,
+  TextField,
+  InputAdornment,
 } from '@mui/material'
 import {
   ArrowUpRight,
@@ -18,7 +20,9 @@ import {
   Clock,
   Layers,
   Plus,
+  Search,
   Users,
+  UserX,
 } from 'lucide-react'
 import { StatCard } from '../components/ui/StatCard'
 import { Avatar } from '../components/ui/Avatar'
@@ -44,6 +48,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const [dashboard, setDashboard] = useState(null)
   const [recentAttendance, setRecentAttendance] = useState([])
+  const [attendanceSearch, setAttendanceSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isStudentFormOpen, setIsStudentFormOpen] = useState(false)
@@ -70,15 +75,23 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadRecentAttendance = async () => {
       try {
-        const response = await apiClient.get('/attendance', { params: { limit: 5 } })
+        const params = { limit: 10 }
+        if (attendanceSearch && attendanceSearch.trim()) {
+          params.search = attendanceSearch.trim()
+        }
+        const response = await apiClient.get('/attendance', { params })
         setRecentAttendance(response.data?.data?.records ?? [])
       } catch (error) {
         console.error('Recent attendance error:', error)
       }
     }
 
-    loadRecentAttendance()
-  }, [])
+    const handler = setTimeout(() => {
+      loadRecentAttendance()
+    }, 300)
+
+    return () => clearTimeout(handler)
+  }, [attendanceSearch])
 
   const counts = dashboard?.counts ?? {}
   const taskStatus = dashboard?.taskStatus ?? {}
@@ -113,14 +126,14 @@ export default function DashboardPage() {
       iconColor: '#2F2B70',
     },
     {
-      label: 'Pending Tasks',
-      value: taskStatus.pending ?? '0',
-      subtitle: 'Requires Student Review',
-      subtitleColor: '#D97706',
-      icon: CheckSquare,
-      iconBg: '#FFFBEB',
-      iconBorder: 'rgba(217, 119, 6, 0.25)',
-      iconColor: '#D97706',
+      label: 'Absent Students',
+      value: todayAttendance.absent ?? '0',
+      subtitle: 'Absent Today',
+      subtitleColor: '#DC2626',
+      icon: UserX,
+      iconBg: '#FEF2F2',
+      iconBorder: 'rgba(239, 68, 68, 0.25)',
+      iconColor: '#EF4444',
     },
   ]
 
@@ -211,7 +224,7 @@ export default function DashboardPage() {
 
       <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' } }}>
         <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, p: 3 }}>
             <Box>
               <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>
                 Recent Attendance
@@ -220,9 +233,22 @@ export default function DashboardPage() {
                 Latest student attendance records
               </Typography>
             </Box>
-            <Button size="small" color="primary" sx={{ fontSize: 12, gap: 0.5, '&:hover': { backgroundColor: '#F0F5FF' } }}>
-              View All <ArrowUpRight size={14} />
-            </Button>
+            <TextField
+              size="small"
+              placeholder="Search student..."
+              value={attendanceSearch}
+              onChange={(e) => setAttendanceSearch(e.target.value)}
+              sx={{ width: { xs: '100%', sm: 200 } }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search size={16} color="#828283" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
           </Box>
           <TableContainer sx={{ borderTop: 1, borderColor: 'divider', maxWidth: '100%', width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <Table sx={{ minWidth: { xs: 450, md: 560 } }} aria-label="recent attendance table">
@@ -280,53 +306,61 @@ export default function DashboardPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {recentAttendance.map((record) => (
-                  <TableRow
-                    key={record.studentId ?? record._id}
-                    sx={{
-                      '&:last-child td, &:last-child th': { border: 0 },
-                      '&:hover': { bgcolor: '#F8FAFA' },
-                    }}
-                  >
-                    <TableCell sx={{ py: 1.25 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-                        <Avatar name={record.studentName} sx={{ width: 32, height: 32, fontSize: 12 }} />
-                        <Box sx={{ minWidth: 0 }}>
-                          <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }} noWrap>
-                            {record.studentName}
-                          </Typography>
-                          <Typography sx={{ fontSize: 10, color: '#828283' }} noWrap>
-                            {record.studentEmail}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell sx={{ py: 1.25 }}>
-                      <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{record.batch}</Typography>
-                    </TableCell>
-                    <TableCell sx={{ py: 1.25 }}>
-                      <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{formatDate(record.date)}</Typography>
-                    </TableCell>
-                    <TableCell align="right" sx={{ py: 1.25 }}>
-                      <Typography
-                        component="span"
-                        sx={{
-                          display: 'inline-flex',
-                          px: 1.25,
-                          py: 0.25,
-                          borderRadius: 9999,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          textTransform: 'capitalize',
-                          bgcolor: record.status === 'present' ? '#ECFDF5' : '#FEF2F2',
-                          color: record.status === 'present' ? '#22C55E' : '#DC2626',
-                        }}
-                      >
-                        {record.status}
-                      </Typography>
+                {recentAttendance.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} align="center" sx={{ py: 3, color: '#828283', fontSize: 13 }}>
+                      No matching attendance records found
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  recentAttendance.map((record) => (
+                    <TableRow
+                      key={record.studentId ?? record._id}
+                      sx={{
+                        '&:last-child td, &:last-child th': { border: 0 },
+                        '&:hover': { bgcolor: '#F8FAFA' },
+                      }}
+                    >
+                      <TableCell sx={{ py: 1.25 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                          <Avatar name={record.studentName} sx={{ width: 32, height: 32, fontSize: 12 }} />
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }} noWrap>
+                              {record.studentName}
+                            </Typography>
+                            <Typography sx={{ fontSize: 10, color: '#828283' }} noWrap>
+                              {record.studentEmail}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      <TableCell sx={{ py: 1.25 }}>
+                        <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{record.batch}</Typography>
+                      </TableCell>
+                      <TableCell sx={{ py: 1.25 }}>
+                        <Typography sx={{ fontSize: 12, color: '#0A0A0A' }}>{formatDate(record.date)}</Typography>
+                      </TableCell>
+                      <TableCell align="right" sx={{ py: 1.25 }}>
+                        <Typography
+                          component="span"
+                          sx={{
+                            display: 'inline-flex',
+                            px: 1.25,
+                            py: 0.25,
+                            borderRadius: 9999,
+                            fontSize: 12,
+                            fontWeight: 600,
+                            textTransform: 'capitalize',
+                            bgcolor: record.status === 'present' ? '#ECFDF5' : '#FEF2F2',
+                            color: record.status === 'present' ? '#22C55E' : '#DC2626',
+                          }}
+                        >
+                          {record.status}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
