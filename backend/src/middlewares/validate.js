@@ -16,6 +16,7 @@ const handleValidationErrors = (req, res, next) => {
 const validateLogin = [
   body('email').isEmail().withMessage('Valid email is required.').normalizeEmail(),
   body('password').notEmpty().withMessage('Password is required.'),
+  body('role').optional().isIn(['admin', 'student']).withMessage('Invalid role.'),
   handleValidationErrors,
 ];
 
