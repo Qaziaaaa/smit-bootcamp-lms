@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   AppBar,
@@ -12,6 +13,9 @@ import {
   Paper,
   Toolbar,
   Typography,
+  Menu,
+  MenuItem,
+  ButtonBase,
 } from '@mui/material'
 import {
   CalendarCheck,
@@ -22,6 +26,9 @@ import {
   Layers,
   LogOut,
   Users,
+  User as UserIcon,
+  Moon,
+  CalendarClock,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { Logo } from '../components/ui/Logo'
@@ -35,6 +42,7 @@ const NAV_ITEMS = [
   { to: '/teams', label: 'Teams', icon: Layers },
   { to: '/projects', label: 'Projects', icon: FolderGit2 },
   { to: '/tasks', label: 'Tasks', icon: CheckSquare },
+  { to: '/schedules', label: 'Schedules', icon: CalendarClock },
 ]
 
 function isPathActive(pathname, to) {
@@ -52,6 +60,16 @@ function SidebarContent({ pathname, onNavigate }) {
   async function handleLogout() {
     await logout()
     navigate('/login', { replace: true })
+  }
+
+  const [anchorEl, setAnchorEl] = useState(null)
+  const openMenu = Boolean(anchorEl)
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleMenuClose = () => {
+    setAnchorEl(null)
   }
 
   return (
@@ -117,17 +135,20 @@ function SidebarContent({ pathname, onNavigate }) {
       </List>
 
       <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', bgcolor: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
-        <Box
+        <ButtonBase
+          onClick={handleMenuClick}
           sx={{
+            width: '100%',
             p: 1.5,
             borderRadius: 1.5,
             border: 1,
-            borderColor: 'divider',
+            borderColor: openMenu ? '#2D69EB' : 'divider',
             bgcolor: '#ffffff',
             display: 'flex',
             alignItems: 'center',
             gap: 1.25,
-            mb: 1,
+            textAlign: 'left',
+            '&:hover': { bgcolor: '#F8FAFA', borderColor: '#2D69EB' }
           }}
         >
           <Box
@@ -148,30 +169,36 @@ function SidebarContent({ pathname, onNavigate }) {
             {(user?.name || 'A').charAt(0).toUpperCase()}
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#0A0A0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {user?.name || 'Admin'}
             </Typography>
-            <Typography sx={{ fontSize: 10, color: '#828283', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <Typography sx={{ fontSize: 11, color: '#828283', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {user?.email}
             </Typography>
           </Box>
-        </Box>
+        </ButtonBase>
 
-        <ListItemButton
-          onClick={handleLogout}
-          sx={{
-            px: 1.5,
-            minHeight: 36,
-            borderRadius: 1,
-            color: '#474B53',
-            justifyContent: 'center',
-            gap: 0.75,
-            '&:hover': { color: '#DC2626', bgcolor: '#FEF2F2' },
-          }}
+        <Menu
+          anchorEl={anchorEl}
+          open={openMenu}
+          onClose={handleMenuClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          slotProps={{ paper: { sx: { width: 200, mt: -1, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' } } }}
         >
-          <LogOut size={16} strokeWidth={1.8} />
-          <Typography sx={{ fontSize: 14, fontWeight: 500, color: 'inherit' }}>Logout</Typography>
-        </ListItemButton>
+          <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ py: 1.5, gap: 1.5 }}>
+            <UserIcon size={16} color="#474B53" />
+            <Typography sx={{ fontSize: 14, fontWeight: 500, color: '#0A0A0A' }}>Profile</Typography>
+          </MenuItem>
+          <MenuItem onClick={handleMenuClose} sx={{ py: 1.5, gap: 1.5 }}>
+            <Moon size={16} color="#474B53" />
+            <Typography sx={{ fontSize: 14, fontWeight: 500, color: '#0A0A0A' }}>Dark Mode</Typography>
+          </MenuItem>
+          <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }} sx={{ py: 1.5, gap: 1.5, color: '#DC2626' }}>
+            <LogOut size={16} color="currentColor" />
+            <Typography sx={{ fontSize: 14, fontWeight: 500, color: 'inherit' }}>Log out</Typography>
+          </MenuItem>
+        </Menu>
       </Box>
     </Box>
   )

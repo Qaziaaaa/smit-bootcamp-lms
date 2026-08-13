@@ -111,6 +111,10 @@ export default function TeamDetailPage() {
                 <Typography variant="body1" sx={{ fontWeight: 600 }}>{team.name}</Typography>
               </Box>
               <Box>
+                <Typography variant="caption" color="text.secondary">Batch</Typography>
+                <Typography variant="body2">{team.batch || '—'}</Typography>
+              </Box>
+              <Box>
                 <Typography variant="caption" color="text.secondary">Assigned Project</Typography>
                 <Typography variant="body2">{team.project?.title || 'None'}</Typography>
               </Box>
@@ -119,6 +123,14 @@ export default function TeamDetailPage() {
                 <Box sx={{ mt: 0.5 }}>
                   {team.project ? <Badge status={team.project.status} /> : <Typography variant="body2" color="text.secondary">—</Typography>}
                 </Box>
+              </Box>
+              <Box>
+                <Typography variant="caption" color="text.secondary">Team Leader</Typography>
+                <Typography variant="body2">
+                  {team.leader 
+                    ? (team.members.find(m => String(m._id) === String(team.leader))?.name || 'Unknown') 
+                    : '—'}
+                </Typography>
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">Members</Typography>

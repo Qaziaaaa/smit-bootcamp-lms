@@ -16,7 +16,8 @@ export const Modal = ({
   children, 
   actions, 
   maxWidth = 'sm',
-  fullWidth = true
+  fullWidth = true,
+  hideDividers = false
 }) => {
   return (
     <Dialog 
@@ -43,7 +44,7 @@ export const Modal = ({
         )}
       </DialogTitle>
       
-      <DialogContent dividers sx={{ p: 3 }}>
+      <DialogContent dividers={!hideDividers} sx={{ p: 3, pt: hideDividers ? 1 : 3 }}>
         {children}
       </DialogContent>
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
-export const FilterBar = ({ label, value, onChange, options = [], minWidth = 120 }) => {
+export const FilterBar = ({ label, value, onChange, options = [], minWidth = 160 }) => {
   return (
-    <FormControl size="small" sx={{ minWidth }}>
+    <FormControl size="small" sx={{ minWidth, flex: 1 }}>
       <InputLabel>{label}</InputLabel>
       <Select
         value={value || ''}

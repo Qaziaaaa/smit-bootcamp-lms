@@ -7,6 +7,7 @@ const statusColorMap = {
   completed: 'success',
   pending: 'warning',
   'in-progress': 'info',
+  'review_requested': 'secondary',
   absent: 'error',
   'on-hold': 'error',
   inactive: 'default',
@@ -17,7 +18,7 @@ export const Badge = ({ status, label, ...props }) => {
   
   return (
     <Chip 
-      label={label || status} 
+      label={label || (status ? status.replace(/[-_]/g, ' ') : '')} 
       color={color} 
       size="small" 
       sx={{ 
