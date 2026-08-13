@@ -250,7 +250,7 @@ export default function DashboardPage() {
               }}
             />
           </Box>
-          <TableContainer sx={{ borderTop: 1, borderColor: 'divider', maxWidth: '100%', width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <TableContainer sx={{ borderTop: 1, borderColor: 'divider', maxWidth: '100%', width: '100%', overflowX: 'auto', height: 420, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <Table sx={{ minWidth: { xs: 450, md: 560 } }} aria-label="recent attendance table">
               <TableHead>
                 <TableRow>
