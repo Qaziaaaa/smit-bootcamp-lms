@@ -55,9 +55,30 @@ const validateStudentId = [
 ];
 
 const validateAttendanceMark = [
-  body('studentId').isMongoId().withMessage('Valid student ID is required.'),
-  body('date').isISO8601().withMessage('Valid date in YYYY-MM-DD format is required.').toDate(),
-  body('status').isIn(['present', 'absent']).withMessage('Status must be present or absent.'),
+  (req, res, next) => {
+    if (req.body && Array.isArray(req.body.records)) {
+      const { records } = req.body;
+      if (records.length === 0) {
+        return res.status(400).json({ success: false, message: 'Validation failed.', errors: ['records cannot be empty.'] });
+      }
+      for (const r of records) {
+        if (!r.studentId || !mongoose.isValidObjectId(r.studentId)) {
+          return res.status(400).json({ success: false, message: 'Validation failed.', errors: ['Invalid student ID in records.'] });
+        }
+        if (!r.date || isNaN(Date.parse(r.date))) {
+          return res.status(400).json({ success: false, message: 'Validation failed.', errors: ['Valid date in YYYY-MM-DD format is required for each record.'] });
+        }
+        if (!['present', 'absent'].includes(r.status)) {
+          return res.status(400).json({ success: false, message: 'Validation failed.', errors: ['Status must be present or absent.'] });
+        }
+      }
+      return next();
+    }
+    next();
+  },
+  body('studentId').optional().isMongoId().withMessage('Valid student ID is required.'),
+  body('date').optional().isISO8601().withMessage('Valid date in YYYY-MM-DD format is required.').toDate(),
+  body('status').optional().isIn(['present', 'absent']).withMessage('Status must be present or absent.'),
   handleValidationErrors,
 ];
 

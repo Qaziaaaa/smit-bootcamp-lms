@@ -27,7 +27,8 @@ import {
 import { StatCard } from '../components/ui/StatCard'
 import { Avatar } from '../components/ui/Avatar'
 import { StudentForm } from '../components/students/StudentForm'
-import { useEffect, useState } from 'react'
+import { MarkAttendanceModal } from '../components/attendance/MarkAttendanceModal'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDashboard } from '../services/dashboardService'
 import { apiClient } from '../services/apiClient'
@@ -52,46 +53,50 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isStudentFormOpen, setIsStudentFormOpen] = useState(false)
+  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false)
 
-  useEffect(() => {
-    const loadDashboard = async () => {
-      try {
-        setLoading(true)
-
-        const response = await getDashboard()
-
-        setDashboard(response)
-      } catch (error) {
-        console.error('Dashboard API error:', error)
-        setError('Failed to load dashboard data')
-      } finally {
-        setLoading(false)
-      }
+  const loadDashboard = useCallback(async (showLoading = true) => {
+    try {
+      if (showLoading) setLoading(true)
+      const response = await getDashboard()
+      setDashboard(response)
+    } catch (error) {
+      console.error('Dashboard API error:', error)
+      setError('Failed to load dashboard data')
+    } finally {
+      if (showLoading) setLoading(false)
     }
-
-    loadDashboard()
   }, [])
 
-  useEffect(() => {
-    const loadRecentAttendance = async () => {
-      try {
-        const params = { limit: 10 }
-        if (attendanceSearch && attendanceSearch.trim()) {
-          params.search = attendanceSearch.trim()
-        }
-        const response = await apiClient.get('/attendance', { params })
-        setRecentAttendance(response.data?.data?.records ?? [])
-      } catch (error) {
-        console.error('Recent attendance error:', error)
+  const loadRecentAttendance = useCallback(async () => {
+    try {
+      const params = { limit: 10 }
+      if (attendanceSearch && attendanceSearch.trim()) {
+        params.search = attendanceSearch.trim()
       }
+      const response = await apiClient.get('/attendance', { params })
+      setRecentAttendance(response.data?.data?.records ?? [])
+    } catch (error) {
+      console.error('Recent attendance error:', error)
     }
+  }, [attendanceSearch])
 
+  useEffect(() => {
+    loadDashboard()
+  }, [loadDashboard])
+
+  const handleAttendanceSuccess = () => {
+    loadDashboard(false)
+    loadRecentAttendance()
+  }
+
+  useEffect(() => {
     const handler = setTimeout(() => {
       loadRecentAttendance()
     }, 300)
 
     return () => clearTimeout(handler)
-  }, [attendanceSearch])
+  }, [attendanceSearch, loadRecentAttendance])
 
   const counts = dashboard?.counts ?? {}
   const taskStatus = dashboard?.taskStatus ?? {}
@@ -204,7 +209,7 @@ export default function DashboardPage() {
           >
             Add Student
           </Button>
-          <Button variant="outlined" size="small" sx={{ height: 36 }} onClick={() => navigate('/attendance')}>
+          <Button variant="outlined" size="small" sx={{ height: 36 }} onClick={() => setIsAttendanceModalOpen(true)}>
             Mark Attendance
           </Button>
         </Box>
@@ -458,6 +463,12 @@ export default function DashboardPage() {
           toast.success('Student created successfully')
           setIsStudentFormOpen(false)
         }}
+      />
+
+      <MarkAttendanceModal
+        open={isAttendanceModalOpen}
+        onClose={() => setIsAttendanceModalOpen(false)}
+        onSuccess={handleAttendanceSuccess}
       />
     </Box>
   )

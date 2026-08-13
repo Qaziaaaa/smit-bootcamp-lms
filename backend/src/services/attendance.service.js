@@ -21,6 +21,24 @@ const markAttendance = async ({ studentId, date, status, markedBy }) => {
   return attendance;
 };
 
+const markAttendanceBulk = async (records) => {
+  const results = await Promise.all(
+    records.map(async (rec) => {
+      const { studentId, date, status, markedBy } = rec;
+      const attendanceDate = new Date(date);
+      attendanceDate.setHours(0, 0, 0, 0);
+
+      return Attendance.findOneAndUpdate(
+        { studentId, date: attendanceDate },
+        { status, markedBy },
+        { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+      ).populate('studentId', 'name email').populate('markedBy', 'email');
+    })
+  );
+  return results;
+};
+
+
 const getAttendance = async (filters = {}, pagination = {}) => {
   const { date, batch, status, studentId, search } = filters;
   const { page = 1, limit = 10 } = pagination;
@@ -40,7 +58,7 @@ const getAttendance = async (filters = {}, pagination = {}) => {
 
     if (search) {
       const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      studentMatch.name = { $regex: `^${escaped}`, $options: 'i' };
+      studentMatch.name = { $regex: `(^|\\s)${escaped}`, $options: 'i' };
     }
 
     let attendanceDate = new Date(date);
@@ -123,8 +141,25 @@ const getAttendance = async (filters = {}, pagination = {}) => {
       },
     ];
 
+    if (search) {
+      const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      pipeline.push({
+        $addFields: {
+          searchPriority: {
+            $cond: [
+              { $regexMatch: { input: '$name', regex: `^${escaped}`, options: 'i' } },
+              1,
+              2,
+            ],
+          },
+        },
+      });
+    }
+
+    const sortStage = search ? { searchPriority: 1, name: 1 } : { name: 1 };
+
     pipeline.push(
-      { $sort: { name: 1 } },
+      { $sort: sortStage },
       { $skip: skip },
       { $limit: limit },
       {
@@ -177,7 +212,7 @@ const getAttendance = async (filters = {}, pagination = {}) => {
   }
   if (search) {
     const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    studentMatch.name = { $regex: `^${escaped}`, $options: 'i' };
+    studentMatch.name = { $regex: `(^|\\s)${escaped}`, $options: 'i' };
   }
 
   const pipeline = [
@@ -214,7 +249,22 @@ const getAttendance = async (filters = {}, pagination = {}) => {
 
   const countPipeline = [...pipeline, { $count: 'total' }];
 
-  const sortStage = search ? { name: 1 } : { 'attendanceDoc.updatedAt': -1, name: 1 };
+  if (search) {
+    const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    pipeline.push({
+      $addFields: {
+        searchPriority: {
+          $cond: [
+            { $regexMatch: { input: '$name', regex: `^${escaped}`, options: 'i' } },
+            1,
+            2,
+          ],
+        },
+      },
+    });
+  }
+
+  const sortStage = search ? { searchPriority: 1, name: 1 } : { 'attendanceDoc.updatedAt': -1, name: 1 };
 
   pipeline.push(
     { $sort: sortStage },
@@ -341,6 +391,7 @@ const getAttendanceSummary = async (batch) => {
 
 export default {
   markAttendance,
+  markAttendanceBulk,
   getAttendance,
   updateAttendance,
   getAttendanceSummary,

@@ -20,7 +20,6 @@ export const SearchBar = ({ value, onChange, placeholder = "Search...", delay = 
   return (
     <TextField
       variant="outlined"
-      size="small"
       placeholder={placeholder}
       value={localValue}
       onChange={(e) => setLocalValue(e.target.value)}
@@ -33,7 +32,15 @@ export const SearchBar = ({ value, onChange, placeholder = "Search...", delay = 
           ),
         },
       }}
-      sx={{ minWidth: { xs: '100%', sm: '300px' } }}
+      sx={{
+        minWidth: { xs: '100%', sm: '300px' },
+        '& .MuiOutlinedInput-root': {
+          height: 44,
+          borderRadius: '10px',
+          bgcolor: '#FFFFFF',
+          fontSize: '0.9rem',
+        },
+      }}
     />
   );
 };

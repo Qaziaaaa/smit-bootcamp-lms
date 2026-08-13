@@ -260,7 +260,6 @@ export default function AttendancePage() {
         <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto', flexWrap: 'wrap' }}>
           <TextField
             type="date"
-            size="small"
             label="Date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
