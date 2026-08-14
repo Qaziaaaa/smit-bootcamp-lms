@@ -75,7 +75,10 @@ export default function StudentsPage() {
     {
       accessorKey: 'rollNo',
       header: 'ROLL NO',
-      cell: ({ getValue }) => <p className="text-[13px] font-semibold uppercase text-foreground">{getValue() || '—'}</p>,
+      cell: ({ row }) => {
+        const roll = row.original.rollNo || row.original.rollNumber || (row.original._id ? `STU-${String(row.original._id).slice(-4).toUpperCase()}` : '—');
+        return <p className="text-[13px] font-semibold uppercase font-mono text-foreground">{roll}</p>;
+      },
     },
     {
       accessorKey: 'batch',

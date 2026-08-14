@@ -51,6 +51,7 @@ Indexes: `email` (unique).
   userId: ObjectId,       // ref users
   name: String,           // required
   email: String,          // unique, required, indexed
+  rollNo: String,         // unique, required (e.g. 'WM-1002' or computed fallback 'STU-XXXX')
   phone: String,
   batch: String,          // e.g. 'SMIT-Bootcamp-LMS3'
   teamId: ObjectId,       // ref teams (nullable until assigned)
@@ -60,7 +61,7 @@ Indexes: `email` (unique).
 }
 ```
 
-Indexes: `email` (unique), `batch`, `teamId`, `name`.
+Indexes: `email` (unique), `rollNo` (unique), `batch`, `teamId`, `name`.
 
 ### attendance
 

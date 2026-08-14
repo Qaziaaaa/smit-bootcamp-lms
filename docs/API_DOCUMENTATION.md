@@ -42,7 +42,7 @@ Error cases: 400 missing fields, 401 invalid credentials, 401 missing/invalid to
 |---|---|---|---|
 | GET | `/students` | query: `search, batch, teamId, page, limit` | List + search/filter (paginated) |
 | GET | `/students/:id` | – | Get one student with attendance summary |
-| POST | `/students` | `{ name, email, password, phone?, batch?, teamId? }` | Create student (+ auth user) |
+| POST | `/students` | `{ name, email, rollNo?, password, phone?, batch?, teamId? }` | Create student (+ auth user) |
 | PUT | `/students/:id` | any of the above | Update student |
 | DELETE | `/students/:id` | – | Delete student |
 | GET | `/students/:id/attendance` | – | Attendance history + percentage |

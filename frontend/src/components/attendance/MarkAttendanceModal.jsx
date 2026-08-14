@@ -20,6 +20,7 @@ import { toast } from 'react-hot-toast';
 import { toastInfo } from '../../lib/toast';
 
 import { getAttendance, markAttendance } from '../../services/attendanceService';
+import { getStudents } from '../../services/studentService';
 
 function todayStr() {
   const d = new Date();
@@ -40,19 +41,25 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
     setLoading(true);
     setError(null);
     try {
-      const result = await getAttendance({ date: dateVal, limit: 500 });
-      const rawRecords = result?.records || [];
+      const [resAttendance, resStudents] = await Promise.all([
+        getAttendance({ date: dateVal, limit: 500 }),
+        getStudents({ limit: 500 }),
+      ]);
+      const rawRecords = resAttendance?.records || [];
+      const allStudents = resStudents?.students || [];
 
       const formatted = rawRecords.map((r) => {
-        const idStr = String(r.studentId || r._id || '');
-        const shortId = idStr ? `STU-${idStr.slice(-5).toUpperCase()}` : 'STU-0000';
+        const sId = String(r.studentId || r._id || '');
+        const studentObj = allStudents.find((s) => String(s._id || s.id) === sId);
+        const actualRoll = r.rollNo || r.rollNumber || studentObj?.rollNo || studentObj?.rollNumber;
+        const shortId = sId ? `STU-${sId.slice(-4).toUpperCase()}` : 'STU-0000';
 
         return {
           studentId: r.studentId || r._id,
-          name: r.studentName || 'Student',
-          email: r.studentEmail || '',
-          batch: r.batch || 'General',
-          rollNumber: shortId,
+          name: r.studentName || studentObj?.name || 'Student',
+          email: r.studentEmail || studentObj?.email || '',
+          batch: r.batch || studentObj?.batch || 'General',
+          rollNumber: actualRoll || shortId,
           status: r.status || null,
           originalStatus: r.status || null,
         };
@@ -326,13 +333,10 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
                         <p className="truncate text-[13px] font-semibold text-foreground">
                           {student.name}
                         </p>
-                        <span className="inline-flex h-[18px] items-center rounded bg-muted px-1 text-[9.5px] font-semibold text-foreground">
+                        <span className="inline-flex h-[18px] items-center rounded bg-muted px-1 text-[9.5px] font-mono font-semibold text-foreground">
                           {student.rollNumber}
                         </span>
                       </div>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        {student.batch}
-                      </p>
                     </div>
                   </div>
 

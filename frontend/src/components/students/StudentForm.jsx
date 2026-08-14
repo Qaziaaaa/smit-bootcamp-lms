@@ -33,7 +33,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
           ? {
               name: initialData.name || '',
               email: initialData.email || '',
-              rollNo: initialData.rollNo || '',
+              rollNo: initialData.rollNo || initialData.rollNumber || '',
               batch: initialData.batch || '',
               status: initialData.status || 'active',
               password: '',
@@ -108,7 +108,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
             onChange={setField('rollNo')}
             error={errors.rollNo}
             required
-            placeholder="e.g. WMA-12345"
+            placeholder="e.g. 112 or WMA-12345"
           />
           <Select
             label="Batch"

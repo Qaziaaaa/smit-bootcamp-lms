@@ -33,17 +33,13 @@ export default function AttendancePage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [togglingId, setTogglingId] = useState(null);
 
-  const fetchRecords = useCallback(async (isSearchChange = false) => {
-    if (!isSearchChange) {
-      setInitialLoading(true);
-    }
+  const fetchRecords = useCallback(async () => {
+    setInitialLoading(true);
     try {
-      const params = { date: dateFilter, page, limit: 10 };
-      if (batchFilter) params.batch = batchFilter;
-      if (search) params.search = search;
+      const params = { date: dateFilter, page: 1, limit: 500 };
       const result = await getAttendance(params);
       setRecords(result.records || []);
-      setPagination(result.pagination || { page: 1, pages: 1, total: 0 });
+      setPagination(result.pagination || { page: 1, pages: 1, total: (result.records || []).length });
       if (result.summary) {
         setSummary(result.summary);
       } else {
@@ -56,12 +52,11 @@ export default function AttendancePage() {
     } finally {
       setInitialLoading(false);
     }
-  }, [dateFilter, batchFilter, search, page]);
+  }, [dateFilter]);
 
   useEffect(() => {
-    const isSearchChange = Boolean(search);
-    fetchRecords(isSearchChange);
-  }, [dateFilter, batchFilter, search, page, fetchRecords]);
+    fetchRecords();
+  }, [dateFilter, fetchRecords]);
 
   useEffect(() => {
     getStudents({ limit: 500 })
@@ -75,14 +70,30 @@ export default function AttendancePage() {
     .filter((r) => {
       if (search && search.trim()) {
         const q = search.trim().toLowerCase();
-        if (!r.studentName?.toLowerCase().startsWith(q)) {
-          return false;
-        }
+        const studentObj = allStudents.find((s) => String(s._id || s.id) === String(r.studentId || r._id));
+        const roll = (r.rollNo || r.rollNumber || studentObj?.rollNo || studentObj?.rollNumber || ((r.studentId || r._id) ? `STU-${String(r.studentId || r._id).slice(-4).toUpperCase()}` : '')).toLowerCase();
+        const name = (r.studentName || '').toLowerCase();
+        const email = (r.studentEmail || '').toLowerCase();
+        return name.includes(q) || roll.includes(q) || email.includes(q);
       }
       return true;
     })
     .sort((a, b) => {
       if (search && search.trim()) {
+        const q = search.trim().toLowerCase();
+        const getPriority = (item) => {
+          const studentObj = allStudents.find((s) => String(s._id || s.id) === String(item.studentId || item._id));
+          const roll = (item.rollNo || item.rollNumber || studentObj?.rollNo || studentObj?.rollNumber || ((item.studentId || item._id) ? `STU-${String(item.studentId || item._id).slice(-4).toUpperCase()}` : '')).toLowerCase();
+          const name = (item.studentName || '').toLowerCase();
+
+          if (name.startsWith(q) || roll.startsWith(q)) return 1;
+          if (name.includes(q) || roll.includes(q)) return 2;
+          return 3;
+        };
+
+        const pA = getPriority(a);
+        const pB = getPriority(b);
+        if (pA !== pB) return pA - pB;
         return (a.studentName || '').localeCompare(b.studentName || '');
       }
       return 0;
@@ -136,9 +147,14 @@ export default function AttendancePage() {
       ),
     },
     {
-      accessorKey: 'batch',
-      header: 'BATCH',
-      cell: ({ getValue }) => <p className="text-sm text-foreground">{getValue() || '—'}</p>,
+      accessorKey: 'rollNo',
+      header: 'ROLL NO',
+      cell: ({ row }) => {
+        const r = row.original;
+        const studentObj = allStudents.find((s) => String(s._id || s.id) === String(r.studentId || r._id));
+        const roll = r.rollNo || r.rollNumber || studentObj?.rollNo || studentObj?.rollNumber || ((r.studentId || r._id) ? `STU-${String(r.studentId || r._id).slice(-4).toUpperCase()}` : '—');
+        return <p className="text-sm font-semibold font-mono uppercase text-foreground">{roll}</p>;
+      },
     },
     {
       accessorKey: 'date',
@@ -238,7 +254,7 @@ export default function AttendancePage() {
 
       {/* Toolbar */}
       <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
-        <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student..." />
+        <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." />
         <div className="ml-auto flex flex-wrap gap-2">
           <Input
             type="date"
@@ -246,14 +262,6 @@ export default function AttendancePage() {
             onChange={(e) => setDateFilter(e.target.value)}
             className="h-11 w-[160px] max-w-[180px] rounded-md"
           />
-          {batchOptions.length > 0 && (
-            <FilterBar
-              label="Batch"
-              value={batchFilter}
-              onChange={(next) => setBatchFilter(next)}
-              options={batchOptions.map((b) => ({ label: b, value: b }))}
-            />
-          )}
         </div>
       </div>
 
