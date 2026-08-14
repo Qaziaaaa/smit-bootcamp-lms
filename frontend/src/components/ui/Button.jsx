@@ -3,7 +3,7 @@ import { Slot } from '@radix-ui/react-slot'
 import { cn } from '../../lib/utils'
 
 const variantClasses = {
-  default: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
+  default: 'bg-primary text-primary-foreground shadow-sm hover:bg-clr-blue-dark',
   destructive: 'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
   success: 'bg-clr-green text-white shadow-sm hover:opacity-90',
   outline: 'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',

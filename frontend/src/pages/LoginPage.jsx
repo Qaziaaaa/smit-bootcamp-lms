@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '../lib/utils'
 import { useAuth } from '../hooks/useAuth'
-import { Alert, AlertDescription, AlertTitle } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Label } from '../components/ui/Label'
@@ -17,7 +17,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPwd, setShowPwd] = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
-  const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   function goHome(user) {
@@ -29,7 +28,6 @@ export default function LoginPage() {
     setEmail('')
     setPassword('')
     setFieldErrors({})
-    setFormError('')
   }
 
   async function handleSubmit(e) {
@@ -38,7 +36,6 @@ export default function LoginPage() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errs.email = 'Please enter a valid email.'
     if (!password) errs.password = 'Password is required.'
     setFieldErrors(errs)
-    setFormError('')
     if (Object.keys(errs).length) return
 
     setSubmitting(true)
@@ -47,7 +44,7 @@ export default function LoginPage() {
       goHome(user)
     } catch (err) {
       const status = err.response?.status
-      setFormError(status === 401 ? 'Invalid email or password.' : err.response?.data?.message || 'Unable to sign in. Please try again.')
+      toast.error(status === 401 ? 'Invalid email or password.' : err.response?.data?.message || 'Unable to sign in. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -62,7 +59,7 @@ export default function LoginPage() {
           <img
             src="/logo.png"
             alt="SMIT – Saylani Mass IT Training"
-            className="mx-auto inline-block h-auto w-[min(180px,60vw)]"
+            className="mx-auto inline-block h-auto w-[150px]"
           />
           <p className="mt-1.5 text-base font-semibold text-clr-navy">Student Portal</p>
         </div>
@@ -140,13 +137,6 @@ export default function LoginPage() {
               </div>
               {fieldErrors.password && <p className="mt-1 text-xs text-destructive">{fieldErrors.password}</p>}
             </div>
-
-            {formError && (
-              <Alert variant="destructive">
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{formError}</AlertDescription>
-              </Alert>
-            )}
 
             <Button
               type="submit"

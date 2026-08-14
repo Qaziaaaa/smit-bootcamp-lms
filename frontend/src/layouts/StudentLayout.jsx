@@ -70,7 +70,7 @@ function SidebarContent({ pathname, profile, onNavigate }) {
                 'mb-1 flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 active
                   ? 'bg-clr-blue-bg font-semibold text-clr-blue-dark'
-                  : 'font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                  : 'font-medium text-muted-foreground hover:bg-clr-blue-bg hover:text-clr-blue-dark',
               )}
             >
               <item.icon size={20} strokeWidth={1.8} className="shrink-0" />
@@ -83,7 +83,7 @@ function SidebarContent({ pathname, profile, onNavigate }) {
       <div className="shrink-0 border-t bg-muted/40 p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex w-full items-center gap-2 rounded-lg border bg-card p-2.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <button className="flex w-full items-center gap-2 rounded-lg border bg-card p-2.5 text-left transition-colors hover:border-clr-blue/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Avatar name={name} className="h-9 w-9 text-sm" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[13px] font-medium text-foreground">{name}</span>
