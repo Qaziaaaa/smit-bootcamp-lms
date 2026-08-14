@@ -36,7 +36,8 @@ src/
 - Use React Router. Wrap protected pages in an `AuthGuard` / `ProtectedRoute`.
 - Store auth token in `localStorage` (or httpOnly cookie — decided at architecture review).
 - No hardcoded API URLs in components. All API calls go through `src/services/`.
-- Forms: use controlled inputs. Validate on both client and server.
+- Forms: use controlled inputs with a zod schema; validate on both client and server. No React Hook Form.
+- All styling uses the master theme in `frontend/src/index.css` — no hardcoded hex/rgb/hsl colors. UI components come from `components/ui/` (see `UI_RULES.md`).
 - Loading, empty, and error states are mandatory on every data screen.
 - Prefer single responsibility, reusable components (DRY, KISS).
 

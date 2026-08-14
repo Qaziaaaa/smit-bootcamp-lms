@@ -61,7 +61,7 @@ export default function AttendancePage() {
   useEffect(() => {
     const isSearchChange = Boolean(search);
     fetchRecords(isSearchChange);
-  }, [dateFilter, batchFilter, search, page]);
+  }, [dateFilter, batchFilter, search, page, fetchRecords]);
 
   useEffect(() => {
     getStudents({ limit: 500 })

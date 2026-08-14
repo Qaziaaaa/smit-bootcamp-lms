@@ -32,7 +32,7 @@ Single source of truth for frontend UI conventions. Read this before touching an
 
 ## Forms
 
-- Plain React state + a zod schema (see `src/lib/schemas.js`). Validate on submit (and per-field once touched if desired). No RHF.
+- Plain React state + a zod schema (schemas are colocated in each form file, e.g. `studentSchema` in `StudentForm.jsx`). Validate on submit (and per-field once touched if desired). No RHF.
 - Use the kit: `FormField`, `Input`, `Select`, `Checkbox`, `Label`. Error text is `text-xs text-destructive`. Required markers are `<span className="text-destructive">*</span>`.
 - Modal-based forms use `Modal` + `ConfirmDialog` for destructive confirmations.
 - FormField/Select callbacks pass **raw values** (strings / booleans), not events — except plain `Input` `onChange` which passes the event.

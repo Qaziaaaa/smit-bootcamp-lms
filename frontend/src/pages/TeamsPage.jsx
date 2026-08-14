@@ -109,7 +109,7 @@ export default function TeamsPage() {
         members: memberIds,
         leader: fullTeam.leader || '',
       });
-    } catch (error) {
+    } catch {
       toast.error('Failed to load full team details');
     }
   };

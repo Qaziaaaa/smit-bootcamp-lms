@@ -18,7 +18,6 @@ import {
   updateStudent,
   deleteStudent,
 } from '../services/studentsService';
-import { getTeams } from '../services/teamsService';
 
 export default function StudentsPage() {
   const navigate = useNavigate();
@@ -30,7 +29,6 @@ export default function StudentsPage() {
 
   const [students, setStudents] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
-  const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -57,12 +55,6 @@ export default function StudentsPage() {
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
-
-  useEffect(() => {
-    getTeams()
-      .then((result) => setTeams(result.teams || []))
-      .catch(() => setTeams([]));
-  }, []);
 
   const batchOptions = [...new Set(students.map((s) => s.batch).filter(Boolean))];
 

@@ -126,3 +126,17 @@ Legend: ✅ done · ⚠️ partial / not integrated · ❌ not done
 3. **Shahzad (Day 5):** connect his admin module pages (students/attendance/teams/projects/tasks) to real APIs — currently mock data.
 4. **All (Day 5):** loading/empty/error states, form validation wiring, responsive pass, remove unused imports (lint warnings).
 5. **Security fixes (lead + backend):** lock CORS to the frontend origin (`app.js:12`), make `JWT_SECRET` fail closed (`env.js:6`), and confirm a student token cannot reach any admin endpoint (403 test) before Day 5 integration/QA.
+
+---
+
+# Update — Frontend Migration (Aug 14)
+
+All historical blockers above are now **RESOLVED**. The frontend was migrated off MUI and standardized:
+
+- **Stack:** MUI + React Hook Form + dayjs + recharts + framer-motion + react-dropzone + fuse.js **removed**. Replaced by Tailwind CSS v4 + a shadcn-style UI kit (`frontend/src/components/ui/`) built on Radix primitives, Lucide icons, plain React + zod forms, and Sonner toasts.
+- **Deps finalized:** `@tanstack/react-query`, `@reduxjs/toolkit`, `react-redux`, `date-fns` removed — they were only used by dead code (Redux `store/`, `hooks/useStudentPortal.js`, `services/studentPortalService.js`), all deleted.
+- **Build:** `npm run build` ✅ · `npm run lint` ✅ (0 warnings, exit 0) · no `@mui` references remain anywhere.
+- **Dead code removed:** legacy `Login/`, `Student{Attendance,Dashboard,Profile,Tasks,Team}/` page folders and top-level `StatCard/EmptyState/ErrorState/LoadingState`.
+- **Docs:** `docs/FRONTEND_DESIGN.md` + `docs/Colors.md` replaced by `UI_RULES.md` (single UI-rule source).
+- **Dark mode:** real toggle in the layouts' user menu (`ThemeContext` + `localStorage`).
+- Committed to `dev` (`e3016ad`, plus follow-up cleanup).

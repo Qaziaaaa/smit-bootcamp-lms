@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { useAuth } from '../hooks/useAuth'
-import { useTheme } from '../context/ThemeContext'
+import { useTheme } from '../context/useTheme'
 import { Avatar } from '../components/ui/Avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/DropdownMenu'
 import { Logo } from '../components/ui/Logo'

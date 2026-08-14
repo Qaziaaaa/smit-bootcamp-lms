@@ -8,7 +8,7 @@ import { Avatar } from '../components/ui/Avatar';
 export default function AdminProfilePage() {
   const { user } = useAuth();
   
-  const [admins, setAdmins] = useState([
+  const [admins] = useState([
     {
       id: 'admin-1',
       name: user?.name || 'Admin',

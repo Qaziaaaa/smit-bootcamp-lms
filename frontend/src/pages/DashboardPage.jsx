@@ -19,7 +19,6 @@ import { StudentForm } from '../components/students/StudentForm'
 import { MarkAttendanceModal } from '../components/attendance/MarkAttendanceModal'
 import { cn } from '../lib/utils'
 import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { getDashboard } from '../services/dashboardService'
 import { apiClient } from '../services/apiClient'
 import { toast } from 'sonner'
@@ -36,7 +35,6 @@ function formatDate(date) {
 }
 
 export default function DashboardPage() {
-  const navigate = useNavigate()
   const [dashboard, setDashboard] = useState(null)
   const [recentAttendance, setRecentAttendance] = useState([])
   const [attendanceSearch, setAttendanceSearch] = useState('')
@@ -89,7 +87,6 @@ export default function DashboardPage() {
   }, [attendanceSearch, loadRecentAttendance])
 
   const counts = dashboard?.counts ?? {}
-  const taskStatus = dashboard?.taskStatus ?? {}
   const todayAttendance = dashboard?.todayAttendance ?? {}
 
   const STAT_CARDS = [

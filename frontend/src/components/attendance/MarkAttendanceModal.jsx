@@ -157,7 +157,7 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
 
       try {
         await markAttendance({ records: recordsToSave });
-      } catch (bulkErr) {
+      } catch {
         await Promise.all(
           recordsToSave.map((rec) => markAttendance(rec))
         );

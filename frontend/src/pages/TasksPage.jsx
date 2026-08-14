@@ -139,7 +139,7 @@ export default function TasksPage() {
                   await updateTask(row.original._id, { status: 'completed' });
                   toast.success('Task marked as completed');
                   fetchTasks();
-                } catch (error) {
+                } catch {
                   toast.error('Failed to complete task');
                 }
               }}

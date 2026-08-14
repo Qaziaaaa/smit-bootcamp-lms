@@ -2,6 +2,8 @@
 
 Deadline: **Wed Aug 12**. 6 working days. Every member follows the Git Workflow: work on own branch → commit → push → PR (base `dev`, reviewer: lead) → lead merges.
 
+> **Note (Aug 14):** historical tasks below referenced `FRONTEND_DESIGN.md`, which has been replaced by `UI_RULES.md` at the repo root. All frontend blockers are resolved (see the Aug 14 update in `DAILY_PROGRESS_REPORT.md`).
+
 Each day ends with a 15-minute standup: done / next / blockers.
 
 ---
@@ -53,7 +55,7 @@ Each day ends with a 15-minute standup: done / next / blockers.
   - [x] `Badge`, `Avatar`, `StatCard`
   - [x] `LoadingState`, `EmptyState`, `ErrorState`, `Toast`
 - [x] ✅ PR: shared components
-- **⚠️ BLOCKER:** imports `@tanstack/react-table` (DataTable), `sonner` (Toast), `react-hook-form` + `zod` (FormField) — **not in `package.json` / `node_modules`**. Frontend cannot build until installed.
+- ✅ **Resolved (Aug 14):** deps installed; frontend migrated from MUI to Tailwind v4 + Radix UI kit (`react-hook-form`, `dayjs`, recharts etc. removed). Build + lint clean.
 
 ### Team Lead
 - [ ] Verify every member completed SETUP_GUIDE (running apps)

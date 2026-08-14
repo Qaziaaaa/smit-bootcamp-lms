@@ -80,19 +80,12 @@ A **library** is like a tool you borrow instead of building it yourself. Imagine
 | **react** + **react-dom** | The engine that builds the screen out of small pieces called "components". | The whole frontend is made of React. Each screen (login, dashboard, etc.) is a component. |
 | **react-router-dom** | Lets the user move between pages (like `/login`, `/students`) without refreshing. | Normal websites reload the whole page; a React app just swaps the part that changed. This library manages that. |
 | **axios** | The messenger. Sends requests to the backend and receives answers. | It is easier and more powerful than the built-in `fetch`. It also lets us automatically attach the token and catch errors. |
-| **@reduxjs/toolkit** + **react-redux** | A shared memory box. One place to keep things like "who is logged in right now?" | When two parts of the app need the same info, they read it from this one shared box instead of each keeping their own copy. |
-| **@tanstack/react-query** | Fetches data from the backend and keeps a copy (cache) so it doesn't fetch again and again. | Makes loading data fast, automatic, and clean (loading/error states included). |
 | **@tanstack/react-table** | Builds tables (like the student list) easily with sorting and searching. | Writing tables by hand is long and boring. This tool does it for us. |
-| **@mui/material** (+ **@emotion**) | A box of ready-made beautiful components: buttons, boxes, dialogs, menus. | Instead of styling everything ourselves, we use a professional-looking design system. |
-| **react-hook-form** | Handles forms (login form, add-student form): keeps the values, checks them, submits them. | Forms are painful to write by hand. This makes them fast and simple. |
-| **zod** | Describes what data SHOULD look like (a "shape" of data) and checks it. | Works together with the form library so wrong data is caught before it reaches the backend. |
-| **dayjs** | Makes working with dates easy (like formatting "2026-08-09" nicely). | Dates are confusing in JavaScript. Dayjs is a friendly helper. |
-| **recharts** | Draws charts (like a bar chart of attendance). | A visual graph is easier to read than a list of numbers. |
-| **framer-motion** | Adds smooth animations (things sliding in, fading). | Makes the app feel alive and pretty. |
+| **tailwindcss** (+ **@tailwindcss/vite**) | A CSS toolkit — special classes on the JSX control the look (colors, spacing, sizes). | Fast, consistent styling driven by one master theme (`index.css`), no CSS files per component. |
+| **@radix-ui/\*** (dialog, dropdown-menu, checkbox, label, slot, progress) | Small building blocks for pop-ups, menus, checkboxes and more — accessible by default. | The UI kit in `components/ui/` is built on them so every control behaves correctly. |
+| **zod** | Describes what data SHOULD look like (a "shape" of data) and checks it. | Forms are plain React state + a zod schema, so bad data is caught before it reaches the backend. |
 | **lucide-react** | A set of icons (like a "user" icon, a "search" icon). | Nice icons without drawing them ourselves. |
-| **react-dropzone** | Lets users drag & drop files onto the page. | For future features like uploading files/assignments. |
-| **sonner** | Shows small pop-up notifications (toasts) like "Login successful". | Easy, pretty notifications with one line of code. |
-| **fuse.js** | A smart search that finds results even with small mistakes ("hamza" finds "Hamza"). | Nice-to-have search improvement (fuzzy = not exact matching). |
+| **sonner** | Shows small pop-up notifications (toasts) like "Login successful". | Easy, pretty notifications with one line of code (`toast.success(...)`). |
 | **vite** | The tool that starts the dev server and builds the final website. | It is super fast. It turns all the JSX files into a normal website. |
 | **@vitejs/plugin-react** | A small plug-in that teaches Vite how to understand React's JSX. | Without it Vite wouldn't know what to do with `.jsx` files. |
 
@@ -162,17 +155,17 @@ Saylani-Bootcamp-LMS3/
 │   └── src/                         ← All the real frontend code.
 │       ├── main.jsx                 ← THE START — mounts React into the page.
 │       ├── App.jsx                  ← THE MAP of pages (routes).
-│       ├── components/              ← (empty for now) small UI pieces.
-│       ├── pages/                   ← (empty for now) whole screens.
-│       ├── layouts/                 ← (empty for now) page frames.
-│       ├── routes/                  ← (empty for now) route helpers.
-│       ├── hooks/                   ← (empty for now) reusable React logic.
-│       ├── constants/               ← (empty for now) fixed values.
-│       ├── store/
-│       │   └── index.js             ← The shared memory box (Redux store).
-│       ├── services/
-│       │   └── apiClient.js         ← The messenger that talks to backend.
-│       └── utils/                   ← (empty for now) frontend helper tools.
+│       ├── index.css                ← The master theme (colors, dark mode, fonts).
+│       ├── components/              ← Reusable pieces:
+│       │   ├── ui/                  ← The UI kit (Button, Input, Modal, DataTable, Badge...).
+│       │   └── admin/, projects/, students/, tasks/, attendance/ ← form components.
+│       ├── pages/                   ← Whole screens (LoginPage, StudentsPage, ...).
+│       ├── layouts/                 ← Page frames (AdminLayout, StudentLayout).
+│       ├── routes/                  ← Route helpers (AppRoutes, ProtectedRoute).
+│       ├── hooks/                   ← Reusable React logic (useAuth, useTheme).
+│       ├── context/                 ← React context (AuthContext, ThemeContext).
+│       ├── services/                ← API call helpers (apiClient, studentService...).
+│       └── lib/                     ← Helpers (cn(), zod schemas).
 │
 ├── design/                          ← Mock-up HTML pages (design drafts).
 │   ├── login.html, dashboard.html, students.html, attendance.html,
@@ -181,7 +174,7 @@ Saylani-Bootcamp-LMS3/
 │
 └── docs/                            ← All the written plans and documents.
     ├── PROJECT_PLAN.md, SPRINT_PLAN.md, SRS.md, ARCHITECTURE.md,
-    ├── DATABASE_SCHEMA.md, API_DOCUMENTATION.md, FRONTEND_DESIGN.md,
+    ├── DATABASE_SCHEMA.md, API_DOCUMENTATION.md, UI_RULES.md,
     ├── SETUP_GUIDE.md, GIT_WORKFLOW.md, CODING_STANDARDS.md ...
 ```
 
@@ -899,68 +892,64 @@ VITE_API_URL=http://localhost:5000/api
 
 #### `frontend/src/main.jsx` — THE start of the frontend
 
-```js
-const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } });
-
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <Provider store={store}>
-        <App />
-        <Toaster position="top-right" />
-      </Provider>
-    </QueryClientProvider>
-  </React.StrictMode>
+```jsx
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ThemeProvider>
+    </BrowserRouter>
+  </StrictMode>
 );
 ```
 
 - `createRoot(...).render(...)` = tell React "take over this empty box and draw the app".
 - `<React.StrictMode>` = a development helper that double-checks our code for mistakes.
-- `<QueryClientProvider>` = wraps the app so every component can use `react-query`.
-- `<Provider store={store}>` = wraps the app so every component can use the Redux shared memory box.
-- `<Toaster />` = the pop-up notification machine from `sonner`.
-- `retry: 1` = if a data fetch fails, try once more. `refetchOnWindowFocus: false` = don't reload data just because the tab regained focus.
+- `<BrowserRouter>` = "we are using the browser URL for navigation".
+- `<ThemeProvider>` = turns dark/light mode on (reads `localStorage`, falls back to the OS setting).
+- `<AuthProvider>` = remembers who is logged in (token + user) and shares it with the whole app.
 
-**Why?** This is the "ignition" of the frontend — it connects everything (React, state, data fetching, notifications) and starts the app.
+**Why?** This is the "ignition" of the frontend — it connects routing, auth, and theming, then starts the app.
 
 #### `frontend/src/App.jsx` — The page map
 
 ```jsx
-function Landing() {
-  return (<div style={{ padding: 40, fontFamily: 'sans-serif' }}>
-    <h1>Bootcamp LMS</h1>
-    <p>Project scaffold is running. Refer to docs/FRONTEND_DESIGN.md for page contracts.</p>
-  </div>);
-}
+import AppRoutes from './routes/AppRoutes';
+import { ToastProvider } from './components/ui/Toast';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <>
+      <AppRoutes />
+      <ToastProvider />
+    </>
   );
 }
 ```
 
-- `<BrowserRouter>` = "we are using the browser URL for navigation".
-- `<Routes>` + `<Route path="..." element={...}>` = "when the URL is X, show component Y".
-- `<Navigate to="/" replace />` = unknown URLs go to the home page.
-- JSX = looks like HTML but it's really JavaScript. `{...}` lets us write JavaScript inside the tags.
+- `<AppRoutes />` = the URL → page map (defined in `routes/AppRoutes.jsx`, with `ProtectedRoute` wrapping admin/student pages).
+- `<ToastProvider />` = the pop-up notification machine from `sonner`, styled with our theme tokens.
 
-**Why?** Right now it's a small placeholder. Later, real pages (Login, Students, Attendance...) will be added here as more `<Route>`s.
+**Why?** `App` is the outer shell of the frontend: it renders the correct page for the current URL and shows toasts.
 
-#### `frontend/src/store/index.js` — The shared memory box
+#### `frontend/src/context/` — The memory boxes (React context)
 
-```js
-import { configureStore } from '@reduxjs/toolkit';
-const store = configureStore({ reducer: {} });
-export default store;
+`ThemeContext.jsx` + `theme-context.js` + `useTheme.js` — dark/light mode:
+
+```jsx
+useEffect(() => {
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+  localStorage.setItem('lms-theme', theme);
+}, [theme]);
 ```
 
-- Creates the Redux store. The `reducer: {}` is empty for now — later we will add "slices" (like a `authSlice` to remember who is logged in).
+- Puts a `dark` class on the page when dark mode is on; `index.css` then swaps to its dark color tokens.
+- `useTheme()` gives any component `{ theme, toggleTheme }` (used by the layouts' user menu).
+
+`AuthContext.jsx` — who is logged in: keeps the token + user and exposes `login`, `logout`, and `useAuth()`.
 
 #### `frontend/src/services/apiClient.js` — The messenger
 
