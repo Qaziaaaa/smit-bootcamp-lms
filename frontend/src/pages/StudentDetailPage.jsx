@@ -121,7 +121,7 @@ export default function StudentDetailPage() {
             <div className="flex flex-col gap-2 text-left">
               <div>
                 <p className="text-xs font-semibold uppercase text-muted-foreground">Roll No</p>
-                <p className="text-sm uppercase text-foreground">{student.rollNo || '—'}</p>
+                <p className="text-sm font-semibold uppercase font-mono text-foreground">{student.rollNo || student.rollNumber || (student._id ? `STU-${String(student._id).slice(-4).toUpperCase()}` : '—')}</p>
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase text-muted-foreground">Phone</p>

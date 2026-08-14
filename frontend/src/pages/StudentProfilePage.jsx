@@ -34,7 +34,7 @@ export default function StudentProfilePage() {
   // Fallback data since backend doesn't store all these fields yet
   const student = profile || {};
   const name = student.name || 'Student Name';
-  const rollNo = student.rollNo || 'Not provided';
+  const rollNo = student.rollNo || student.rollNumber || (student._id ? `STU-${String(student._id).slice(-4).toUpperCase()}` : '—');
   const email = student.email || 'student@example.com';
   const batch = student.batch || 'Batch Not Assigned';
   const phone = student.phone || 'Not provided';
@@ -110,7 +110,7 @@ export default function StudentProfilePage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <p className="mb-0.5 text-xs text-muted-foreground">Roll No</p>
-              <p className="text-sm font-medium uppercase text-foreground">{rollNo}</p>
+              <p className="text-sm font-semibold font-mono uppercase text-foreground">{rollNo}</p>
             </div>
             <div>
               <p className="mb-0.5 text-xs text-muted-foreground">Gender</p>

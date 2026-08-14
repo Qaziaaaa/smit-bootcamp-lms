@@ -114,11 +114,12 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null, teams
   const filteredStudents = useMemo(() => {
     if (!studentSearch.trim()) return students;
     const lower = studentSearch.toLowerCase();
-    return students.filter(
-      (s) =>
-        (s.name && s.name.toLowerCase().includes(lower)) ||
-        (s.email && s.email.toLowerCase().includes(lower)),
-    );
+    return students.filter((s) => {
+      const roll = (s.rollNo || s.rollNumber || (s._id || s.id ? `STU-${String(s._id || s.id).slice(-4).toUpperCase()}` : '')).toLowerCase();
+      const name = (s.name || '').toLowerCase();
+      const email = (s.email || '').toLowerCase();
+      return name.includes(lower) || roll.includes(lower) || email.includes(lower);
+    });
   }, [students, studentSearch]);
 
   const studentIds = students.map((s) => s._id || s.id);
@@ -252,17 +253,20 @@ export const ProjectForm = ({ open, onClose, onSubmit, initialData = null, teams
                     {filteredStudents.map((s) => {
                       const id = s._id || s.id;
                       const checked = values.assignedStudents.includes(id);
+                      const roll = s.rollNo || s.rollNumber || (id ? `STU-${String(id).slice(-4).toUpperCase()}` : '');
                       return (
                         <button
                           key={id}
                           type="button"
                           onClick={() => toggleStudent(id)}
-                          className="flex w-full cursor-pointer items-start gap-2 rounded px-1.5 py-1.5 text-left hover:bg-accent"
+                          className="flex w-full cursor-pointer items-center gap-2 rounded px-1.5 py-1.5 text-left hover:bg-accent"
                         >
                           <Checkbox checked={checked} />
-                          <span className="min-w-0">
-                            <span className="block text-sm text-foreground">{s.name}</span>
-                            <span className="block truncate text-xs text-muted-foreground">{s.email}</span>
+                          <span className="min-w-0 flex items-center gap-1.5">
+                            <span className="text-sm text-foreground">{s.name}</span>
+                            {roll && (
+                              <span className="text-xs font-mono font-medium text-muted-foreground">({roll})</span>
+                            )}
                           </span>
                         </button>
                       );

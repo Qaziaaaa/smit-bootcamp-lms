@@ -5,11 +5,12 @@ import Student from './models/student.model.js';
 async function check() {
   console.log('Connecting to:', env.mongoUri);
   await mongoose.connect(env.mongoUri);
-  const students = await Student.find({}, 'name email status batch');
-  console.log('Total students:', students.length);
-  students.forEach(s => {
-    console.log(`- ID: ${s._id} | Name: "${s.name}" | Email: "${s.email}" | Status: ${s.status}`);
-  });
+  const student = await Student.findOne({ email: 'du@lms.com' });
+  if (student) {
+    student.rollNo = '110';
+    await student.save();
+    console.log(`Updated student ${student.name} (${student.email}) rollNo to: ${student.rollNo}`);
+  }
   await mongoose.disconnect();
 }
 

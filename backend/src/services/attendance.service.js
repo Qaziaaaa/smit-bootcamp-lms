@@ -58,7 +58,11 @@ const getAttendance = async (filters = {}, pagination = {}) => {
 
     if (search) {
       const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      studentMatch.name = { $regex: `(^|\\s)${escaped}`, $options: 'i' };
+      studentMatch.$or = [
+        { name: { $regex: `^${escaped}`, $options: 'i' } },
+        { rollNo: { $regex: `^${escaped}`, $options: 'i' } },
+        { email: { $regex: `^${escaped}`, $options: 'i' } },
+      ];
     }
 
     let attendanceDate = new Date(date);
@@ -168,6 +172,7 @@ const getAttendance = async (filters = {}, pagination = {}) => {
           studentId: '$_id',
           studentName: '$name',
           studentEmail: '$email',
+          rollNo: '$rollNo',
           batch: '$batch',
           date: { $ifNull: ['$attendanceDoc.date', attendanceDate] },
           status: { $ifNull: ['$attendanceDoc.status', null] },
@@ -212,7 +217,11 @@ const getAttendance = async (filters = {}, pagination = {}) => {
   }
   if (search) {
     const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    studentMatch.name = { $regex: `(^|\\s)${escaped}`, $options: 'i' };
+    studentMatch.$or = [
+      { name: { $regex: `^${escaped}`, $options: 'i' } },
+      { rollNo: { $regex: `^${escaped}`, $options: 'i' } },
+      { email: { $regex: `^${escaped}`, $options: 'i' } },
+    ];
   }
 
   const pipeline = [
@@ -276,6 +285,7 @@ const getAttendance = async (filters = {}, pagination = {}) => {
         studentId: '$_id',
         studentName: '$name',
         studentEmail: '$email',
+        rollNo: '$rollNo',
         batch: '$batch',
         date: '$attendanceDoc.date',
         status: '$attendanceDoc.status',
