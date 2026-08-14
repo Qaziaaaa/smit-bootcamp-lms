@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Box,
   Typography,
   Button,
@@ -12,16 +11,13 @@ import {
   InputAdornment,
   CircularProgress,
   Chip,
-  Paper,
   Stack,
-  Tooltip,
 } from '@mui/material';
 import {
   X,
   Search,
   CheckCircle2,
   XCircle,
-  Calendar,
   AlertCircle,
   Users,
   Check,
@@ -214,7 +210,8 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
       <DialogTitle
         sx={{
           m: 0,
-          p: 2.5,
+          py: 1.5,
+          px: { xs: 2, sm: 2.5 },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -223,10 +220,10 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
         }}
       >
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#0A0A0A', fontSize: 18 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: '#0A0A0A', fontSize: 16 }}>
             Mark Attendance
           </Typography>
-          <Typography variant="body2" sx={{ color: '#828283', mt: 0.25, fontSize: 13 }}>
+          <Typography variant="body2" sx={{ color: '#828283', mt: 0.1, fontSize: 12 }}>
             Update daily student attendance records.
           </Typography>
         </Box>
@@ -234,21 +231,23 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
           aria-label="close modal"
           onClick={onClose}
           disabled={saving}
-          sx={{ ml: 'auto', color: '#828283', '&:hover': { color: '#0A0A0A', bgcolor: '#F4F5F6' } }}
+          size="small"
+          sx={{ ml: 'auto', p: 0.5, color: '#828283', '&:hover': { color: '#0A0A0A', bgcolor: '#F4F5F6' } }}
         >
-          <X size={20} />
+          <X size={18} />
         </IconButton>
       </DialogTitle>
 
       {/* Modal Content */}
       <DialogContent
         sx={{
-          p: { xs: 2, sm: 3 },
-          pt: '10px !important',
+          p: { xs: 1.5, sm: 2 },
+          pt: '8px !important',
+          pb: { xs: '16px !important', sm: '20px !important' },
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          gap: 2.5,
+          gap: 1.5,
         }}
       >
         {/* Controls Toolbar */}
@@ -258,15 +257,15 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: { xs: 'stretch', sm: 'center' },
             justifyContent: 'space-between',
-            gap: 2,
-            p: 2,
+            gap: 1.5,
+            p: 1.5,
             bgcolor: '#F8FAFA',
             borderRadius: '10px',
             border: '1px solid',
             borderColor: '#E5E7EB',
           }}
         >
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', flex: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', flex: 1 }}>
             <TextField
               type="date"
               label="Date"
@@ -274,12 +273,12 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
               onChange={handleDateChange}
               disabled={loading || saving}
               sx={{
-                width: { xs: '100%', sm: 170 },
+                width: { xs: '100%', sm: 160 },
                 '& .MuiOutlinedInput-root': {
-                  height: 44,
-                  borderRadius: '10px',
+                  height: 38,
+                  borderRadius: '8px',
                   bgcolor: '#FFFFFF',
-                  fontSize: '0.9rem',
+                  fontSize: '0.85rem',
                 },
               }}
               slotProps={{ inputLabel: { shrink: true } }}
@@ -292,19 +291,19 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
               disabled={loading || saving}
               sx={{
                 flex: 1,
-                minWidth: { xs: '100%', sm: 220 },
+                minWidth: { xs: '100%', sm: 200 },
                 '& .MuiOutlinedInput-root': {
-                  height: 44,
-                  borderRadius: '10px',
+                  height: 38,
+                  borderRadius: '8px',
                   bgcolor: '#FFFFFF',
-                  fontSize: '0.9rem',
+                  fontSize: '0.85rem',
                 },
               }}
               slotProps={{
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Search size={18} color="#828283" />
+                      <Search size={16} color="#828283" />
                     </InputAdornment>
                   ),
                 },
@@ -319,8 +318,8 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
               color="success"
               onClick={() => handleMarkAll('present')}
               disabled={loading || saving || filteredStudents.length === 0}
-              startIcon={<CheckCircle2 size={16} />}
-              sx={{ textTransform: 'none', fontSize: 13, height: 44, px: 2, bgcolor: '#FFFFFF', borderRadius: '10px' }}
+              startIcon={<CheckCircle2 size={15} />}
+              sx={{ textTransform: 'none', fontSize: 12, height: 38, px: 1.75, bgcolor: '#FFFFFF', borderRadius: '8px' }}
             >
               All Present
             </Button>
@@ -331,46 +330,74 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
               color="error"
               onClick={() => handleMarkAll('absent')}
               disabled={loading || saving || filteredStudents.length === 0}
-              startIcon={<XCircle size={16} />}
-              sx={{ textTransform: 'none', fontSize: 13, height: 44, px: 2, bgcolor: '#FFFFFF', borderRadius: '10px' }}
+              startIcon={<XCircle size={15} />}
+              sx={{ textTransform: 'none', fontSize: 12, height: 38, px: 1.75, bgcolor: '#FFFFFF', borderRadius: '8px' }}
             >
               All Absent
             </Button>
           </Box>
         </Box>
 
-        {/* Stats Pills */}
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Chip
-            avatar={<Users size={14} color="#2D69EB" />}
-            label={`Total: ${counts.total}`}
-            variant="outlined"
-            size="small"
-            sx={{ fontWeight: 600, fontSize: 12, bgcolor: '#F4F9FF', borderColor: 'rgba(45, 105, 235, 0.3)', color: '#2D69EB' }}
-          />
-          <Chip
-            avatar={<CheckCircle2 size={14} color="#22C55E" />}
-            label={`Present: ${counts.present}`}
-            variant="outlined"
-            size="small"
-            sx={{ fontWeight: 600, fontSize: 12, bgcolor: '#ECFDF5', borderColor: 'rgba(34, 197, 94, 0.3)', color: '#15803D' }}
-          />
-          <Chip
-            avatar={<XCircle size={14} color="#DC2626" />}
-            label={`Absent: ${counts.absent}`}
-            variant="outlined"
-            size="small"
-            sx={{ fontWeight: 600, fontSize: 12, bgcolor: '#FEF2F2', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#B91C1C' }}
-          />
-          {counts.pending > 0 && (
+        {/* Stats Pills & Save Button */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', gap: 1.25, flexWrap: 'wrap', alignItems: 'center' }}>
             <Chip
-              avatar={<AlertCircle size={14} color="#D97706" />}
-              label={`Unmarked: ${counts.pending}`}
+              avatar={<Users size={14} color="#2D69EB" />}
+              label={`Total: ${counts.total}`}
               variant="outlined"
               size="small"
-              sx={{ fontWeight: 600, fontSize: 12, bgcolor: '#FFFBEB', borderColor: 'rgba(217, 119, 6, 0.3)', color: '#B45309' }}
+              sx={{ fontWeight: 600, fontSize: 12, bgcolor: '#F4F9FF', borderColor: 'rgba(45, 105, 235, 0.3)', color: '#2D69EB' }}
             />
-          )}
+            <Chip
+              avatar={<CheckCircle2 size={14} color="#22C55E" />}
+              label={`Present: ${counts.present}`}
+              variant="outlined"
+              size="small"
+              sx={{ fontWeight: 600, fontSize: 12, bgcolor: '#ECFDF5', borderColor: 'rgba(34, 197, 94, 0.3)', color: '#15803D' }}
+            />
+            <Chip
+              avatar={<XCircle size={14} color="#DC2626" />}
+              label={`Absent: ${counts.absent}`}
+              variant="outlined"
+              size="small"
+              sx={{ fontWeight: 600, fontSize: 12, bgcolor: '#FEF2F2', borderColor: 'rgba(239, 68, 68, 0.3)', color: '#B91C1C' }}
+            />
+            {counts.pending > 0 && (
+              <Chip
+                avatar={<AlertCircle size={14} color="#D97706" />}
+                label={`Unmarked: ${counts.pending}`}
+                variant="outlined"
+                size="small"
+                sx={{ fontWeight: 600, fontSize: 12, bgcolor: '#FFFBEB', borderColor: 'rgba(217, 119, 6, 0.3)', color: '#B45309' }}
+              />
+            )}
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, ml: 'auto' }}>
+            <Typography variant="caption" sx={{ color: '#828283', fontWeight: 500, fontSize: 12 }}>
+              {counts.present + counts.absent} of {counts.total} students marked
+            </Typography>
+
+            <Button
+              onClick={handleSave}
+              disabled={loading || saving}
+              variant="contained"
+              disableElevation
+              startIcon={saving ? <CircularProgress size={15} color="inherit" /> : <Check size={15} />}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 2.5,
+                height: 34,
+                fontSize: 12.5,
+                borderRadius: '8px',
+                bgcolor: '#0277BD',
+                '&:hover': { bgcolor: '#01579B' },
+              }}
+            >
+              {saving ? 'Saving...' : 'Save Attendance'}
+            </Button>
+          </Box>
         </Box>
 
         {/* Student List Section */}
@@ -420,37 +447,37 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
               {filteredStudents.map((student) => {
                 const isPresent = student.status === 'present';
                 const isAbsent = student.status === 'absent';
-                const isNotMarked = !student.status;
 
                 return (
                   <Box
                     key={student.studentId}
                     sx={{
-                      p: { xs: 1.5, sm: 2 },
+                      py: 1,
+                      px: { xs: 1.5, sm: 2 },
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       flexWrap: 'wrap',
-                      gap: 1.5,
+                      gap: 1.25,
                       bgcolor: isPresent ? 'rgba(236, 253, 245, 0.3)' : isAbsent ? 'rgba(254, 242, 242, 0.3)' : 'transparent',
                       transition: 'background-color 0.15s ease',
                       '&:hover': { bgcolor: isPresent ? '#ECFDF5' : isAbsent ? '#FEF2F2' : '#F9FAFB' },
                     }}
                   >
                     {/* Student Info */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0, flex: 1 }}>
-                      <Avatar name={student.name} sx={{ width: 38, height: 38, fontSize: 14 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0, flex: 1 }}>
+                      <Avatar name={student.name} sx={{ width: 32, height: 32, fontSize: 12 }} />
                       <Box sx={{ minWidth: 0 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                          <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#0A0A0A' }} noWrap>
+                          <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0A0A0A' }} noWrap>
                             {student.name}
                           </Typography>
                           <Chip
                             label={student.rollNumber}
                             size="small"
                             sx={{
-                              height: 20,
-                              fontSize: 10,
+                              height: 18,
+                              fontSize: 9.5,
                               fontWeight: 600,
                               bgcolor: '#F3F4F6',
                               color: '#374151',
@@ -458,8 +485,8 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
                             }}
                           />
                         </Box>
-                        <Typography sx={{ fontSize: 12, color: '#828283', mt: 0.25 }} noWrap>
-                          {student.email ? `${student.email} • ` : ''}{student.batch}
+                        <Typography sx={{ fontSize: 11, color: '#828283' }} noWrap>
+                          {student.batch}
                         </Typography>
                       </Box>
                     </Box>
@@ -562,54 +589,6 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
           )}
         </Box>
       </DialogContent>
-
-      {/* Modal Actions */}
-      <DialogActions
-        sx={{
-          p: 2.5,
-          px: { xs: 2, sm: 3 },
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          bgcolor: '#FAFBFB',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Typography variant="caption" sx={{ color: '#828283', fontWeight: 500 }}>
-          {counts.present + counts.absent} of {counts.total} students marked
-        </Typography>
-
-        <Box sx={{ display: 'flex', gap: 1.5 }}>
-          <Button
-            onClick={onClose}
-            disabled={saving}
-            color="inherit"
-            sx={{ textTransform: 'none', fontWeight: 500, color: '#4B5563' }}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            onClick={handleSave}
-            disabled={loading || saving}
-            variant="contained"
-            disableElevation
-            startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <Check size={16} />}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 3,
-              height: 38,
-              borderRadius: 1.5,
-              bgcolor: '#0277BD',
-              '&:hover': { bgcolor: '#01579B' },
-            }}
-          >
-            {saving ? 'Saving...' : 'Save Attendance'}
-          </Button>
-        </Box>
-      </DialogActions>
     </Dialog>
   );
 }
