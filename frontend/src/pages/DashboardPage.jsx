@@ -21,7 +21,7 @@ import { cn } from '../lib/utils'
 import { useEffect, useState, useCallback } from 'react'
 import { getDashboard } from '../services/dashboardService'
 import { apiClient } from '../services/apiClient'
-import { toast } from 'sonner'
+import { toast } from 'react-hot-toast'
 
 const TASK_STATUS_STYLE = {
   completed: { icon: Award, iconBg: 'bg-clr-emerald-bg', iconColor: 'text-clr-green' },

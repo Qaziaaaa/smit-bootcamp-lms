@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Edit2, Trash2, Plus, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
+import { toastInfo } from '../lib/toast';
 
 import { Button } from '../components/ui/Button';
 import { DataTable } from '../components/ui/DataTable';
@@ -212,7 +213,7 @@ export default function TasksPage() {
       const allTasks = result.tasks || [];
       const pending = allTasks.filter((t) => t.status !== 'completed');
       if (pending.length === 0) {
-        toast.info('All tasks are already completed');
+        toastInfo('All tasks are already completed');
       } else {
         let marked = 0;
         for (const task of pending) {

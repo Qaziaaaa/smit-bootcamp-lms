@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Plus, Trash2, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
+import { toastInfo } from '../lib/toast';
 
 import { Button } from '../components/ui/Button';
 import { Progress } from '../components/ui/Progress';
@@ -168,7 +169,7 @@ export default function ProjectDetailPage() {
     try {
       const pending = tasks.filter((t) => t.status !== 'completed');
       if (pending.length === 0) {
-        toast.info('All tasks are already completed');
+        toastInfo('All tasks are already completed');
       } else {
         let marked = 0;
         for (const task of pending) {

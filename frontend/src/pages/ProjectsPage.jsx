@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Eye, Edit2, Trash2, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 
 import { Button } from '../components/ui/Button';
 import { DataTable } from '../components/ui/DataTable';

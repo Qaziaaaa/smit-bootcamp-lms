@@ -10,7 +10,7 @@ import {
   Play,
   Users,
 } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from 'react-hot-toast'
 import { getStudentAttendance, getStudentProfile, getStudentTasks, updateTaskProgress } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
 import { Badge } from '../components/ui/Badge'

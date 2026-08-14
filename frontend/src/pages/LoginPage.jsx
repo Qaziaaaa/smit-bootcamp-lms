@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from 'react-hot-toast'
 import { cn } from '../lib/utils'
 import { useAuth } from '../hooks/useAuth'
 import { Button } from '../components/ui/Button'

@@ -16,7 +16,8 @@ import {
   RefreshCw,
   Loader2,
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
+import { toastInfo } from '../../lib/toast';
 
 import { getAttendance, markAttendance } from '../../services/attendanceService';
 
@@ -142,7 +143,7 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
     const markedStudents = students.filter((s) => s.status === 'present' || s.status === 'absent');
 
     if (markedStudents.length === 0) {
-      toast.info('No attendance status selected to save.');
+      toastInfo('No attendance status selected to save.');
       onClose();
       return;
     }

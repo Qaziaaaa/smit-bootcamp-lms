@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { CalendarCheck } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
