@@ -191,7 +191,7 @@ export default function DashboardPage() {
           >
             Saylani Mass IT Training (SMIT)
           </Typography> */}
-          <Typography variant="h5" sx={{ fontWeight: 500, color: '#0A0A0A', letterSpacing: '-0.02em' }}>
+          <Typography variant="h4" sx={{ fontWeight: 500, color: '#0A0A0A', letterSpacing: '-0.02em' }}>
             SMIT Bootcamp Overview
           </Typography>
           <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
