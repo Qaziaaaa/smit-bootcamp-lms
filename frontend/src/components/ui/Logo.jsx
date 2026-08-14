@@ -1,22 +1,11 @@
+import { cn } from '../../lib/utils'
+
 export function Logo({ compact = false }) {
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      width: '100%',
-    }}>
-      <img
-        src="/logo.png"
-        alt="SMIT – Saylani Mass IT Training"
-        style={{
-          width: compact ? '110px' : '150px',
-          maxWidth: '100%',
-          height: 'auto',
-          objectFit: 'contain',
-          flexShrink: 0,
-          display: 'block',
-        }}
-      />
-    </div>
+    <img
+      src="/logo.png"
+      alt="SMIT – Saylani Mass IT Training"
+      className={cn('block h-auto w-auto object-contain', compact ? 'h-10' : 'h-14')}
+    />
   )
 }

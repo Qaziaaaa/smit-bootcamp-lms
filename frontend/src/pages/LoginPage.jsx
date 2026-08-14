@@ -59,7 +59,7 @@ export default function LoginPage() {
           <img
             src="/logo.png"
             alt="SMIT – Saylani Mass IT Training"
-            className="mx-auto inline-block h-auto w-[150px]"
+            className="mx-auto inline-block h-auto w-24"
           />
           <p className="mt-1.5 text-base font-semibold text-clr-navy">Student Portal</p>
         </div>
