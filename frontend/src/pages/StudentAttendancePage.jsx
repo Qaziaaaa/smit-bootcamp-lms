@@ -3,6 +3,7 @@ import { Box, Paper, Typography } from '@mui/material'
 import { CalendarCheck, CalendarX, CalendarDays, Percent } from 'lucide-react'
 import { getStudentAttendance } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
+import { Badge } from '../components/ui/Badge'
 
 // Formats a raw date into a readable label (e.g. Sat, Aug 9, 2026)
 function formatDate(date) {
@@ -153,23 +154,7 @@ export default function StudentAttendancePage() {
                   <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#0A0A0A' }}>{formatDate(record.date)}</Typography>
                 </Box>
                 {/* Record status pill (present / absent) */}
-                <Box
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    px: 1.25,
-                    py: 0.25,
-                    borderRadius: 9999,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    textTransform: 'capitalize',
-                    ...(record.status === 'present'
-                      ? { bgcolor: '#E8F5E9', color: '#166534' }
-                      : { bgcolor: '#FEF2F2', color: '#B91C1C' }),
-                  }}
-                >
-                  {record.status}
-                </Box>
+                <Badge status={record.status} />
               </Box>
             ))}
           </Box>

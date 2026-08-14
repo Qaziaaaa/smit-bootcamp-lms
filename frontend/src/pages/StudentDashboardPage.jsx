@@ -13,13 +13,7 @@ import {
 } from 'lucide-react'
 import { getStudentAttendance, getStudentProfile, getStudentTasks, updateTaskProgress } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
-
-// Colors/background for each task status badge (pending, in-progress, completed)
-const TASK_STYLE = {
-  pending: { label: 'Pending', color: '#92400E', bg: '#FEF3C7' },
-  'in-progress': { label: 'In Progress', color: '#1E40AF', bg: '#DBEAFE' },
-  completed: { label: 'Completed', color: '#166534', bg: '#DCFCE7' },
-}
+import { Badge } from '../components/ui/Badge'
 
 // Builds the current week (Sun-Sat) and marks specific days as active based on student schedule
 function currentWeek(activeDays = []) {
@@ -48,29 +42,6 @@ const MOCK_SCHEDULE_DATA = {
   'student@example.com': ['Fri', 'Sat'],
   'qari@gmail.com': ['Mon', 'Wed', 'Fri'],
   'default': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
-}
-// Renders a small rounded pill showing the task status
-function StatusPill({ status }) {
-  const style = TASK_STYLE[status] ?? TASK_STYLE.pending
-  return (
-    <Typography
-      component="span"
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        px: 1.25,
-        py: 0.25,
-        borderRadius: 9999,
-        fontSize: 12,
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-        bgcolor: style.bg,
-        color: style.color,
-      }}
-    >
-      {style.label}
-    </Typography>
-  )
 }
 
 export default function StudentDashboardPage() {
@@ -427,7 +398,7 @@ export default function StudentDashboardPage() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                   {/* Task title + status pill */}
                   <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#0A0A0A' }}>{task.title}</Typography>
-                  <StatusPill status={task.status} />
+                  <Badge status={task.status} />
                 </Box>
                 {/* Task description (fallback text when empty) */}
                 <Typography sx={{ fontSize: 12, color: '#828283', mt: 0.5 }}>

@@ -5,7 +5,7 @@ import LoadingState from '../../components/LoadingState.jsx';
 import ErrorState from '../../components/ErrorState.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import StatCard from '../../components/StatCard.jsx';
-import StatusChip from '../../components/StatusChip.jsx';
+import { Badge } from '../../components/ui/Badge.jsx';
 import dayjs from 'dayjs';
 
 const StudentAttendance = () => {
@@ -82,7 +82,7 @@ const StudentAttendance = () => {
                   <TableRow key={record._id} hover>
                     <TableCell>{dayjs(record.date).format('MMM D, YYYY')}</TableCell>
                     <TableCell>
-                      <StatusChip status={record.status} />
+                      <Badge status={record.status} />
                     </TableCell>
                   </TableRow>
                 ))}

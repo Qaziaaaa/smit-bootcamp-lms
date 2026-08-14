@@ -4,7 +4,7 @@ import { useTeam } from '../../hooks/useStudentPortal.js';
 import LoadingState from '../../components/LoadingState.jsx';
 import ErrorState from '../../components/ErrorState.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
-import StatusChip from '../../components/StatusChip.jsx';
+import { Badge } from '../../components/ui/Badge.jsx';
 import dayjs from 'dayjs';
 
 const StudentTeam = () => {
@@ -86,7 +86,7 @@ const StudentTeam = () => {
                 <Stack spacing={2}>
                   <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
                     <Typography variant="h6">{project.title}</Typography>
-                    <StatusChip status={project.status} />
+                    <Badge status={project.status} />
                   </Stack>
                   <Typography variant="body2" color="text.secondary">
                     {project.description || 'No description provided.'}

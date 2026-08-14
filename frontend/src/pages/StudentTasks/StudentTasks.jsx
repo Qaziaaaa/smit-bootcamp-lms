@@ -20,7 +20,7 @@ import { useTasks, useUpdateTaskProgress } from '../../hooks/useStudentPortal.js
 import LoadingState from '../../components/LoadingState.jsx';
 import ErrorState from '../../components/ErrorState.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
-import StatusChip from '../../components/StatusChip.jsx';
+import { Badge } from '../../components/ui/Badge.jsx';
 import dayjs from 'dayjs';
 
 const NEXT_STATUS = {
@@ -63,10 +63,10 @@ const TaskRow = ({ task }) => {
       </TableCell>
       <TableCell>{task.projectId?.title || '—'}</TableCell>
       <TableCell>
-        <StatusChip status={task.priority} />
+        <Badge status={task.priority} />
       </TableCell>
       <TableCell>
-        <StatusChip status={task.status} />
+        <Badge status={task.status} />
       </TableCell>
       <TableCell>{task.deadline ? dayjs(task.deadline).format('MMM D, YYYY') : '—'}</TableCell>
       <TableCell align="right">

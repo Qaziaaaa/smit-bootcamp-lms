@@ -4,16 +4,11 @@ import { FolderKanban, Users, Calendar, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { getStudentProjects } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
+import { Badge } from '../components/ui/Badge'
 
 // Renders a single project card for the student
 function ProjectCard({ project }) {
   const navigate = useNavigate()
-
-  const statusStyle = {
-    active: { label: 'Active', color: '#166534', bg: '#DCFCE7' },
-    completed: { label: 'Completed', color: '#1E40AF', bg: '#DBEAFE' },
-    'on-hold': { label: 'On Hold', color: '#92400E', bg: '#FEF3C7' },
-  }[project.status] || { label: 'Unknown', color: '#828283', bg: '#F1F5F9' }
 
   return (
     <Paper variant="outlined" sx={{ borderRadius: 2, p: 3, bgcolor: '#ffffff', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -28,23 +23,7 @@ function ProjectCard({ project }) {
             </Typography>
           )}
         </Box>
-        <Box
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            px: 1.25,
-            py: 0.25,
-            borderRadius: 9999,
-            fontSize: 12,
-            fontWeight: 600,
-            whiteSpace: 'nowrap',
-            bgcolor: statusStyle.bg,
-            color: statusStyle.color,
-            flexShrink: 0
-          }}
-        >
-          {statusStyle.label}
-        </Box>
+        <Badge status={project.status} />
       </Box>
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 1 }}>

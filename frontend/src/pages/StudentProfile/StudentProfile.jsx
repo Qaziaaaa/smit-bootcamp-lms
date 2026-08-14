@@ -24,7 +24,7 @@ import { useAttendance, useProfile, useTasks, useTeam } from '../../hooks/useStu
 import LoadingState from '../../components/LoadingState.jsx';
 import ErrorState from '../../components/ErrorState.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
-import StatusChip from '../../components/StatusChip.jsx';
+import { Badge } from '../../components/ui/Badge.jsx';
 import dayjs from 'dayjs';
 
 const InfoRow = ({ label, value }) => (
@@ -79,7 +79,7 @@ const StudentProfile = () => {
               </Typography>
               <Typography color="text.secondary">{p.email || '—'}</Typography>
               <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                <StatusChip status={p.status} />
+                <Badge status={p.status} />
                 {p.teamId?.name && (
                   <Chip size="small" label={`Team: ${p.teamId.name}`} variant="outlined" />
                 )}
@@ -162,21 +162,21 @@ const StudentProfile = () => {
                 <Stack spacing={1}>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Typography variant="body2">Pending</Typography>
-                    <StatusChip status="pending" />
+                    <Badge status="pending" />
                     <Typography variant="body1" fontWeight={600}>
                       {tasksByStatus.pending}
                     </Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Typography variant="body2">In progress</Typography>
-                    <StatusChip status="in-progress" />
+                    <Badge status="in-progress" />
                     <Typography variant="body1" fontWeight={600}>
                       {tasksByStatus['in-progress']}
                     </Typography>
                   </Stack>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Typography variant="body2">Completed</Typography>
-                    <StatusChip status="completed" />
+                    <Badge status="completed" />
                     <Typography variant="body1" fontWeight={600}>
                       {tasksByStatus.completed}
                     </Typography>
@@ -212,7 +212,7 @@ const StudentProfile = () => {
                 project ? (
                   <Stack spacing={1}>
                     <Typography variant="h6">{project.title}</Typography>
-                    <StatusChip status={project.status} />
+                    <Badge status={project.status} />
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                       {project.description || 'No description provided.'}
                     </Typography>
@@ -307,10 +307,10 @@ const StudentProfile = () => {
                     <TableCell>{task.title}</TableCell>
                     <TableCell>{task.projectId?.title || '—'}</TableCell>
                     <TableCell>
-                      <StatusChip status={task.priority} />
+                      <Badge status={task.priority} />
                     </TableCell>
                     <TableCell>
-                      <StatusChip status={task.status} />
+                      <Badge status={task.status} />
                     </TableCell>
                     <TableCell>
                       {task.deadline ? dayjs(task.deadline).format('MMM D, YYYY') : '—'}

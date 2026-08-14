@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Paper, Typography, Button, Avatar, Chip } from '@mui/material';
+import { Box, Paper, Typography, Button, Avatar } from '@mui/material';
 import { Mail, Phone, Shield, Plus, Key } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Logo } from '../components/ui/Logo';
+import { Badge } from '../components/ui/Badge';
 import { AdminForm } from '../components/admin/AdminForm';
 
 export default function AdminProfilePage() {
@@ -137,17 +138,7 @@ export default function AdminProfilePage() {
                 <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {adm.email}
                 </Typography>
-                <Chip 
-                  label={adm.role} 
-                  size="small" 
-                  sx={{ 
-                    height: 20, 
-                    fontSize: 10, 
-                    fontWeight: 600, 
-                    bgcolor: adm.role === 'Admin' ? '#DBEAFE' : '#F1F5F9',
-                    color: adm.role === 'Admin' ? '#1E40AF' : '#475569'
-                  }} 
-                />
+                <Badge status={adm.role.toLowerCase()} />
               </Box>
             </Paper>
           ))}

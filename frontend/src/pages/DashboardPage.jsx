@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { StatCard } from '../components/ui/StatCard'
 import { Avatar } from '../components/ui/Avatar'
+import { Badge } from '../components/ui/Badge'
 import { StudentForm } from '../components/students/StudentForm'
 import { MarkAttendanceModal } from '../components/attendance/MarkAttendanceModal'
 import { useEffect, useState, useCallback } from 'react'
@@ -35,9 +36,9 @@ import { apiClient } from '../services/apiClient'
 import { toast } from 'sonner'
 
 const TASK_STATUS_STYLE = {
-  completed: { status: 'Completed', statusColor: '#22C55E', statusBg: '#ECFDF5', icon: Award, iconBg: '#ECFDF5', iconColor: '#22C55E' },
-  'in-progress': { status: 'In Progress', statusColor: '#374151', statusBg: '#F1F5F9', icon: Clock, iconBg: '#DBEAFE', iconColor: '#2D69EB' },
-  pending: { status: 'Pending', statusColor: '#D97706', statusBg: '#FFFBEB', icon: CheckSquare, iconBg: '#FFFBEB', iconColor: '#D97706' },
+  completed: { icon: Award, iconBg: '#ECFDF5', iconColor: '#22C55E' },
+  'in-progress': { icon: Clock, iconBg: '#DBEAFE', iconColor: '#2D69EB' },
+  pending: { icon: CheckSquare, iconBg: '#FFFBEB', iconColor: '#D97706' },
 }
 
 function formatDate(date) {
@@ -147,9 +148,7 @@ export default function DashboardPage() {
     return {
       text: task.title,
       meta: `${task.assignedTo?.name ?? '—'} • ${task.projectId?.title ?? 'Project'}`,
-      status: style.status,
-      statusColor: style.statusColor,
-      statusBg: style.statusBg,
+      status: task.status,
       icon: style.icon,
       iconBg: style.iconBg,
       iconColor: style.iconColor,
@@ -355,22 +354,7 @@ export default function DashboardPage() {
                         </Typography>
                       </TableCell>
                       <TableCell align="right" sx={{ py: 1.25, verticalAlign: 'middle' }}>
-                        <Typography
-                          component="span"
-                          sx={{
-                            display: 'inline-flex',
-                            px: 1.25,
-                            py: 0.25,
-                            borderRadius: 9999,
-                            fontSize: 12,
-                            fontWeight: 600,
-                            textTransform: 'capitalize',
-                            bgcolor: record.status === 'present' ? '#ECFDF5' : record.status === 'absent' ? '#FEF2F2' : '#F1F5F9',
-                            color: record.status === 'present' ? '#22C55E' : record.status === 'absent' ? '#DC2626' : '#64748B',
-                          }}
-                        >
-                          {record.status ?? 'Not Marked'}
-                        </Typography>
+                        <Badge status={record.status} />
                       </TableCell>
                     </TableRow>
                   ))
@@ -433,22 +417,7 @@ export default function DashboardPage() {
                     </Typography>
                   </Box>
                 </Box>
-                <Typography
-                  component="span"
-                  sx={{
-                    px: 1.25,
-                    py: 0.25,
-                    borderRadius: 9999,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap',
-                    flexShrink: 0,
-                    bgcolor: item.statusBg,
-                    color: item.statusColor,
-                  }}
-                >
-                  {item.status}
-                </Typography>
+                <Badge status={item.status} sx={{ flexShrink: 0 }} />
               </Box>
             ))}
           </Box>

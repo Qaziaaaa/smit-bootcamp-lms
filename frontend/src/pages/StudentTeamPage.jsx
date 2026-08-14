@@ -3,6 +3,7 @@ import { Box, Paper, Typography } from '@mui/material'
 import { FolderKanban, Mail, Users } from 'lucide-react'
 import { getStudentTeam } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
+import { Badge } from '../components/ui/Badge'
 
 // Renders a member card: initials avatar + name, email and batch
 function MemberCard({ member }) {
@@ -90,11 +91,6 @@ export default function StudentTeamPage() {
 
   const members = team.members ?? []
   const project = team.project
-  const projectStatusStyle = {
-    active: { label: 'Active', color: '#166534', bg: '#DCFCE7' },
-    completed: { label: 'Completed', color: '#1E40AF', bg: '#DBEAFE' },
-    'on-hold': { label: 'On Hold', color: '#92400E', bg: '#FEF3C7' },
-  }[project?.status] ?? { label: '—', color: '#828283', bg: '#F1F5F9' }
 
   return (
     <Box sx={{ display: 'grid', gap: 3 }}>
@@ -182,23 +178,7 @@ export default function StudentTeamPage() {
               </Typography>
             </Box>
             {/* Project status pill */}
-            <Box
-              sx={{
-                ml: 'auto',
-                display: 'inline-flex',
-                alignItems: 'center',
-                px: 1.25,
-                py: 0.25,
-                borderRadius: 9999,
-                fontSize: 12,
-                fontWeight: 600,
-                whiteSpace: 'nowrap',
-                bgcolor: projectStatusStyle.bg,
-                color: projectStatusStyle.color,
-              }}
-            >
-              {projectStatusStyle.label}
-            </Box>
+            <Badge status={project.status} />
           </Paper>
         ) : (
           <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5 }}>

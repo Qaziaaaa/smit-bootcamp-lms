@@ -99,32 +99,7 @@ export default function StudentsPage() {
     {
       accessorKey: 'status',
       header: 'STATUS',
-      cell: ({ getValue }) => {
-        const status = getValue();
-        const isActive = status?.toLowerCase() === 'active';
-        return (
-          <Box
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              px: 1.5,
-              py: 0.35,
-              borderRadius: '9999px',
-              border: '1px solid',
-              borderColor: isActive ? '#4ADE80' : '#CBD5E1',
-              color: isActive ? '#22C55E' : '#64748B',
-              fontSize: '11px',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              bgcolor: 'transparent',
-              letterSpacing: '0.05em'
-            }}
-          >
-            {status || 'Unknown'}
-          </Box>
-        );
-      },
+      cell: ({ getValue }) => <Badge status={getValue()} />,
     },
     {
       id: 'actions',

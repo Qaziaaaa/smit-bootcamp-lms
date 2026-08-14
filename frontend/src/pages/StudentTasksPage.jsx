@@ -3,69 +3,7 @@ import { Box, Button, Paper, Typography } from '@mui/material'
 import { CheckCircle2, CheckSquare, Play, Send } from 'lucide-react'
 import { getStudentTasks, updateTaskProgress } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
-
-// Colors/background for each task status badge (pending, in-progress, completed)
-const TASK_STYLE = {
-  pending: { label: 'Pending', color: '#92400E', bg: '#FEF3C7' },
-  'in-progress': { label: 'In Progress', color: '#1E40AF', bg: '#DBEAFE' },
-  'review_requested': { label: 'In Review', color: '#6B21A8', bg: '#F3E8FF' },
-  completed: { label: 'Completed', color: '#166534', bg: '#DCFCE7' },
-}
-
-// Colors/background for each task priority badge
-const PRIORITY_STYLE = {
-  low: { label: 'Low', color: '#1E40AF', bg: '#DBEAFE' },
-  medium: { label: 'Medium', color: '#92400E', bg: '#FEF3C7' },
-  high: { label: 'High', color: '#B91C1C', bg: '#FEE2E2' },
-}
-
-// Renders a small rounded pill showing the task status
-function StatusPill({ status }) {
-  const style = TASK_STYLE[status] ?? TASK_STYLE.pending
-  return (
-    <Typography
-      component="span"
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        px: 1.25,
-        py: 0.25,
-        borderRadius: 9999,
-        fontSize: 12,
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-        bgcolor: style.bg,
-        color: style.color,
-      }}
-    >
-      {style.label}
-    </Typography>
-  )
-}
-
-// Renders a small rounded pill showing the task priority
-function PriorityPill({ priority }) {
-  const style = PRIORITY_STYLE[priority] ?? PRIORITY_STYLE.medium
-  return (
-    <Typography
-      component="span"
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        px: 1.25,
-        py: 0.25,
-        borderRadius: 9999,
-        fontSize: 12,
-        fontWeight: 600,
-        whiteSpace: 'nowrap',
-        bgcolor: style.bg,
-        color: style.color,
-      }}
-    >
-      {style.label}
-    </Typography>
-  )
-}
+import { Badge } from '../components/ui/Badge'
 
 // Formats a raw date into a readable label (e.g. Sat, Aug 9, 2026)
 function formatDate(date) {
@@ -197,8 +135,8 @@ export default function StudentTasksPage() {
               <Box sx={{ minWidth: 0 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#0A0A0A' }}>{task.title}</Typography>
-                  <StatusPill status={task.status} />
-                  <PriorityPill priority={task.priority} />
+                  <Badge status={task.status} />
+                  <Badge status={task.priority} />
                 </Box>
                 <Typography sx={{ fontSize: 12, color: '#828283', mt: 0.5 }}>
                   {task.description || 'No description provided.'}

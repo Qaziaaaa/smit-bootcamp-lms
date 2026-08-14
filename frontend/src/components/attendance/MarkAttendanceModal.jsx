@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Badge } from '../ui/Badge';
 import {
   Dialog,
   DialogTitle,
@@ -494,36 +495,15 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
                     {/* Attendance Status & Action Buttons */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
                       {/* Current Status Badge */}
-                      <Typography
-                        component="span"
+                      <Badge
+                        status={isPresent ? 'present' : isAbsent ? 'absent' : 'not-marked'}
+                        icon={isPresent ? CheckCircle2 : isAbsent ? XCircle : undefined}
                         sx={{
                           display: { xs: 'none', sm: 'inline-flex' },
-                          alignItems: 'center',
-                          gap: 0.5,
-                          px: 1.25,
-                          py: 0.25,
-                          borderRadius: 9999,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          textTransform: 'capitalize',
-                          bgcolor: isPresent ? '#ECFDF5' : isAbsent ? '#FEF2F2' : '#F3F4F6',
-                          color: isPresent ? '#15803D' : isAbsent ? '#B91C1C' : '#6B7280',
                           border: '1px solid',
                           borderColor: isPresent ? 'rgba(34, 197, 94, 0.3)' : isAbsent ? 'rgba(239, 68, 68, 0.3)' : '#E5E7EB',
                         }}
-                      >
-                        {isPresent ? (
-                          <>
-                            <CheckCircle2 size={12} /> Present
-                          </>
-                        ) : isAbsent ? (
-                          <>
-                            <XCircle size={12} /> Absent
-                          </>
-                        ) : (
-                          'Not Marked'
-                        )}
-                      </Typography>
+                      />
 
                       {/* Toggle Button Group */}
                       <Box sx={{ display: 'flex', gap: 0.75 }}>
