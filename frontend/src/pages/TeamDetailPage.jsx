@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, UserPlus } from 'lucide-react';
+import { ArrowLeft, UserPlus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '../components/ui/Button';
 import { Avatar } from '../components/ui/Avatar';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
 import { FilterBar } from '../components/ui/FilterBar';
-import { getTeamById, assignStudentsToTeam } from '../services/teamsService';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { getTeamById, assignStudentsToTeam, updateTeam } from '../services/teamsService';
 import { getStudents } from '../services/studentsService';
 
 export default function TeamDetailPage() {
@@ -17,6 +18,7 @@ export default function TeamDetailPage() {
   const [availableStudents, setAvailableStudents] = useState([]);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState('');
+  const [deletingMember, setDeletingMember] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchTeam = useCallback(async () => {
@@ -66,6 +68,28 @@ export default function TeamDetailPage() {
     }
   };
 
+  const handleConfirmRemove = async () => {
+    if (!deletingMember) return;
+    try {
+      const delId = String(deletingMember._id || deletingMember.id);
+      const updatedMembers = team.members
+        .filter((m) => String(m._id || m.id) !== delId)
+        .map((m) => String(m._id || m.id));
+      const currentLeaderId = team.leader ? String(team.leader._id || team.leader) : null;
+      const isLeader = currentLeaderId === delId;
+      await updateTeam(id, {
+        name: team.name,
+        members: updatedMembers,
+        leader: isLeader ? null : currentLeaderId,
+      });
+      toast.success('Member removed from team');
+      setDeletingMember(null);
+      await fetchTeam();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to remove member');
+    }
+  };
+
   if (loading) {
     return (
       <div className="mx-auto max-w-[1200px] p-3">
@@ -95,18 +119,15 @@ export default function TeamDetailPage() {
             Team — {team.name}
           </h1>
         </div>
-        <Button variant="outline" onClick={() => setIsAssignOpen(true)}>
-          <UserPlus size={16} />
-          Assign Student
-        </Button>
+        
       </div>
 
       <div className="grid gap-3">
         {/* Team Info */}
-        <div className="col-span-12 md:col-span-4">
+        <div className="col-span-12">
           <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-            <p className="mb-2 text-sm font-medium uppercase text-muted-foreground">Team Information</p>
-            <div className="flex flex-col gap-2">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Team Information</p>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
               <div>
                 <p className="text-xs text-muted-foreground">Team Name</p>
                 <p className="text-sm font-semibold text-foreground">{team.name}</p>
@@ -134,7 +155,7 @@ export default function TeamDetailPage() {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Members</p>
+                <p className="text-xs text-muted-foreground">Total Members</p>
                 <p className="text-sm font-semibold text-foreground">{team.members.length}</p>
               </div>
             </div>
@@ -142,7 +163,7 @@ export default function TeamDetailPage() {
         </div>
 
         {/* Members */}
-        <div className="col-span-12 md:col-span-8">
+        <div className="col-span-12">
           <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
             <div className="border-b border-border bg-muted/50 p-3">
               <h2 className="text-base font-semibold text-foreground">Team Members ({team.members.length})</h2>
@@ -156,6 +177,15 @@ export default function TeamDetailPage() {
                     <p className="text-sm text-muted-foreground">{member.email}</p>
                   </div>
                   <Badge status={member.status} />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => setDeletingMember(member)}
+                    title="Remove member"
+                  >
+                    <Trash2 size={16} />
+                  </Button>
                 </li>
               ))}
               {team.members.length === 0 && (
@@ -193,6 +223,14 @@ export default function TeamDetailPage() {
           )}
         </div>
       </Modal>
+
+      <ConfirmDialog
+        open={!!deletingMember}
+        title="Remove Team Member"
+        message={`Are you sure you want to remove ${deletingMember?.name} from this team?`}
+        onConfirm={handleConfirmRemove}
+        onCancel={() => setDeletingMember(null)}
+      />
 
     </div>
   );

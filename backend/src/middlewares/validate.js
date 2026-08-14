@@ -131,12 +131,16 @@ const validateTeamId = [
 
 const validateTeamCreate = [
   body('name').trim().notEmpty().withMessage('Team name is required.').isLength({ max: 100 }).withMessage('Team name must be at most 100 characters.'),
+  body('members').optional().isArray().withMessage('Members must be an array.'),
+  body('leader').optional({ nullable: true, checkFalsy: true }).isMongoId().withMessage('Invalid leader ID.'),
   handleValidationErrors,
 ];
 
 const validateTeamUpdate = [
   param('id').isMongoId().withMessage('Invalid team ID.'),
-  body('name').trim().notEmpty().withMessage('Team name cannot be empty.').isLength({ max: 100 }).withMessage('Team name must be at most 100 characters.'),
+  body('name').optional().trim().notEmpty().withMessage('Team name cannot be empty.').isLength({ max: 100 }).withMessage('Team name must be at most 100 characters.'),
+  body('members').optional().isArray().withMessage('Members must be an array.'),
+  body('leader').optional({ nullable: true, checkFalsy: true }).isMongoId().withMessage('Invalid leader ID.'),
   handleValidationErrors,
 ];
 
