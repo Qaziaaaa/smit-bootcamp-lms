@@ -3,6 +3,7 @@ import { Users, Eye, Edit2, Trash2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
+import { cn } from '../lib/utils';
 
 import { Button } from '../components/ui/Button';
 import { Checkbox } from '../components/ui/Checkbox';
@@ -14,20 +15,17 @@ import { Label } from '../components/ui/Label';
 import { Modal } from '../components/ui/Modal';
 import { Pagination } from '../components/ui/Pagination';
 import { SearchBar } from '../components/ui/SearchBar';
-import { Select } from '../components/ui/Select';
 import { getTeams, createTeam, updateTeam, deleteTeam, getTeamById } from '../services/teamsService';
 import { getProjects } from '../services/projectsService';
 import { getStudents } from '../services/studentsService';
 
 const teamSchema = z.object({
   name: z.string().min(2, 'Team name is required'),
-  batch: z.string().optional(),
-  projectId: z.string().optional(),
   members: z.array(z.string()).min(1, 'At least one team member is required'),
   leader: z.string().min(1, 'Team leader is required'),
 });
 
-const emptyForm = { name: '', batch: '', projectId: '', members: [], leader: '' };
+const emptyForm = { name: '', members: [], leader: '' };
 
 export default function TeamsPage() {
   const navigate = useNavigate();
@@ -37,10 +35,8 @@ export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const [projects, setProjects] = useState([]);
   const [projectMap, setProjectMap] = useState({});
   const [students, setStudents] = useState([]);
-  const [batchOptions, setBatchOptions] = useState([]);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState(null);
@@ -49,6 +45,7 @@ export default function TeamsPage() {
   const [formValues, setFormValues] = useState(emptyForm);
   const [formErrors, setFormErrors] = useState({});
   const [memberSearch, setMemberSearch] = useState('');
+  const [leaderSearch, setLeaderSearch] = useState('');
 
   const fetchTeams = useCallback(async () => {
     setLoading(true);
@@ -66,37 +63,46 @@ export default function TeamsPage() {
     fetchTeams();
   }, [fetchTeams]);
 
-  useEffect(() => {
-    Promise.all([getProjects({ limit: 500 }), getStudents({ limit: 1000 })])
-      .then(([projRes, stuRes]) => {
-        const projList = projRes.projects || [];
-        setProjects(projList);
-        const map = {};
+  const loadReferenceData = useCallback(async () => {
+    try {
+      const [projRes, stuRes] = await Promise.all([getProjects({ limit: 500 }), getStudents({ limit: 500 })]);
+      const projList = Array.isArray(projRes) ? projRes : (projRes?.projects || projRes?.data || []);
+      const map = {};
+      if (Array.isArray(projList)) {
         projList.forEach((p) => {
-          map[p._id] = p.title;
+          if (p && p._id) map[p._id] = p.title;
         });
-        setProjectMap(map);
+      }
+      setProjectMap(map);
 
-        const stuList = stuRes.students || [];
-        setStudents(stuList);
-        setBatchOptions([...new Set(stuList.map((s) => s.batch).filter(Boolean))]);
-      })
-      .catch((err) => console.error('Failed to fetch reference data:', err));
+      const stuList = Array.isArray(stuRes) ? stuRes : (stuRes?.students || stuRes?.data || []);
+      setStudents(stuList);
+    } catch (err) {
+      console.error('Failed to fetch reference data:', err);
+    }
   }, []);
 
+  useEffect(() => {
+    loadReferenceData();
+  }, [loadReferenceData]);
+
   const openCreate = () => {
+    loadReferenceData();
     setEditingTeam(null);
     setFormValues(emptyForm);
     setFormErrors({});
     setMemberSearch('');
+    setLeaderSearch('');
     setIsFormOpen(true);
   };
 
   const openEdit = async (team) => {
+    loadReferenceData();
     setEditingTeam(team);
-    setFormValues({ ...emptyForm, name: team.name, batch: team.batch || '', projectId: team.projectId || '', leader: team.leader || '' });
+    setFormValues({ ...emptyForm, name: team.name, leader: team.leader || '' });
     setFormErrors({});
     setMemberSearch('');
+    setLeaderSearch('');
     setIsFormOpen(true);
 
     try {
@@ -104,8 +110,6 @@ export default function TeamsPage() {
       const memberIds = (fullTeam.members || []).map((m) => m._id || m.id);
       setFormValues({
         name: fullTeam.name,
-        batch: fullTeam.batch || '',
-        projectId: fullTeam.project?._id || fullTeam.projectId || '',
         members: memberIds,
         leader: fullTeam.leader || '',
       });
@@ -169,18 +173,55 @@ export default function TeamsPage() {
     setFormErrors((err) => ({ ...err, members: undefined }));
   };
 
+  const getStudentRoll = (s) => {
+    if (!s) return '';
+    const raw = s.rollNo ?? s.rollNumber;
+    if (raw !== undefined && raw !== null && raw !== '') {
+      return String(raw);
+    }
+    const id = s._id || s.id;
+    return id ? `STU-${String(id).slice(-4).toUpperCase()}` : '';
+  };
+
+  const selectLeader = (sId) => {
+    setFormValues((v) => ({
+      ...v,
+      leader: sId,
+    }));
+    setFormErrors((err) => ({ ...err, leader: undefined }));
+  };
+
   const filteredMemberStudents = useMemo(() => {
-    const lower = memberSearch.toLowerCase();
-    return students.filter(
-      (s) => s.name.toLowerCase().includes(lower) || (s.email && s.email.toLowerCase().includes(lower)),
-    );
+    if (!memberSearch || !memberSearch.trim()) return students;
+    const lower = memberSearch.trim().toLowerCase();
+    return students.filter((s) => {
+      const name = String(s.name || '').toLowerCase();
+      const roll = getStudentRoll(s).toLowerCase();
+      const email = String(s.email || '').toLowerCase();
+      return name.includes(lower) || roll.includes(lower) || email.includes(lower);
+    });
   }, [students, memberSearch]);
+
+  const filteredLeaderStudents = useMemo(() => {
+    const selectedMembers = students.filter((s) => formValues.members.includes(s._id || s.id));
+    if (!leaderSearch || !leaderSearch.trim()) return selectedMembers;
+    const lower = leaderSearch.trim().toLowerCase();
+    return selectedMembers.filter((s) => {
+      const name = String(s.name || '').toLowerCase();
+      const roll = getStudentRoll(s).toLowerCase();
+      const email = String(s.email || '').toLowerCase();
+      return name.includes(lower) || roll.includes(lower) || email.includes(lower);
+    });
+  }, [students, formValues.members, leaderSearch]);
 
   const renderSelectedMembers = (selectedIds) => {
     if (!selectedIds || selectedIds.length === 0) return 'Select members';
     return students
       .filter((s) => selectedIds.includes(s._id || s.id))
-      .map((s) => s.name)
+      .map((s) => {
+        const roll = getStudentRoll(s);
+        return roll ? `${s.name} (${roll})` : s.name;
+      })
       .join(', ');
   };
 
@@ -264,7 +305,7 @@ export default function TeamsPage() {
       >
         <form onSubmit={handleSaveTeam}>
           <p className="mb-6 text-sm text-muted-foreground">
-            Create a new team, assign a project, and define members and leadership.
+            {editingTeam ? 'Update team name, members, and leadership.' : 'Create a new team, select team members, and assign a team lead.'}
           </p>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -279,22 +320,6 @@ export default function TeamsPage() {
               placeholder="e.g. Alpha Team"
             />
 
-            <Select
-              label="Batch (Optional)"
-              value={formValues.batch}
-              onChange={(next) => setField('batch')({ target: { value: next } })}
-              options={batchOptions.map((b) => ({ label: b, value: b }))}
-              placeholder="None"
-            />
-
-            <Select
-              label="Project (Optional)"
-              value={formValues.projectId}
-              onChange={(next) => setField('projectId')({ target: { value: next } })}
-              options={projects.map((p) => ({ label: p.title, value: p._id || p.id }))}
-              placeholder="None"
-            />
-
             <div className="space-y-1.5 sm:col-span-2">
               <Label>
                 Team Members
@@ -306,26 +331,36 @@ export default function TeamsPage() {
                   <Input
                     value={memberSearch}
                     onChange={(e) => setMemberSearch(e.target.value)}
-                    placeholder="Search students..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') e.preventDefault();
+                    }}
+                    placeholder="Search students by name or roll no..."
                     className="h-9 bg-card pl-9"
                   />
                 </div>
                 <div className="max-h-48 space-y-0.5 overflow-y-auto">
-                  {filteredMemberStudents.map((student) => {
-                    const sId = student._id || student.id;
-                    const checked = formValues.members.includes(sId);
-                    return (
-                      <button
-                        key={sId}
-                        type="button"
-                        onClick={() => toggleMember(sId)}
-                        className="flex w-full cursor-pointer items-center gap-2 rounded px-1.5 py-1.5 text-left hover:bg-accent"
-                      >
-                        <Checkbox checked={checked} />
-                        <span className="text-sm text-foreground">{student.name}</span>
-                      </button>
-                    );
-                  })}
+                  {filteredMemberStudents.length === 0 ? (
+                    <p className="px-1.5 py-2 text-sm text-muted-foreground">No students found.</p>
+                  ) : (
+                    filteredMemberStudents.map((student) => {
+                      const sId = student._id || student.id;
+                      const checked = formValues.members.includes(sId);
+                      const roll = getStudentRoll(student);
+                      return (
+                        <div
+                          key={sId}
+                          onClick={() => toggleMember(sId)}
+                          className="flex w-full cursor-pointer items-center gap-2 rounded px-1.5 py-1.5 text-left hover:bg-accent"
+                        >
+                          <Checkbox checked={checked} onCheckedChange={() => toggleMember(sId)} />
+                          <span className="flex min-w-0 items-center gap-1.5">
+                            <span className="text-sm text-foreground">{student.name}</span>
+                            {roll && <span className="font-mono text-xs text-muted-foreground">({roll})</span>}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
               {formErrors.members && <p className="text-xs font-medium text-destructive">{formErrors.members}</p>}
@@ -335,18 +370,72 @@ export default function TeamsPage() {
             </div>
 
             <div className="space-y-1.5 sm:col-span-2">
-              <Select
-                label="Team Leader"
-                value={formValues.leader}
-                onChange={(next) => setField('leader')({ target: { value: next } })}
-                options={students
-                  .filter((s) => formValues.members.includes(s._id || s.id))
-                  .map((s) => ({ label: s.name, value: s._id || s.id }))}
-                placeholder={formValues.members.length === 0 ? 'Select members first' : 'Select team leader'}
-                error={formErrors.leader}
-                disabled={formValues.members.length === 0}
-                required
-              />
+              <Label>
+                Team Lead
+                <span className="text-destructive"> *</span>
+              </Label>
+              <div className="rounded-lg border bg-muted/40 p-3">
+                <div className="relative mb-2">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={leaderSearch}
+                    onChange={(e) => setLeaderSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') e.preventDefault();
+                    }}
+                    placeholder="Search team lead by name or roll no..."
+                    className="h-9 bg-card pl-9"
+                  />
+                </div>
+                <div className="max-h-48 space-y-0.5 overflow-y-auto">
+                  {filteredLeaderStudents.length === 0 ? (
+                    <p className="px-1.5 py-2 text-sm text-muted-foreground">
+                      {formValues.members.length === 0
+                        ? 'Please select team members above first.'
+                        : 'No matching team members found.'}
+                    </p>
+                  ) : (
+                    filteredLeaderStudents.map((student) => {
+                      const sId = student._id || student.id;
+                      const isSelected = formValues.leader === sId;
+                      const roll = getStudentRoll(student);
+                      return (
+                        <div
+                          key={sId}
+                          onClick={() => selectLeader(sId)}
+                          className={cn(
+                            'flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left transition-colors hover:bg-accent',
+                            isSelected && 'bg-primary/10 font-semibold',
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            name="teamLeader"
+                            checked={isSelected}
+                            onChange={() => selectLeader(sId)}
+                            className="h-4 w-4 text-primary pointer-events-none"
+                          />
+                          <span className="flex min-w-0 items-center gap-1.5 text-sm text-foreground">
+                            <span>{student.name}</span>
+                            {roll && <span className="font-mono text-xs text-muted-foreground">({roll})</span>}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+              {formErrors.leader && <p className="text-xs font-medium text-destructive">{formErrors.leader}</p>}
+              {formValues.leader && (() => {
+                const leaderObj = students.find((s) => (s._id || s.id) === formValues.leader);
+                if (!leaderObj) return null;
+                const roll = getStudentRoll(leaderObj);
+                return (
+                  <p className="text-xs text-muted-foreground">
+                    Selected Lead: <span className="font-medium text-foreground">{leaderObj.name}</span> {roll && `(${roll})`}
+                  </p>
+                );
+              })()}
             </div>
           </div>
 
