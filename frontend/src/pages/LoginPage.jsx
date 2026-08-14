@@ -41,6 +41,7 @@ export default function LoginPage() {
     setSubmitting(true)
     try {
       const user = await login(email.trim(), password, isStudent ? 'student' : 'admin')
+      toast.success('Logged in!')
       goHome(user)
     } catch (err) {
       const status = err.response?.status

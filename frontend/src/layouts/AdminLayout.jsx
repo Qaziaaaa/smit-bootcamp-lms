@@ -48,8 +48,10 @@ function SidebarContent({ pathname, onNavigate }) {
 
   return (
     <div className="flex h-full flex-col border-r bg-sidebar text-sidebar-foreground">
-      <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
-        <Logo />
+      <div className="flex shrink-0 items-center border-b p-4">
+        <div className="flex flex-1 justify-center">
+          <Logo />
+        </div>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-3">
@@ -71,7 +73,7 @@ function SidebarContent({ pathname, onNavigate }) {
               )}
             >
               <item.icon size={20} strokeWidth={1.8} className="shrink-0" />
-              {item.label}
+              <span className="min-w-0 truncate">{item.label}</span>
             </Link>
           )
         })}
@@ -124,7 +126,7 @@ export function AdminLayout() {
 
   return (
     <div className="flex h-screen w-full max-w-full flex-col overflow-hidden bg-background md:flex-row">
-      <aside className="hidden w-[240px] shrink-0 md:block">
+      <aside className="hidden w-[180px] shrink-0 md:block lg:w-[200px]">
         <SidebarContent pathname={pathname} />
       </aside>
 
