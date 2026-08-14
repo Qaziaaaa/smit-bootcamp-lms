@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Alert, Box, Button, Paper, Snackbar, Typography } from '@mui/material'
 import {
   ArrowRight,
   CalendarCheck,
@@ -11,9 +10,13 @@ import {
   Play,
   Users,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { getStudentAttendance, getStudentProfile, getStudentTasks, updateTaskProgress } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
 import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
+import { StatCard } from '../components/ui/StatCard'
+import { cn } from '../lib/utils'
 
 // Builds the current week (Sun-Sat) and marks specific days as active based on student schedule
 function currentWeek(activeDays = []) {
@@ -52,7 +55,6 @@ export default function StudentDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [updatingId, setUpdatingId] = useState(null)
-  const [snackbar, setSnackbar] = useState(null)
 
   // Fetch profile, attendance and tasks in parallel; used on mount and on retry
   const loadData = useCallback(async () => {
@@ -85,9 +87,9 @@ export default function StudentDashboardPage() {
     try {
       await updateTaskProgress(task._id, status)
       setTasks((prev) => prev.map((item) => (item._id === task._id ? { ...item, status } : item)))
-      setSnackbar({ severity: 'success', message: 'Task progress updated' })
+      toast.success('Task progress updated')
     } catch {
-      setSnackbar({ severity: 'error', message: 'Failed to update task progress' })
+      toast.error('Failed to update task progress')
     } finally {
       setUpdatingId(null)
     }
@@ -96,9 +98,9 @@ export default function StudentDashboardPage() {
   // Loading state while fetching data
   if (loading) {
     return (
-      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
-        <Typography color="#828283">Loading dashboard...</Typography>
-      </Box>
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-muted-foreground">Loading dashboard...</p>
+      </div>
     )
   }
 
@@ -118,15 +120,15 @@ export default function StudentDashboardPage() {
   const totalDays = summary.totalDays ?? 0
   const percentage = Math.round(summary.percentage ?? 0)
 
-  // Dynamic standing status label & text color (background remains clean/unchanged)
+  // Dynamic standing status label & text color
   let standingText = 'Good Standing'
-  let standingColor = '#22C55E' // Green for >= 75%
+  let standingColor = 'hsl(var(--clr-green))' // Green for >= 75%
   if (percentage < 50) {
     standingText = 'Low Attendance'
-    standingColor = '#EF4444' // Red for < 50%
+    standingColor = 'hsl(var(--clr-red))' // Red for < 50%
   } else if (percentage < 75) {
     standingText = 'Average Standing'
-    standingColor = '#F59E0B' // Orange for 50-74%
+    standingColor = 'hsl(var(--clr-amber))' // Orange for 50-74%
   }
 
   // Derived task counts (active = not yet completed)
@@ -139,323 +141,159 @@ export default function StudentDashboardPage() {
   const week = currentWeek(activeDays)
 
   return (
-    <Box sx={{ display: 'grid', gap: 3 }}>
+    <div className="grid gap-3">
       {/* Welcome banner: greeting + batch/team summary + shortcut to sprint tasks */}
-      <Box
-        sx={{
-          p: 3,
-          borderRadius: 3,
-          color: '#ffffff',
-          background: 'linear-gradient(90deg, #01579B 0%, #0277BD 50%, #7CB342 100%)',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.12)',
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          alignItems: { md: 'center' },
-          justifyContent: 'space-between',
-          gap: 2,
-        }}
-      >
-        <Box sx={{ minWidth: 0 }}>
+      <div className="flex flex-col gap-2 rounded-xl bg-clr-blue-dark p-3 text-white shadow-md md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
           {/* SMIT badge */}
-          <Box
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 0.75,
-              px: 1.5,
-              py: 0.5,
-              mb: 1,
-              borderRadius: 9999,
-              bgcolor: 'rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(8px)',
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            <GraduationCap size={16} color="#B9F6CA" />
+          <div className="mb-1 inline-flex items-center gap-0.75 rounded-full bg-white/20 px-1.5 py-0.5 text-xs font-semibold backdrop-blur">
+            <GraduationCap size={16} className="text-clr-green-bg" />
             <span>Saylani Mass IT Training (SMIT)</span>
-          </Box>
+          </div>
           {/* Personalized greeting with student name */}
-          <Typography sx={{ fontSize: { xs: 20, sm: 24 }, fontWeight: 500, letterSpacing: '-0.02em' }}>
-            Welcome back, {name}!
-          </Typography>
+          <h2 className="text-xl font-medium tracking-tight sm:text-2xl">Welcome back, {name}!</h2>
           {/* Enrollment line: batch and team */}
-          <Typography sx={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.9)', mt: 0.5 }}>
-            Enrolled in SMIT Batch {batch} - Web Dev • Team {teamName}
-          </Typography>
-        </Box>
+          <p className="mt-0.5 text-xs text-white/90">Enrolled in SMIT Batch {batch} - Web Dev • Team {teamName}</p>
+        </div>
         {/* Quick link to the full tasks page */}
-        <Button
-          component={Link}
-          to="/student/tasks"
-          sx={{
-            flexShrink: 0,
-            bgcolor: '#ffffff',
-            color: '#0277BD',
-            fontSize: 12,
-            fontWeight: 500,
-            height: 36,
-            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-            '&:hover': { bgcolor: '#F4F9FF' },
-          }}
-        >
-          View My Sprint Tasks <ArrowRight size={16} style={{ marginLeft: 8 }} />
+        <Button asChild className="h-9 shrink-0 bg-card text-xs font-medium text-clr-blue shadow-sm hover:bg-clr-blue-bg">
+          <Link to="/student/tasks">
+            View My Sprint Tasks <ArrowRight size={16} className="ml-2" />
+          </Link>
         </Button>
-      </Box>
+      </div>
 
       {/* Overview: 3 metric cards (left) + class schedule widget (right) */}
-      <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' } }}>
-        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' } }}>
-          {/* Metric card: attendance (present/total + percentage pill) */}
-          <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5 }}>
-            <Box>
-              <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-                My Attendance
-              </Typography>
-              <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#0A0A0A', fontVariantNumeric: 'tabular-nums' }}>
-                {present}/{totalDays}
-              </Typography>
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  mt: 1,
-                  px: 1.25,
-                  py: 0.25,
-                  borderRadius: 9999,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: standingColor,
-                }}
-              >
-                {percentage}% {standingText}
-              </Box>
-            </Box>
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: '50%',
-                bgcolor: '#E8F5E9',
-                border: 1,
-                borderColor: 'rgba(34, 197, 94, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#22C55E',
-                flexShrink: 0,
-              }}
-            >
-              <CalendarCheck size={24} strokeWidth={2} />
-            </Box>
-          </Paper>
-
+      <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
+        <div className="grid gap-2 sm:grid-cols-3">
+          {/* Metric card: attendance (present/total + standing subtitle) */}
+          <StatCard
+            label="My Attendance"
+            value={`${present}/${totalDays}`}
+            subtitle={`${percentage}% ${standingText}`}
+            subtitleColor={standingColor}
+            icon={CalendarCheck}
+            iconBg="hsl(var(--clr-emerald-bg))"
+            iconBorder="hsl(var(--clr-green) / 0.25)"
+            iconColor="hsl(var(--clr-green))"
+          />
           {/* Metric card: team (name + member subtitle) */}
-          <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5 }}>
-            <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-                My Team
-              </Typography>
-              <Typography sx={{ mt: 0.5, fontSize: 20, fontWeight: 500, color: '#0A0A0A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150 }}>
-                {teamName}
-              </Typography>
-              <Typography sx={{ mt: 0.5, fontSize: 12, fontWeight: 600, color: '#2D69EB' }}>Bootcamp Team Member</Typography>
-            </Box>
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 2,
-                bgcolor: '#F4F9FF',
-                border: 1,
-                borderColor: 'rgba(45, 105, 235, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#2D69EB',
-                flexShrink: 0,
-              }}
-            >
-              <Users size={24} strokeWidth={1.75} />
-            </Box>
-          </Paper>
-
+          <StatCard
+            label="My Team"
+            value={teamName}
+            subtitle="Bootcamp Team Member"
+            subtitleColor="hsl(var(--clr-blue))"
+            icon={Users}
+          />
           {/* Metric card: active task count + completed count */}
-          <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5 }}>
-            <Box>
-              <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-                Active Tasks
-              </Typography>
-              <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#0A0A0A', fontVariantNumeric: 'tabular-nums' }}>
-                {activeCount}
-              </Typography>
-              <Typography sx={{ mt: 0.5, fontSize: 12, color: '#828283' }}>{completedCount} completed</Typography>
-            </Box>
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 2,
-                bgcolor: '#FFFBEB',
-                border: 1,
-                borderColor: '#FDE68A',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#D97706',
-                flexShrink: 0,
-              }}
-            >
-              <CheckSquare size={24} strokeWidth={1.75} />
-            </Box>
-          </Paper>
-        </Box>
+          <StatCard
+            label="Active Tasks"
+            value={activeCount}
+            subtitle={`${completedCount} completed`}
+            icon={CheckSquare}
+            iconBg="hsl(var(--clr-amber-bg))"
+            iconBorder="hsl(var(--clr-amber) / 0.3)"
+            iconColor="hsl(var(--clr-amber))"
+          />
+        </div>
 
         {/* Schedule widget: current week grid, class days highlighted */}
-        <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', overflow: 'hidden' }}>
-          <Box sx={{ p: 2, pb: 1.5 }}>
-            <Typography sx={{ fontSize: 16, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1, color: '#0A0A0A' }}>
-              <CalendarDays size={18} color="#0A0A0A" /> Class Schedule
-            </Typography>
-          </Box>
-          <Box sx={{ px: 2, pb: 2 }}>
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0.75 }}>
+        <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+          <div className="px-2 pb-1.5 pt-2">
+            <h3 className="flex items-center gap-1 text-base font-semibold text-foreground">
+              <CalendarDays size={18} className="text-foreground" /> Class Schedule
+            </h3>
+          </div>
+          <div className="px-2 pb-2">
+            <div className="grid grid-cols-7 gap-0.75">
               {week.map((day) => (
-                <Box
+                <div
                   key={day.name}
-                  sx={{
-                    p: 1,
-                    borderRadius: 1.5,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    ...(day.active
-                      ? { bgcolor: '#22C55E', color: '#ffffff', border: 1, borderColor: '#22C55E' }
-                      : { bgcolor: '#ffffff', color: '#828283', border: 1, borderColor: '#E2E8F0' }),
-                  }}
+                  className={cn(
+                    'flex flex-col items-center justify-center rounded-md border p-1',
+                    day.active
+                      ? 'border-clr-green bg-clr-green text-white'
+                      : 'border-border bg-card text-muted-foreground',
+                  )}
                 >
-                  <Typography sx={{ fontSize: 11, fontWeight: day.active ? 600 : 500 }}>{day.name}</Typography>
-                  <Typography sx={{ fontSize: 14, fontWeight: day.active ? 700 : 500, mt: 0.25 }}>{day.date}</Typography>
-                </Box>
+                  <span className={day.active ? 'text-[11px] font-semibold' : 'text-[11px] font-medium'}>{day.name}</span>
+                  <span className={cn('mt-0.25 text-sm', day.active ? 'font-bold' : 'font-medium')}>{day.date}</span>
+                </div>
               ))}
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Sprint tasks section: list of assigned tasks with progress actions */}
-      <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', overflow: 'hidden' }}>
-        <Box
-          sx={{
-            bgcolor: '#F4F9FF',
-            p: 2.5,
-            borderBottom: 1,
-            borderColor: 'divider',
-            display: 'flex',
-            alignItems: { sm: 'center' },
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 1,
-          }}
-        >
-          <Box>
-            <Typography sx={{ fontWeight: 600, fontSize: 18, color: '#0A0A0A' }}>Sprint Tasks Assigned To You</Typography>
-            <Typography sx={{ fontSize: 13, color: '#828283', mt: 0.25 }}>
+      <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-1 border-b border-border bg-clr-blue-bg p-2.5 sm:items-center">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Sprint Tasks Assigned To You</h3>
+            <p className="mt-0.25 text-[13px] text-muted-foreground">
               Update your progress as you work on sprint deliverables.
-            </Typography>
-          </Box>
+            </p>
+          </div>
           {/* Link to the full tasks page */}
-          <Button
-            component={Link}
-            to="/student/tasks"
-            sx={{ fontSize: 12, fontWeight: 500, color: '#2D69EB', minHeight: 'auto', p: 0.5, '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' } }}
-          >
-            Manage All Tasks
+          <Button asChild variant="ghost" className="h-auto p-0.5 text-xs font-medium text-clr-blue hover:bg-transparent hover:underline">
+            <Link to="/student/tasks">Manage All Tasks</Link>
           </Button>
-        </Box>
+        </div>
 
         {/* Empty state when no tasks are assigned */}
         {tasks.length === 0 ? (
           <EmptyState message="No tasks assigned yet." icon={CheckSquare} />
         ) : (
           tasks.map((task, index) => (
-            <Box
+            <div
               key={task._id}
-              sx={{
-                p: 2,
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                alignItems: { sm: 'center' },
-                justifyContent: 'space-between',
-                gap: 2,
-                borderBottom: index < tasks.length - 1 ? 1 : 0,
-                borderColor: 'divider',
-                '&:hover': { bgcolor: '#F8FAFA' },
-              }}
+              className={cn(
+                'flex flex-col gap-2 p-2 hover:bg-muted sm:flex-row sm:items-center sm:justify-between',
+                index < tasks.length - 1 && 'border-b border-border',
+              )}
             >
-              <Box sx={{ minWidth: 0 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1">
                   {/* Task title + status pill */}
-                  <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#0A0A0A' }}>{task.title}</Typography>
+                  <span className="text-[13px] font-medium text-foreground">{task.title}</span>
                   <Badge status={task.status} />
-                </Box>
+                </div>
                 {/* Task description (fallback text when empty) */}
-                <Typography sx={{ fontSize: 12, color: '#828283', mt: 0.5 }}>
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {task.description || 'No description provided.'}
-                </Typography>
-              </Box>
+                </p>
+              </div>
               {/* Progress actions hidden once the task is completed */}
               {task.status !== 'completed' && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                <div className="flex shrink-0 items-center gap-1">
                   {/* Start Work: moves a pending task to in-progress */}
                   {task.status === 'pending' && (
                     <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<Play size={14} />}
+                      variant="outline"
+                      size="sm"
+                      className="border-clr-blue text-xs text-clr-blue hover:border-clr-blue hover:bg-clr-blue-bg"
                       disabled={updatingId === task._id}
                       onClick={() => handleUpdateStatus(task, 'in-progress')}
-                      sx={{
-                        fontSize: 12,
-                        minHeight: 32,
-                        px: 1.5,
-                        color: '#2D69EB',
-                        borderColor: '#2D69EB',
-                        '&:hover': { bgcolor: '#F4F9FF', borderColor: '#2D69EB' },
-                      }}
                     >
-                      Start Work
+                      <Play size={14} /> Start Work
                     </Button>
                   )}
                   {/* Mark Completed: finishes the task */}
                   <Button
-                    size="small"
-                    startIcon={<CheckCircle2 size={14} />}
+                    variant="success"
+                    size="sm"
+                    className="text-xs"
                     disabled={updatingId === task._id}
                     onClick={() => handleUpdateStatus(task, 'completed')}
-                    sx={{ fontSize: 12, minHeight: 32, px: 1.5, bgcolor: '#22C55E', color: '#ffffff', '&:hover': { bgcolor: '#16A34A' } }}
                   >
-                    Mark Completed
+                    <CheckCircle2 size={14} /> Mark Completed
                   </Button>
-                </Box>
+                </div>
               )}
-            </Box>
+            </div>
           ))
         )}
-      </Paper>
-
-      {/* Toast notification for task progress success/error */}
-      <Snackbar
-        open={Boolean(snackbar)}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert onClose={() => setSnackbar(null)} severity={snackbar?.severity} variant="filled" sx={{ width: '100%' }}>
-          {snackbar?.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+      </div>
+    </div>
   )
 }

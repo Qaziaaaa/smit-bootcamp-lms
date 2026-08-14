@@ -1,39 +1,40 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useForm, Controller, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useMemo, useState } from 'react';
 import * as z from 'zod';
-import { 
-  Button, Box, Typography, OutlinedInput, Select, MenuItem, 
-  FormHelperText, Radio, RadioGroup, FormControlLabel, 
-  Checkbox, ListSubheader, InputAdornment 
-} from '@mui/material';
 import { Search } from 'lucide-react';
+import { cn } from '../../lib/utils';
+import { Button } from '../ui/Button';
+import { Checkbox } from '../ui/Checkbox';
+import { FormField } from '../ui/FormField';
+import { Input } from '../ui/Input';
+import { Select } from '../ui/Select';
 import { Modal } from '../ui/Modal';
 
-const projectSchema = z.object({
-  title: z.string().min(2, 'Title is required'),
-  description: z.string().optional(),
-  status: z.enum(['active', 'completed', 'on-hold']).default('active'),
-  deadline: z.string().optional(),
-  assignmentMode: z.enum(['individual', 'team', 'everyone']).default('team'),
-  teamId: z.string().optional(),
-  assignedStudents: z.array(z.string()).optional(),
-}).superRefine((data, ctx) => {
-  if (data.assignmentMode === 'team' && !data.teamId) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Team is required when assigning to a team',
-      path: ['teamId'],
-    });
-  }
-  if (data.assignmentMode === 'individual' && (!data.assignedStudents || data.assignedStudents.length === 0)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'At least one student must be selected',
-      path: ['assignedStudents'],
-    });
-  }
-});
+const projectSchema = z
+  .object({
+    title: z.string().min(2, 'Title is required'),
+    description: z.string().optional(),
+    status: z.enum(['active', 'completed', 'on-hold']).default('active'),
+    deadline: z.string().optional(),
+    assignmentMode: z.enum(['individual', 'team', 'everyone']).default('team'),
+    teamId: z.string().optional(),
+    assignedStudents: z.array(z.string()).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.assignmentMode === 'team' && !data.teamId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Team is required when assigning to a team',
+        path: ['teamId'],
+      });
+    }
+    if (data.assignmentMode === 'individual' && (!data.assignedStudents || data.assignedStudents.length === 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'At least one student must be selected',
+        path: ['assignedStudents'],
+      });
+    }
+  });
 
 const STATUS_OPTIONS = [
   { label: 'Active', value: 'active' },
@@ -41,347 +42,285 @@ const STATUS_OPTIONS = [
   { label: 'On Hold', value: 'on-hold' },
 ];
 
-const Label = ({ children }) => (
-  <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#828283', textTransform: 'uppercase', mb: 0.5 }}>
-    {children}
-  </Typography>
-);
+const MODE_OPTIONS = [
+  { value: 'individual', label: 'Individual Students' },
+  { value: 'team', label: 'Team' },
+  { value: 'everyone', label: 'Everyone' },
+];
 
-const inputStyles = {
-  borderRadius: '8px',
-  bgcolor: '#FFFFFF',
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#E2E8F0',
-  },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#CBD5E1',
-  },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#2D69EB',
-    borderWidth: '1px',
-  },
-  '& .MuiOutlinedInput-input': {
-    fontSize: '14px',
-    color: '#0A0A0A',
-  }
+const emptyValues = {
+  title: '',
+  description: '',
+  status: 'active',
+  deadline: '',
+  assignmentMode: 'team',
+  teamId: '',
+  assignedStudents: [],
 };
 
 export const ProjectForm = ({ open, onClose, onSubmit, initialData = null, teams = [], students = [] }) => {
   const isEditing = !!initialData;
+  const [values, setValues] = useState(emptyValues);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [studentSearch, setStudentSearch] = useState('');
-
-  const { control, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(projectSchema),
-    defaultValues: {
-      title: '',
-      description: '',
-      status: 'active',
-      deadline: '',
-      assignmentMode: 'team',
-      teamId: '',
-      assignedStudents: [],
-    },
-  });
-
-  const assignmentMode = useWatch({ control, name: 'assignmentMode' });
-  const teamId = useWatch({ control, name: 'teamId' });
-  const assignedStudents = useWatch({ control, name: 'assignedStudents' }) || [];
 
   useEffect(() => {
     if (open) {
-      setStudentSearch('');
-      reset({
+      setValues({
         title: initialData?.title || '',
         description: initialData?.description || '',
         status: initialData?.status || 'active',
         deadline: initialData?.deadline || '',
-        assignmentMode: initialData?.assignmentMode || (initialData?.teamId ? 'team' : 'team'),
+        assignmentMode: initialData?.assignmentMode || 'team',
         teamId: initialData?.teamId || '',
         assignedStudents: initialData?.assignedStudents || [],
       });
+      setErrors({});
+      setStudentSearch('');
     }
-  }, [open, initialData, reset]);
+  }, [open, initialData]);
 
-  const onFormSubmit = async (data) => {
-    await onSubmit({
-      title: data.title,
-      description: data.description || undefined,
-      status: data.status,
-      deadline: data.deadline || undefined,
-      assignmentMode: data.assignmentMode,
-      teamId: data.assignmentMode === 'team' ? data.teamId : undefined,
-      assignedStudents: data.assignmentMode === 'individual' ? data.assignedStudents : undefined,
-    });
-    onClose();
+  const setField = (name) => (e) => {
+    setValues((v) => ({ ...v, [name]: e.target.value }));
+    setErrors((err) => ({ ...err, [name]: undefined }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = projectSchema.safeParse(values);
+    if (!result.success) {
+      const next = {};
+      for (const issue of result.error.issues) {
+        if (!next[issue.path[0]]) next[issue.path[0]] = issue.message;
+      }
+      setErrors(next);
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const { teamId, assignedStudents, ...rest } = result.data;
+      await onSubmit({
+        ...rest,
+        teamId: result.data.assignmentMode === 'team' ? teamId : undefined,
+        assignedStudents: result.data.assignmentMode === 'individual' ? assignedStudents : undefined,
+      });
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filteredStudents = useMemo(() => {
     if (!studentSearch.trim()) return students;
     const lower = studentSearch.toLowerCase();
-    return students.filter(s => 
-      (s.name && s.name.toLowerCase().includes(lower)) || 
-      (s.email && s.email.toLowerCase().includes(lower))
+    return students.filter(
+      (s) =>
+        (s.name && s.name.toLowerCase().includes(lower)) ||
+        (s.email && s.email.toLowerCase().includes(lower)),
     );
   }, [students, studentSearch]);
 
-  const handleSelectAllStudents = () => {
-    if (assignedStudents.length === students.length) {
-      setValue('assignedStudents', []);
-    } else {
-      setValue('assignedStudents', students.map(s => s._id || s.id));
-    }
+  const studentIds = students.map((s) => s._id || s.id);
+  const allSelected = studentIds.length > 0 && studentIds.every((id) => values.assignedStudents.includes(id));
+
+  const handleSelectAll = () => {
+    setValues((v) => ({
+      ...v,
+      assignedStudents: allSelected ? [] : studentIds,
+    }));
+    setErrors((err) => ({ ...err, assignedStudents: undefined }));
+  };
+
+  const toggleStudent = (id) => {
+    setValues((v) => ({
+      ...v,
+      assignedStudents: v.assignedStudents.includes(id)
+        ? v.assignedStudents.filter((x) => x !== id)
+        : [...v.assignedStudents, id],
+    }));
+    setErrors((err) => ({ ...err, assignedStudents: undefined }));
   };
 
   let summaryText = 'No assignment selected';
-  if (assignmentMode === 'individual') {
-    summaryText = `Individual → ${assignedStudents.length} Student${assignedStudents.length !== 1 ? 's' : ''}`;
-  } else if (assignmentMode === 'team') {
-    const selectedTeam = teams.find(t => (t._id || t.id) === teamId);
-    if (selectedTeam) {
-      summaryText = `Team → ${selectedTeam.name} — ${selectedTeam.memberCount || 0} Members`;
-    } else {
-      summaryText = 'Team → None Selected';
-    }
-  } else if (assignmentMode === 'everyone') {
+  if (values.assignmentMode === 'individual') {
+    summaryText = `Individual → ${values.assignedStudents.length} Student${values.assignedStudents.length !== 1 ? 's' : ''}`;
+  } else if (values.assignmentMode === 'team') {
+    const selectedTeam = teams.find((t) => (t._id || t.id) === values.teamId);
+    summaryText = selectedTeam
+      ? `Team → ${selectedTeam.name} — ${selectedTeam.memberCount || 0} Members`
+      : 'Team → None Selected';
+  } else if (values.assignmentMode === 'everyone') {
     summaryText = 'Everyone → All Students';
   }
-
-  const actions = (
-    <Box sx={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Box sx={{ flex: 1 }}>
-        <Typography sx={{ fontSize: '12px', fontWeight: 600, color: '#2D69EB', bgcolor: '#F0F5FF', px: 1.5, py: 0.75, borderRadius: 1, display: 'inline-block' }}>
-          {summaryText}
-        </Typography>
-      </Box>
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <Button onClick={onClose} color="inherit" disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSubmit(onFormSubmit)}
-          color="primary"
-          variant="contained"
-          disabled={isSubmitting}
-          disableElevation
-        >
-          {isSubmitting ? 'Saving...' : 'Save Project'}
-        </Button>
-      </Box>
-    </Box>
-  );
 
   return (
     <Modal
       open={open}
       onClose={onClose}
       title={isEditing ? 'Edit Project' : 'Add Project'}
-      actions={actions}
-      hideDividers
       maxWidth="sm"
+      hideDividers
     >
-      <form onSubmit={handleSubmit(onFormSubmit)}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2.5 }}>
-            <Box sx={{ gridColumn: '1 / -1' }}>
-              <Label>Project Title *</Label>
-              <Controller
-                name="title"
-                control={control}
-                render={({ field }) => (
-                  <OutlinedInput
-                    {...field}
-                    fullWidth
-                    placeholder="e.g. Website Redesign"
-                    error={!!errors.title}
-                    sx={inputStyles}
-                  />
-                )}
-              />
-              {errors.title && <FormHelperText error sx={{ ml: 0.5 }}>{errors.title.message}</FormHelperText>}
-            </Box>
-
-            <Box sx={{ gridColumn: '1 / -1' }}>
-              <Label>Description</Label>
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <OutlinedInput
-                    {...field}
-                    fullWidth
-                    multiline
-                    rows={3}
-                    placeholder="Brief description of the project"
-                    error={!!errors.description}
-                    sx={inputStyles}
-                  />
-                )}
-              />
-              {errors.description && <FormHelperText error sx={{ ml: 0.5 }}>{errors.description.message}</FormHelperText>}
-            </Box>
-
-            <Box>
-              <Label>Status *</Label>
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    fullWidth
-                    error={!!errors.status}
-                    sx={inputStyles}
-                  >
-                    {STATUS_OPTIONS.map((o) => (
-                      <MenuItem key={o.value} value={o.value} sx={{ fontSize: '14px' }}>{o.label}</MenuItem>
-                    ))}
-                  </Select>
-                )}
-              />
-              {errors.status && <FormHelperText error sx={{ ml: 0.5 }}>{errors.status.message}</FormHelperText>}
-            </Box>
-
-            <Box>
-              <Label>Deadline (Optional)</Label>
-              <Controller
-                name="deadline"
-                control={control}
-                render={({ field }) => (
-                  <OutlinedInput
-                    {...field}
-                    type="date"
-                    fullWidth
-                    error={!!errors.deadline}
-                    sx={inputStyles}
-                  />
-                )}
-              />
-              {errors.deadline && <FormHelperText error sx={{ ml: 0.5 }}>{errors.deadline.message}</FormHelperText>}
-            </Box>
-          </Box>
-
-          <Box sx={{ borderTop: 1, borderColor: 'divider', pt: 3 }}>
-            <Label>ASSIGN PROJECT TO</Label>
-            <Controller
-              name="assignmentMode"
-              control={control}
-              render={({ field }) => (
-                <RadioGroup row {...field} sx={{ mb: 2, gap: 2 }}>
-                  <FormControlLabel value="individual" control={<Radio size="small" />} label={<Typography sx={{ fontSize: '14px' }}>Individual Students</Typography>} />
-                  <FormControlLabel value="team" control={<Radio size="small" />} label={<Typography sx={{ fontSize: '14px' }}>Team</Typography>} />
-                  <FormControlLabel value="everyone" control={<Radio size="small" />} label={<Typography sx={{ fontSize: '14px' }}>Everyone</Typography>} />
-                </RadioGroup>
-              )}
+      <form onSubmit={handleSubmit}>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField
+              label="Project Title"
+              name="title"
+              className="sm:col-span-2"
+              value={values.title}
+              onChange={setField('title')}
+              error={errors.title}
+              required
+              placeholder="e.g. Website Redesign"
             />
+            <FormField
+              label="Description"
+              name="description"
+              className="sm:col-span-2"
+              multiline
+              rows={3}
+              value={values.description}
+              onChange={setField('description')}
+              error={errors.description}
+              placeholder="Brief description of the project"
+            />
+            <Select
+              label="Status"
+              value={values.status}
+              onChange={(next) => setField('status')({ target: { value: next } })}
+              options={STATUS_OPTIONS}
+              error={errors.status}
+              required
+            />
+            <FormField
+              label="Deadline (Optional)"
+              name="deadline"
+              type="date"
+              value={values.deadline}
+              onChange={setField('deadline')}
+              error={errors.deadline}
+            />
+          </div>
 
-            {assignmentMode === 'individual' && (
-              <Box sx={{ bgcolor: '#F8FAFA', p: 2, borderRadius: 2, border: 1, borderColor: 'divider' }}>
-                <Controller
-                  name="assignedStudents"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      multiple
-                      displayEmpty
-                      fullWidth
-                      sx={{ ...inputStyles, bgcolor: '#ffffff' }}
-                      error={!!errors.assignedStudents}
-                      renderValue={(selected) => {
-                        if (selected.length === 0) return <Typography sx={{ color: '#828283', fontSize: 14 }}>Select students...</Typography>;
-                        return <Typography sx={{ fontSize: 14 }}>{selected.length} Student(s) Selected</Typography>;
-                      }}
-                    >
-                      <ListSubheader sx={{ pt: 1, pb: 1, bgcolor: '#ffffff', zIndex: 2 }}>
-                        <OutlinedInput
-                          size="small"
-                          fullWidth
-                          placeholder="Search students..."
-                          value={studentSearch}
-                          onChange={(e) => setStudentSearch(e.target.value)}
-                          onKeyDown={(e) => e.stopPropagation()}
-                          startAdornment={<InputAdornment position="start"><Search size={16} color="#828283" /></InputAdornment>}
-                          sx={{ '& .MuiOutlinedInput-input': { fontSize: '14px' } }}
-                        />
-                      </ListSubheader>
-                      
-                      <MenuItem 
-                        value="all" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleSelectAllStudents();
-                        }}
-                        sx={{ fontSize: '14px', fontWeight: 600, color: '#2D69EB', borderBottom: 1, borderColor: 'divider', mb: 1 }}
-                      >
-                        {assignedStudents.length === students.length && students.length > 0 ? 'Deselect All' : 'Select All Students'}
-                      </MenuItem>
-
-                      {filteredStudents.length === 0 && (
-                        <MenuItem disabled sx={{ fontSize: '14px' }}>No students found.</MenuItem>
-                      )}
-                      
-                      {filteredStudents.map((s) => (
-                        <MenuItem key={s._id || s.id} value={s._id || s.id} sx={{ fontSize: '14px' }}>
-                          <Checkbox checked={field.value.includes(s._id || s.id)} size="small" />
-                          <Box>
-                            <Typography sx={{ fontSize: 14 }}>{s.name}</Typography>
-                            <Typography sx={{ fontSize: 12, color: '#828283' }}>{s.email}</Typography>
-                          </Box>
-                        </MenuItem>
-                      ))}
-                    </Select>
+          <div className="border-t pt-5">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Assign Project To
+            </p>
+            <div className="mb-4 flex flex-wrap gap-2">
+              {MODE_OPTIONS.map((m) => (
+                <button
+                  key={m.value}
+                  type="button"
+                  onClick={() => setField('assignmentMode')({ target: { value: m.value } })}
+                  className={cn(
+                    'rounded-md border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    values.assignmentMode === m.value
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-background text-muted-foreground hover:bg-accent',
                   )}
-                />
-                {errors.assignedStudents && <FormHelperText error sx={{ mt: 1 }}>{errors.assignedStudents.message}</FormHelperText>}
-              </Box>
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+
+            {values.assignmentMode === 'individual' && (
+              <div className="rounded-lg border bg-muted/40 p-3">
+                <div className="relative mb-2">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={studentSearch}
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                    placeholder="Search students..."
+                    className="h-9 bg-card pl-9"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSelectAll}
+                  className="flex w-full cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-left text-sm font-semibold text-primary hover:bg-accent"
+                >
+                  <Checkbox checked={allSelected} onCheckedChange={handleSelectAll} />
+                  {allSelected ? 'Deselect All' : 'Select All Students'}
+                </button>
+                {filteredStudents.length === 0 ? (
+                  <p className="px-1.5 py-2 text-sm text-muted-foreground">No students found.</p>
+                ) : (
+                  <div className="mt-1 max-h-48 space-y-0.5 overflow-y-auto">
+                    {filteredStudents.map((s) => {
+                      const id = s._id || s.id;
+                      const checked = values.assignedStudents.includes(id);
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => toggleStudent(id)}
+                          className="flex w-full cursor-pointer items-start gap-2 rounded px-1.5 py-1.5 text-left hover:bg-accent"
+                        >
+                          <Checkbox checked={checked} />
+                          <span className="min-w-0">
+                            <span className="block text-sm text-foreground">{s.name}</span>
+                            <span className="block truncate text-xs text-muted-foreground">{s.email}</span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {errors.assignedStudents && (
+                  <p className="mt-2 text-xs font-medium text-destructive">{errors.assignedStudents}</p>
+                )}
+              </div>
             )}
 
-            {assignmentMode === 'team' && (
-              <Box sx={{ bgcolor: '#F8FAFA', p: 2, borderRadius: 2, border: 1, borderColor: 'divider' }}>
-                <Controller
-                  name="teamId"
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      {...field}
-                      fullWidth
-                      displayEmpty
-                      error={!!errors.teamId}
-                      sx={{ ...inputStyles, bgcolor: '#ffffff' }}
-                    >
-                      <MenuItem value="" disabled sx={{ fontSize: '14px', color: '#828283' }}>Select a team...</MenuItem>
-                      {teams.map((t) => (
-                        <MenuItem key={t._id || t.id} value={t._id || t.id} sx={{ fontSize: '14px' }}>
-                          {t.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
+            {values.assignmentMode === 'team' && (
+              <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
+                <Select
+                  label="Select Team"
+                  value={values.teamId}
+                  onChange={(next) => setField('teamId')({ target: { value: next } })}
+                  options={teams.map((t) => ({ label: t.name, value: t._id || t.id }))}
+                  placeholder="Select a team..."
+                  error={errors.teamId}
                 />
-                {errors.teamId && <FormHelperText error sx={{ mt: 1 }}>{errors.teamId.message}</FormHelperText>}
-                {teamId && (() => {
-                  const selectedTeam = teams.find(t => (t._id || t.id) === teamId);
-                  const count = selectedTeam?.memberCount || 0;
-                  return (
-                    <Typography sx={{ fontSize: 13, color: '#059669', mt: 1.5, display: 'flex', alignItems: 'center', gap: 0.5, bgcolor: '#ECFDF5', p: 1, borderRadius: 1 }}>
-                      ALL {count} members of the selected team will receive this project.
-                    </Typography>
-                  );
-                })()}
-              </Box>
+                {values.teamId &&
+                  (() => {
+                    const selectedTeam = teams.find((t) => (t._id || t.id) === values.teamId);
+                    const count = selectedTeam?.memberCount || 0;
+                    return (
+                      <p className="rounded-md bg-clr-emerald-bg px-2 py-1.5 text-[13px] font-medium text-clr-green-dark">
+                        ALL {count} members of the selected team will receive this project.
+                      </p>
+                    );
+                  })()}
+              </div>
             )}
 
-            {assignmentMode === 'everyone' && (
-              <Box sx={{ bgcolor: '#F8FAFA', p: 2, borderRadius: 2, border: 1, borderColor: 'divider' }}>
-                <Typography sx={{ fontSize: 13, color: '#2D69EB', display: 'flex', alignItems: 'center', gap: 0.5, bgcolor: '#F0F5FF', p: 1, borderRadius: 1 }}>
+            {values.assignmentMode === 'everyone' && (
+              <div className="rounded-lg border bg-muted/40 p-3">
+                <p className="rounded-md bg-clr-blue-bg px-2 py-1.5 text-[13px] font-medium text-clr-blue-dark">
                   All bootcamp students will receive this project.
-                </Typography>
-              </Box>
+                </p>
+              </div>
             )}
-            
-          </Box>
-        </Box>
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center justify-between gap-3 border-t pt-4">
+          <span className="inline-block rounded bg-clr-blue-bg px-2 py-1 text-xs font-semibold text-clr-blue-dark">
+            {summaryText}
+          </span>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Project'}
+            </Button>
+          </div>
+        </div>
       </form>
     </Modal>
   );

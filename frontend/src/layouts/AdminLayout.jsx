@@ -1,22 +1,4 @@
-import { useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import {
-  AppBar,
-  Box,
-  BottomNavigation,
-  BottomNavigationAction,
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Paper,
-  Toolbar,
-  Typography,
-  Menu,
-  MenuItem,
-  ButtonBase,
-} from '@mui/material'
 import {
   CalendarCheck,
   CheckSquare,
@@ -28,11 +10,14 @@ import {
   Users,
   User as UserIcon,
   Moon,
+  Sun,
 } from 'lucide-react'
+import { cn } from '../lib/utils'
 import { useAuth } from '../hooks/useAuth'
+import { useTheme } from '../context/ThemeContext'
+import { Avatar } from '../components/ui/Avatar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/DropdownMenu'
 import { Logo } from '../components/ui/Logo'
-
-const DRAWER_WIDTH = 240
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -53,6 +38,7 @@ function todayLabel() {
 
 function SidebarContent({ pathname, onNavigate }) {
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   async function handleLogout() {
@@ -60,145 +46,72 @@ function SidebarContent({ pathname, onNavigate }) {
     navigate('/login', { replace: true })
   }
 
-  const [anchorEl, setAnchorEl] = useState(null)
-  const openMenu = Boolean(anchorEl)
-
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
-  const handleMenuClose = () => {
-    setAnchorEl(null)
-  }
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: '#F8FAFA' }}>
-      <Box
-        sx={{
-          px: 2,
-          py: 2,
-          borderBottom: 1,
-          borderColor: 'divider',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-        }}
-      >
+    <div className="flex h-full flex-col border-r bg-sidebar text-sidebar-foreground">
+      <div className="flex shrink-0 items-center justify-between border-b px-4 py-3">
         <Logo />
-      </Box>
+      </div>
 
-      <List sx={{ px: 1.5, py: 1.5, flexGrow: 1, overflowY: 'auto' }}>
-        <Typography
-          variant="caption"
-          sx={{
-            display: 'block',
-            px: 1.5,
-            py: 1,
-            fontWeight: 500,
-            fontSize: 10,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: '#828283',
-          }}
-        >
+      <nav className="flex-1 overflow-y-auto px-3 py-3">
+        <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
           Management
-        </Typography>
+        </p>
         {NAV_ITEMS.map((item) => {
           const active = isPathActive(pathname, item.to)
           return (
-            <ListItemButton
+            <Link
               key={item.to}
-              component={Link}
               to={item.to}
-              selected={active}
               onClick={onNavigate}
-              sx={{
-                minHeight: 44,
-                mb: 0.25,
-                px: 1.75,
-                borderRadius: 1.5,
-                color: active ? '#294683' : '#474B53',
-                fontWeight: active ? 600 : 500,
-                bgcolor: active ? '#F0F5FF' : 'transparent',
-                '&:hover': { bgcolor: '#F0F5FF', color: '#294683' },
-              }}
+              className={cn(
+                'mb-1 flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                active
+                  ? 'bg-clr-blue-bg font-semibold text-clr-blue-dark'
+                  : 'font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+              )}
             >
-              <ListItemIcon sx={{ minWidth: 34, color: 'inherit' }}>
-                <item.icon size={20} strokeWidth={1.8} />
-              </ListItemIcon>
-              <ListItemText primary={item.label} slotProps={{ primary: { fontSize: 14, fontWeight: 'inherit' } }} />
-            </ListItemButton>
+              <item.icon size={20} strokeWidth={1.8} className="shrink-0" />
+              {item.label}
+            </Link>
           )
         })}
-      </List>
+      </nav>
 
-      <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', bgcolor: 'rgba(255,255,255,0.5)', flexShrink: 0 }}>
-        <ButtonBase
-          onClick={handleMenuClick}
-          sx={{
-            width: '100%',
-            p: 1.5,
-            borderRadius: 1.5,
-            border: 1,
-            borderColor: openMenu ? '#2D69EB' : 'divider',
-            bgcolor: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.25,
-            textAlign: 'left',
-            '&:hover': { bgcolor: '#F8FAFA', borderColor: '#2D69EB' }
-          }}
-        >
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              bgcolor: '#2D69EB',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 14,
-              fontWeight: 600,
-              flexShrink: 0,
-            }}
-          >
-            {(user?.name || 'A').charAt(0).toUpperCase()}
-          </Box>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#0A0A0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {user?.name || 'Admin'}
-            </Typography>
-            <Typography sx={{ fontSize: 11, color: '#828283', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {user?.email}
-            </Typography>
-          </Box>
-        </ButtonBase>
-
-        <Menu
-          anchorEl={anchorEl}
-          open={openMenu}
-          onClose={handleMenuClose}
-          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-          slotProps={{ paper: { sx: { width: 200, mt: -1, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' } } }}
-        >
-          <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ py: 1.5, gap: 1.5 }}>
-            <UserIcon size={16} color="#474B53" />
-            <Typography sx={{ fontSize: 14, fontWeight: 500, color: '#0A0A0A' }}>Profile</Typography>
-          </MenuItem>
-          <MenuItem onClick={handleMenuClose} sx={{ py: 1.5, gap: 1.5 }}>
-            <Moon size={16} color="#474B53" />
-            <Typography sx={{ fontSize: 14, fontWeight: 500, color: '#0A0A0A' }}>Dark Mode</Typography>
-          </MenuItem>
-          <MenuItem onClick={() => { handleMenuClose(); handleLogout(); }} sx={{ py: 1.5, gap: 1.5, color: '#DC2626' }}>
-            <LogOut size={16} color="currentColor" />
-            <Typography sx={{ fontSize: 14, fontWeight: 500, color: 'inherit' }}>Log out</Typography>
-          </MenuItem>
-        </Menu>
-      </Box>
-    </Box>
+      <div className="shrink-0 border-t bg-muted/40 p-3">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="flex w-full items-center gap-2 rounded-lg border bg-card p-2.5 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Avatar name={user?.name || 'A'} className="h-9 w-9 text-sm" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] font-medium text-foreground">
+                  {user?.name || 'Admin'}
+                </span>
+                <span className="block truncate text-[11px] text-muted-foreground">{user?.email}</span>
+              </span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-52" align="end">
+            <DropdownMenuItem asChild>
+              <Link to="/profile">
+                <UserIcon />
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun /> : <Moon />}
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+              <LogOut />
+              Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   )
 }
 
@@ -210,148 +123,49 @@ export function AdminLayout() {
   const title = current?.label || 'Dashboard'
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
-        height: '100vh',
-        width: '100%',
-        maxWidth: '100%',
-        overflow: 'hidden',
-        bgcolor: '#F8FAFA',
-      }}
-    >
-      {/* Desktop Sidebar */}
-      <Drawer
-        variant="permanent"
-        open
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH, borderColor: '#E2E8F0' },
-        }}
-      >
+    <div className="flex h-screen w-full max-w-full flex-col overflow-hidden bg-background md:flex-row">
+      <aside className="hidden w-[240px] shrink-0 md:block">
         <SidebarContent pathname={pathname} />
-      </Drawer>
+      </aside>
 
-      {/* Main Layout Column */}
-      <Box
-        component="main"
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          bgcolor: '#F7F9FA',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Topbar Header */}
-        <AppBar
-          position="static"
-          elevation={0}
-          color="inherit"
-          sx={{
-            height: 64,
-            flexShrink: 0,
-            justifyContent: 'center',
-            bgcolor: '#ffffff',
-            borderBottom: 1,
-            borderColor: 'divider',
-          }}
-        >
-          <Toolbar sx={{ px: { xs: 2, md: 3 }, minHeight: '64px !important' }}>
-            <Box sx={{ display: { xs: 'flex', md: 'none' }, mr: 1.5, alignItems: 'center' }}>
-              <Logo />
-            </Box>
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/40">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-card px-4 md:px-6">
+          <div className="flex items-center gap-1.5 md:hidden">
+            <Logo />
+          </div>
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            <span className="whitespace-nowrap text-sm font-medium text-muted-foreground">Home</span>
+            <ChevronRight size={14} className="text-muted-foreground" />
+            <span className="truncate text-sm font-semibold text-foreground">{title}</span>
+          </div>
+          <span className="hidden text-xs font-medium text-muted-foreground md:block">{todayLabel()}</span>
+        </header>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0, flex: 1 }}>
-              <Typography sx={{ fontSize: { xs: 12, sm: 14 }, fontWeight: 500, color: '#0A0A0A', whiteSpace: 'nowrap' }}>
-                Home
-              </Typography>
-              <ChevronRight size={14} color="#828283" />
-              <Typography sx={{ fontSize: { xs: 12, sm: 14 }, fontWeight: 600, color: '#0A0A0A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {title}
-              </Typography>
-            </Box>
-
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#828283', display: { xs: 'none', md: 'block' } }}>
-              {todayLabel()}
-            </Typography>
-          </Toolbar>
-        </AppBar>
-
-        {/* Scrollable Center Content */}
-        <Box
-          sx={{
-            flex: 1,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            p: { xs: 2, sm: 3, md: 4 },
-            width: '100%',
-            boxSizing: 'border-box',
-          }}
-        >
-          <Box sx={{ maxWidth: 1200, mx: 'auto', width: '100%' }}>
+        <div className="w-full flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8">
+          <div className="mx-auto w-full max-w-[1200px]">
             <Outlet />
-          </Box>
-        </Box>
+          </div>
+        </div>
 
-        {/* Fixed Mobile Bottom Navigation Bar */}
-        <Paper
-          elevation={6}
-          sx={{
-            flexShrink: 0,
-            display: { xs: 'block', md: 'none' },
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            bgcolor: '#ffffff',
-            boxShadow: '0 -2px 10px rgba(0,0,0,0.08)',
-            zIndex: 1100,
-          }}
-        >
-          <BottomNavigation
-            showLabels
-            value={NAV_ITEMS.find((item) => isPathActive(pathname, item.to))?.to || false}
-            onChange={(event, newValue) => {
-              if (newValue) navigate(newValue)
-            }}
-            sx={{
-              height: 60,
-              '& .MuiBottomNavigationAction-root': {
-                minWidth: 'auto',
-                px: 0.5,
-                py: 0.5,
-                color: '#828283',
-                '&.Mui-selected': {
-                  color: '#2D69EB',
-                  fontWeight: 600,
-                },
-                '& .MuiBottomNavigationAction-label': {
-                  fontSize: 10,
-                  '&.Mui-selected': {
-                    fontSize: 10,
-                  },
-                },
-              },
-            }}
-          >
-            {NAV_ITEMS.map((item) => {
-              const Icon = item.icon
-              return (
-                <BottomNavigationAction
-                  key={item.to}
-                  label={item.label}
-                  value={item.to}
-                  icon={<Icon size={18} />}
-                />
-              )
-            })}
-          </BottomNavigation>
-        </Paper>
-      </Box>
-    </Box>
+        <nav className="mobile-bottom-nav grid grid-cols-6 border-t bg-card shadow-[0_-2px_10px_rgba(0,0,0,0.08)] md:hidden">
+          {NAV_ITEMS.map((item) => {
+            const active = isPathActive(pathname, item.to)
+            return (
+              <button
+                key={item.to}
+                onClick={() => navigate(item.to)}
+                className={cn(
+                  'flex flex-col items-center gap-0.5 py-2 text-[10px] transition-colors',
+                  active ? 'font-semibold text-clr-blue' : 'text-muted-foreground',
+                )}
+              >
+                <item.icon size={18} />
+                {item.label}
+              </button>
+            )
+          })}
+        </nav>
+      </main>
+    </div>
   )
 }

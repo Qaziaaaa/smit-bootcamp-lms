@@ -1,17 +1,20 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Button, IconButton, OutlinedInput, FormHelperText, Select, MenuItem, Checkbox, ListItemText, ListSubheader, TextField } from '@mui/material';
-import { Users, Eye, Edit2, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Users, Eye, Edit2, Trash2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-
-import { DataTable } from '../components/ui/DataTable';
-import { SearchBar } from '../components/ui/SearchBar';
-import { Pagination } from '../components/ui/Pagination';
-import { ConfirmDialog } from '../components/ui/ConfirmDialog';
-import { Modal } from '../components/ui/Modal';
-import { useForm, Controller, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+
+import { Button } from '../components/ui/Button';
+import { Checkbox } from '../components/ui/Checkbox';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { DataTable } from '../components/ui/DataTable';
+import { FormField } from '../components/ui/FormField';
+import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/Label';
+import { Modal } from '../components/ui/Modal';
+import { Pagination } from '../components/ui/Pagination';
+import { SearchBar } from '../components/ui/SearchBar';
+import { Select } from '../components/ui/Select';
 import { getTeams, createTeam, updateTeam, deleteTeam, getTeamById } from '../services/teamsService';
 import { getProjects } from '../services/projectsService';
 import { getStudents } from '../services/studentsService';
@@ -24,33 +27,7 @@ const teamSchema = z.object({
   leader: z.string().min(1, 'Team leader is required'),
 });
 
-const Label = ({ children }) => (
-  <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#828283', textTransform: 'uppercase', mb: 0.5 }}>
-    {children}
-  </Typography>
-);
-
-const inputStyles = {
-  borderRadius: '8px',
-  bgcolor: '#FFFFFF',
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#E2E8F0',
-  },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#CBD5E1',
-  },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#2D69EB',
-    borderWidth: '1px',
-  },
-  '& .MuiOutlinedInput-input': {
-    fontSize: '14px',
-    color: '#0A0A0A',
-  },
-  '&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#E2E8F0',
-  }
-};
+const emptyForm = { name: '', batch: '', projectId: '', members: [], leader: '' };
 
 export default function TeamsPage() {
   const navigate = useNavigate();
@@ -60,7 +37,6 @@ export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Reference data
   const [projects, setProjects] = useState([]);
   const [projectMap, setProjectMap] = useState({});
   const [students, setStudents] = useState([]);
@@ -69,22 +45,10 @@ export default function TeamsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState(null);
   const [deletingTeam, setDeletingTeam] = useState(null);
+
+  const [formValues, setFormValues] = useState(emptyForm);
+  const [formErrors, setFormErrors] = useState({});
   const [memberSearch, setMemberSearch] = useState('');
-
-  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm({
-    resolver: zodResolver(teamSchema),
-    defaultValues: { name: '', batch: '', projectId: '', members: [], leader: '' },
-  });
-
-  const selectedMembers = useWatch({ control, name: 'members' }) || [];
-  const selectedLeader = useWatch({ control, name: 'leader' });
-
-  // Clear leader if leader is removed from members array
-  useEffect(() => {
-    if (selectedLeader && !selectedMembers.includes(selectedLeader)) {
-      setValue('leader', '');
-    }
-  }, [selectedMembers, selectedLeader, setValue]);
 
   const fetchTeams = useCallback(async () => {
     setLoading(true);
@@ -102,59 +66,71 @@ export default function TeamsPage() {
     fetchTeams();
   }, [fetchTeams]);
 
-  // Fetch reference data (projects, students)
   useEffect(() => {
-    Promise.all([
-      getProjects({ limit: 500 }),
-      getStudents({ limit: 1000 })
-    ])
-    .then(([projRes, stuRes]) => {
-      const projList = projRes.projects || [];
-      setProjects(projList);
-      const map = {};
-      projList.forEach(p => { map[p._id] = p.title; });
-      setProjectMap(map);
+    Promise.all([getProjects({ limit: 500 }), getStudents({ limit: 1000 })])
+      .then(([projRes, stuRes]) => {
+        const projList = projRes.projects || [];
+        setProjects(projList);
+        const map = {};
+        projList.forEach((p) => {
+          map[p._id] = p.title;
+        });
+        setProjectMap(map);
 
-      const stuList = stuRes.students || [];
-      setStudents(stuList);
-      setBatchOptions([...new Set(stuList.map(s => s.batch).filter(Boolean))]);
-    })
-    .catch(err => console.error("Failed to fetch reference data:", err));
+        const stuList = stuRes.students || [];
+        setStudents(stuList);
+        setBatchOptions([...new Set(stuList.map((s) => s.batch).filter(Boolean))]);
+      })
+      .catch((err) => console.error('Failed to fetch reference data:', err));
   }, []);
 
   const openCreate = () => {
     setEditingTeam(null);
-    reset({ name: '', batch: '', projectId: '', members: [], leader: '' });
+    setFormValues(emptyForm);
+    setFormErrors({});
+    setMemberSearch('');
     setIsFormOpen(true);
   };
 
   const openEdit = async (team) => {
     setEditingTeam(team);
-    reset({ name: team.name, batch: team.batch || '', projectId: team.projectId || '', members: [], leader: team.leader || '' });
+    setFormValues({ ...emptyForm, name: team.name, batch: team.batch || '', projectId: team.projectId || '', leader: team.leader || '' });
+    setFormErrors({});
+    setMemberSearch('');
     setIsFormOpen(true);
 
     try {
       const fullTeam = await getTeamById(team._id);
-      const memberIds = (fullTeam.members || []).map(m => m._id || m.id);
-      reset({ 
-        name: fullTeam.name, 
-        batch: fullTeam.batch || '', 
-        projectId: fullTeam.project?._id || fullTeam.projectId || '', 
-        members: memberIds, 
-        leader: fullTeam.leader || '' 
+      const memberIds = (fullTeam.members || []).map((m) => m._id || m.id);
+      setFormValues({
+        name: fullTeam.name,
+        batch: fullTeam.batch || '',
+        projectId: fullTeam.project?._id || fullTeam.projectId || '',
+        members: memberIds,
+        leader: fullTeam.leader || '',
       });
     } catch (error) {
       toast.error('Failed to load full team details');
     }
   };
 
-  const handleSaveTeam = async (data) => {
+  const handleSaveTeam = async (e) => {
+    e.preventDefault();
+    const result = teamSchema.safeParse(formValues);
+    if (!result.success) {
+      const next = {};
+      for (const issue of result.error.issues) {
+        if (!next[issue.path[0]]) next[issue.path[0]] = issue.message;
+      }
+      setFormErrors(next);
+      return;
+    }
     try {
       if (editingTeam) {
-        await updateTeam(editingTeam._id, data);
+        await updateTeam(editingTeam._id, result.data);
         toast.success('Team updated successfully');
       } else {
-        await createTeam(data);
+        await createTeam(result.data);
         toast.success('Team created successfully');
       }
       setIsFormOpen(false);
@@ -176,20 +152,52 @@ export default function TeamsPage() {
     }
   };
 
+  const setField = (name) => (e) => {
+    setFormValues((v) => ({ ...v, [name]: e.target.value }));
+    setFormErrors((err) => ({ ...err, [name]: undefined }));
+  };
+
+  const toggleMember = (id) => {
+    setFormValues((v) => {
+      const members = v.members.includes(id) ? v.members.filter((x) => x !== id) : [...v.members, id];
+      return {
+        ...v,
+        members,
+        leader: members.includes(v.leader) ? v.leader : '',
+      };
+    });
+    setFormErrors((err) => ({ ...err, members: undefined }));
+  };
+
+  const filteredMemberStudents = useMemo(() => {
+    const lower = memberSearch.toLowerCase();
+    return students.filter(
+      (s) => s.name.toLowerCase().includes(lower) || (s.email && s.email.toLowerCase().includes(lower)),
+    );
+  }, [students, memberSearch]);
+
+  const renderSelectedMembers = (selectedIds) => {
+    if (!selectedIds || selectedIds.length === 0) return 'Select members';
+    return students
+      .filter((s) => selectedIds.includes(s._id || s.id))
+      .map((s) => s.name)
+      .join(', ');
+  };
+
   const columns = [
     {
       accessorKey: 'name',
       header: 'TEAM NAME',
-      cell: ({ getValue }) => <Typography variant="body2" sx={{ fontWeight: 600 }}>{getValue()}</Typography>,
+      cell: ({ getValue }) => <span className="text-sm font-semibold text-foreground">{getValue()}</span>,
     },
     {
       accessorKey: 'memberCount',
       header: 'MEMBERS',
       cell: ({ getValue }) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+        <span className="flex items-center gap-1 text-sm text-muted-foreground">
           <Users size={16} />
-          <Typography variant="body2">{getValue() || 0} students</Typography>
-        </Box>
+          {getValue() || 0} students
+        </span>
       ),
     },
     {
@@ -197,78 +205,53 @@ export default function TeamsPage() {
       header: 'TEAM LEADER',
       cell: ({ getValue }) => {
         const leaderId = getValue();
-        if (!leaderId) return <Typography variant="body2" color="text.secondary">—</Typography>;
-        const leader = students.find(s => (s._id || s.id) === leaderId);
-        return <Typography variant="body2">{leader ? leader.name : 'Unknown'}</Typography>;
+        if (!leaderId) return <span className="text-sm text-muted-foreground">—</span>;
+        const leader = students.find((s) => (s._id || s.id) === leaderId);
+        return <span className="text-sm text-foreground">{leader ? leader.name : 'Unknown'}</span>;
       },
     },
     {
       accessorKey: 'projectId',
       header: 'PROJECT',
       cell: ({ getValue }) => (
-        <Typography variant="body2">{getValue() ? projectMap[getValue()] || '—' : '—'}</Typography>
+        <span className="text-sm text-foreground">{getValue() ? projectMap[getValue()] || '—' : '—'}</span>
       ),
     },
     {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton size="small" onClick={() => navigate(`/teams/${row.original._id}`)}>
+        <div className="flex gap-1">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/teams/${row.original._id}`)} aria-label="View team">
             <Eye size={18} />
-          </IconButton>
-          <IconButton size="small" color="primary" onClick={() => openEdit(row.original)}>
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-clr-blue" onClick={() => openEdit(row.original)} aria-label="Edit team">
             <Edit2 size={18} />
-          </IconButton>
-          <IconButton size="small" color="error" onClick={() => setDeletingTeam(row.original)}>
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeletingTeam(row.original)} aria-label="Delete team">
             <Trash2 size={18} />
-          </IconButton>
-        </Box>
+          </Button>
+        </div>
       ),
     },
   ];
 
-  // Helper to render selected member names
-  const renderSelectedMembers = (selectedIds) => {
-    if (!selectedIds || selectedIds.length === 0) return <Typography sx={{ fontSize: '14px', fontStyle: 'italic', color: '#828283' }}>Select members</Typography>;
-    return students
-      .filter(s => selectedIds.includes(s._id || s.id))
-      .map(s => s.name)
-      .join(', ');
-  };
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>Teams</Typography>
-          <Typography variant="body2" color="text.secondary">Manage student teams and project assignments.</Typography>
-        </Box>
-        <Button variant="contained" startIcon={<Users size={18} />} disableElevation onClick={openCreate}>
+    <div className="mx-auto flex max-w-[1200px] flex-col gap-6 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">Teams</h1>
+          <p className="text-sm text-muted-foreground">Manage student teams and project assignments.</p>
+        </div>
+        <Button onClick={openCreate}>
+          <Users size={18} />
           Add Team
         </Button>
-      </Box>
+      </div>
 
-      <Box sx={{
-        bgcolor: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #E2E8F0',
-        p: 2.5,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        '& .MuiTextField-root': {
-          flex: 1,
-          maxWidth: '380px',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '8px',
-            bgcolor: '#ffffff',
-            height: '44px',
-          }
-        }
-      }}>
+      <div className="flex items-center gap-2 rounded-lg border bg-card p-2.5">
         <SearchBar value={search} onChange={setSearch} placeholder="Search teams..." />
-      </Box>
+      </div>
 
       <DataTable data={teams} columns={columns} isLoading={loading} emptyMessage="No teams found" />
       <Pagination page={page} totalPages={1} totalItems={teams.length} onChange={setPage} />
@@ -278,150 +261,101 @@ export default function TeamsPage() {
         onClose={() => setIsFormOpen(false)}
         title={editingTeam ? 'Edit Team' : 'Add New Team'}
         hideDividers
-        actions={
-          <>
-            <Button onClick={() => setIsFormOpen(false)} color="inherit">Cancel</Button>
-            <Button onClick={handleSubmit(handleSaveTeam)} color="primary" variant="contained" disableElevation>
-              {editingTeam ? 'Save Changes' : 'Create Team'}
-            </Button>
-          </>
-        }
       >
-        <form onSubmit={handleSubmit(handleSaveTeam)}>
-          <Box sx={{ mb: 3 }}>
-            <Typography sx={{ fontSize: '14px', color: '#828283' }}>
-              Create a new team, assign a project, and define members and leadership.
-            </Typography>
-          </Box>
+        <form onSubmit={handleSaveTeam}>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Create a new team, assign a project, and define members and leadership.
+          </p>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2.5 }}>
-            <Box sx={{ gridColumn: '1 / -1' }}>
-              <Label>Team Name *</Label>
-              <Controller
-                name="name"
-                control={control}
-                render={({ field }) => (
-                  <OutlinedInput
-                    {...field}
-                    fullWidth
-                    placeholder="e.g. Alpha Team"
-                    error={!!errors.name}
-                    sx={inputStyles}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField
+              label="Team Name"
+              name="name"
+              className="sm:col-span-2"
+              value={formValues.name}
+              onChange={setField('name')}
+              error={formErrors.name}
+              required
+              placeholder="e.g. Alpha Team"
+            />
+
+            <Select
+              label="Batch (Optional)"
+              value={formValues.batch}
+              onChange={(next) => setField('batch')({ target: { value: next } })}
+              options={batchOptions.map((b) => ({ label: b, value: b }))}
+              placeholder="None"
+            />
+
+            <Select
+              label="Project (Optional)"
+              value={formValues.projectId}
+              onChange={(next) => setField('projectId')({ target: { value: next } })}
+              options={projects.map((p) => ({ label: p.title, value: p._id || p.id }))}
+              placeholder="None"
+            />
+
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>
+                Team Members
+                <span className="text-destructive"> *</span>
+              </Label>
+              <div className="rounded-lg border bg-muted/40 p-3">
+                <div className="relative mb-2">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={memberSearch}
+                    onChange={(e) => setMemberSearch(e.target.value)}
+                    placeholder="Search students..."
+                    className="h-9 bg-card pl-9"
                   />
-                )}
-              />
-              {errors.name && <FormHelperText error sx={{ ml: 0.5 }}>{errors.name.message}</FormHelperText>}
-            </Box>
+                </div>
+                <div className="max-h-48 space-y-0.5 overflow-y-auto">
+                  {filteredMemberStudents.map((student) => {
+                    const sId = student._id || student.id;
+                    const checked = formValues.members.includes(sId);
+                    return (
+                      <button
+                        key={sId}
+                        type="button"
+                        onClick={() => toggleMember(sId)}
+                        className="flex w-full cursor-pointer items-center gap-2 rounded px-1.5 py-1.5 text-left hover:bg-accent"
+                      >
+                        <Checkbox checked={checked} />
+                        <span className="text-sm text-foreground">{student.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              {formErrors.members && <p className="text-xs font-medium text-destructive">{formErrors.members}</p>}
+              {formValues.members.length > 0 && (
+                <p className="text-xs text-muted-foreground">{renderSelectedMembers(formValues.members)}</p>
+              )}
+            </div>
 
-            <Box>
-              <Label>Batch (Optional)</Label>
-              <Controller
-                name="batch"
-                control={control}
-                render={({ field }) => (
-                  <Select {...field} fullWidth displayEmpty sx={inputStyles}>
-                    <MenuItem value="" sx={{ fontSize: '14px', fontStyle: 'italic', color: '#828283' }}>None</MenuItem>
-                    {batchOptions.map((b) => (
-                      <MenuItem key={b} value={b} sx={{ fontSize: '14px' }}>{b}</MenuItem>
-                    ))}
-                  </Select>
-                )}
+            <div className="space-y-1.5 sm:col-span-2">
+              <Select
+                label="Team Leader"
+                value={formValues.leader}
+                onChange={(next) => setField('leader')({ target: { value: next } })}
+                options={students
+                  .filter((s) => formValues.members.includes(s._id || s.id))
+                  .map((s) => ({ label: s.name, value: s._id || s.id }))}
+                placeholder={formValues.members.length === 0 ? 'Select members first' : 'Select team leader'}
+                error={formErrors.leader}
+                disabled={formValues.members.length === 0}
+                required
               />
-            </Box>
+            </div>
+          </div>
 
-            <Box>
-              <Label>Project (Optional)</Label>
-              <Controller
-                name="projectId"
-                control={control}
-                render={({ field }) => (
-                  <Select {...field} fullWidth displayEmpty sx={inputStyles}>
-                    <MenuItem value="" sx={{ fontSize: '14px', fontStyle: 'italic', color: '#828283' }}>None</MenuItem>
-                    {projects.map((p) => (
-                      <MenuItem key={p._id || p.id} value={p._id || p.id} sx={{ fontSize: '14px' }}>{p.title}</MenuItem>
-                    ))}
-                  </Select>
-                )}
-              />
-            </Box>
-
-            <Box sx={{ gridColumn: '1 / -1' }}>
-              <Label>Team Members *</Label>
-              <Controller
-                name="members"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    multiple
-                    fullWidth
-                    displayEmpty
-                    error={!!errors.members}
-                    sx={inputStyles}
-                    renderValue={renderSelectedMembers}
-                    MenuProps={{ autoFocus: false }}
-                  >
-                    <ListSubheader sx={{ pt: 1, pb: 1, bgcolor: '#fff' }}>
-                      <TextField
-                        size="small"
-                        autoFocus
-                        placeholder="Search students..."
-                        fullWidth
-                        value={memberSearch}
-                        onChange={(e) => setMemberSearch(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key !== 'Escape') e.stopPropagation();
-                        }}
-                      />
-                    </ListSubheader>
-                    {students
-                      .filter((s) => s.name.toLowerCase().includes(memberSearch.toLowerCase()) || s.email?.toLowerCase().includes(memberSearch.toLowerCase()))
-                      .map((student) => {
-                      const sId = student._id || student.id;
-                      return (
-                        <MenuItem key={sId} value={sId} sx={{ p: 0 }}>
-                          <Checkbox checked={field.value.indexOf(sId) > -1} size="small" />
-                          <ListItemText primary={student.name} primaryTypographyProps={{ fontSize: '14px' }} />
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                )}
-              />
-              {errors.members && <FormHelperText error sx={{ ml: 0.5 }}>{errors.members.message}</FormHelperText>}
-            </Box>
-
-            <Box sx={{ gridColumn: '1 / -1' }}>
-              <Label>Team Leader *</Label>
-              <Controller
-                name="leader"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    fullWidth
-                    displayEmpty
-                    error={!!errors.leader}
-                    disabled={selectedMembers.length === 0}
-                    sx={inputStyles}
-                  >
-                    <MenuItem value="" sx={{ fontSize: '14px', fontStyle: 'italic', color: '#828283' }}>
-                      {selectedMembers.length === 0 ? 'Select members first' : 'Select team leader'}
-                    </MenuItem>
-                    {students
-                      .filter(s => selectedMembers.includes(s._id || s.id))
-                      .map((s) => (
-                        <MenuItem key={s._id || s.id} value={s._id || s.id} sx={{ fontSize: '14px' }}>
-                          {s.name}
-                        </MenuItem>
-                      ))}
-                  </Select>
-                )}
-              />
-              {errors.leader && <FormHelperText error sx={{ ml: 0.5 }}>{errors.leader.message}</FormHelperText>}
-            </Box>
-
-          </Box>
+          <div className="mt-6 flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">{editingTeam ? 'Save Changes' : 'Create Team'}</Button>
+          </div>
         </form>
       </Modal>
 
@@ -432,6 +366,6 @@ export default function TeamsPage() {
         onConfirm={handleDeleteTeam}
         onCancel={() => setDeletingTeam(null)}
       />
-    </Box>
+    </div>
   );
 }

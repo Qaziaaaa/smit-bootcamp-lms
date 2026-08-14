@@ -1,47 +1,26 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Box, Paper, Typography } from '@mui/material'
 import { FolderKanban, Mail, Users } from 'lucide-react'
 import { getStudentTeam } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
 import { Badge } from '../components/ui/Badge'
+import { Avatar } from '../components/ui/Avatar'
 
 // Renders a member card: initials avatar + name, email and batch
 function MemberCard({ member }) {
   return (
-    <Paper
-      variant="outlined"
-      sx={{ borderRadius: 2, p: 2, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5 }}
-    >
+    <div className="flex items-center gap-1.5 rounded-lg border bg-card p-2 shadow-sm">
       {/* Initials avatar */}
-      <Box
-        sx={{
-          width: 40,
-          height: 40,
-          borderRadius: '50%',
-          bgcolor: '#2D69EB',
-          color: '#ffffff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 14,
-          fontWeight: 600,
-          flexShrink: 0,
-        }}
-      >
-        {member.name.charAt(0).toUpperCase()}
-      </Box>
-      <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#0A0A0A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {member.name}
-        </Typography>
-        <Typography sx={{ fontSize: 12, color: '#828283', mt: 0.25, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Avatar name={member.name} className="h-10 w-10" />
+      <div className="min-w-0">
+        <p className="truncate text-[13px] font-semibold text-foreground">{member.name}</p>
+        <p className="mt-0.25 flex items-center gap-0.5 text-xs text-muted-foreground">
           <Mail size={12} /> {member.email}
-        </Typography>
+        </p>
         {member.batch && (
-          <Typography sx={{ fontSize: 11, color: '#828283', mt: 0.25 }}>Batch {member.batch}</Typography>
+          <p className="mt-0.25 text-[11px] text-muted-foreground">Batch {member.batch}</p>
         )}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }
 
@@ -73,9 +52,9 @@ export default function StudentTeamPage() {
   // Loading state while fetching data
   if (loading) {
     return (
-      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
-        <Typography color="#828283">Loading team...</Typography>
-      </Box>
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-muted-foreground">Loading team...</p>
+      </div>
     )
   }
 
@@ -93,139 +72,87 @@ export default function StudentTeamPage() {
   const project = team.project
 
   return (
-    <Box sx={{ display: 'grid', gap: 3 }}>
+    <div className="grid gap-3">
       {/* Page header */}
-      <Box>
-        <Typography sx={{ fontWeight: 600, fontSize: 24, color: '#0A0A0A', letterSpacing: '-0.02em' }}>My Team</Typography>
-        <Typography sx={{ fontSize: 13, color: '#828283', mt: 0.25 }}>Your bootcamp team and its members.</Typography>
-      </Box>
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">My Team</h2>
+        <p className="mt-0.25 text-[13px] text-muted-foreground">Your bootcamp team and its members.</p>
+      </div>
 
       {/* Team info + linked project */}
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         {/* Team name card */}
-        <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: 2,
-              bgcolor: '#F4F9FF',
-              border: 1,
-              borderColor: 'rgba(45, 105, 235, 0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#2D69EB',
-              flexShrink: 0,
-            }}
-          >
+        <div className="flex items-center gap-1.5 rounded-lg border bg-card p-2.5 shadow-sm">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-clr-blue-border bg-clr-blue-bg text-clr-blue">
             <Users size={24} strokeWidth={1.75} />
-          </Box>
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-              Team Name
-            </Typography>
-            <Typography sx={{ mt: 0.5, fontSize: 20, fontWeight: 600, color: '#0A0A0A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {team.name}
-            </Typography>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Team Name</p>
+            <p className="mt-0.5 truncate text-xl font-semibold text-foreground">{team.name}</p>
 
-            <Box sx={{ mt: 2, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-              <Box>
-                <Typography sx={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', color: '#828283' }}>Batch</Typography>
-                <Typography sx={{ fontSize: 14, color: '#0A0A0A', mt: 0.25 }}>{team.batch || '—'}</Typography>
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', color: '#828283' }}>Team Leader</Typography>
-                <Typography sx={{ fontSize: 14, color: '#0A0A0A', mt: 0.25 }}>
-                  {team.leader 
-                    ? (members.find(m => String(m._id) === String(team.leader))?.name || 'Unknown') 
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Batch</p>
+                <p className="mt-0.25 text-sm text-foreground">{team.batch || '—'}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Team Leader</p>
+                <p className="mt-0.25 text-sm text-foreground">
+                  {team.leader
+                    ? (members.find(m => String(m._id) === String(team.leader))?.name || 'Unknown')
                     : '—'}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Paper>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Project card (if a project is linked) */}
         {project ? (
-          <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 2,
-                bgcolor: '#FFFBEB',
-                border: 1,
-                borderColor: '#FDE68A',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#D97706',
-                flexShrink: 0,
-              }}
-            >
+          <div className="flex items-center gap-1.5 rounded-lg border bg-card p-2.5 shadow-sm">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-clr-amber-border bg-clr-amber-bg text-clr-amber">
               <FolderKanban size={24} strokeWidth={1.75} />
-            </Box>
-            <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-                Project
-              </Typography>
-              <Typography sx={{ mt: 0.5, fontSize: 16, fontWeight: 600, color: '#0A0A0A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {project.title}
-              </Typography>
-              <Typography sx={{ mt: 0.5, fontSize: 12, color: '#828283' }}>
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Project</p>
+              <p className="mt-0.5 truncate text-base font-semibold text-foreground">{project.title}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 {project.description || 'No description provided.'}
-              </Typography>
-            </Box>
+              </p>
+            </div>
             {/* Project status pill */}
             <Badge status={project.status} />
-          </Paper>
+          </div>
         ) : (
-          <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 48,
-                height: 48,
-                borderRadius: 2,
-                bgcolor: '#F8FAFA',
-                border: 1,
-                borderColor: '#E2E8F0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#828283',
-                flexShrink: 0,
-              }}
-            >
+          <div className="flex items-center gap-1.5 rounded-lg border bg-card p-2.5 shadow-sm">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground">
               <FolderKanban size={24} strokeWidth={1.75} />
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-                Project
-              </Typography>
-              <Typography sx={{ mt: 0.5, fontSize: 14, color: '#828283' }}>No project linked to this team yet.</Typography>
-            </Box>
-          </Paper>
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Project</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">No project linked to this team yet.</p>
+            </div>
+          </div>
         )}
-      </Box>
+      </div>
 
       {/* Team members list */}
-      <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', overflow: 'hidden' }}>
-        <Box sx={{ p: 2.5, borderBottom: 1, borderColor: 'divider', bgcolor: '#F4F9FF' }}>
-          <Typography sx={{ fontWeight: 600, fontSize: 18, color: '#0A0A0A' }}>Team Members</Typography>
-          <Typography sx={{ fontSize: 13, color: '#828283', mt: 0.25 }}>Everyone assigned to this team.</Typography>
-        </Box>
+      <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+        <div className="border-b border-border bg-clr-blue-bg p-2.5">
+          <h3 className="text-lg font-semibold text-foreground">Team Members</h3>
+          <p className="mt-0.25 text-[13px] text-muted-foreground">Everyone assigned to this team.</p>
+        </div>
         {/* Members grid */}
         {members.length === 0 ? (
           <EmptyState message="No team members available right now." icon={Users} />
         ) : (
-          <Box sx={{ p: 2, display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' } }}>
+          <div className="grid grid-cols-1 gap-1.5 p-2 sm:grid-cols-2 lg:grid-cols-3">
             {members.map((member) => (
               <MemberCard key={member._id} member={member} />
             ))}
-          </Box>
+          </div>
         )}
-      </Paper>
-    </Box>
+      </div>
+    </div>
   )
 }

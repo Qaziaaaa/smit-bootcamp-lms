@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, Paper, Grid, Divider, IconButton, LinearProgress } from '@mui/material';
 import { ArrowLeft, Edit2, CalendarCheck, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from '../components/ui/Button';
+import { Progress } from '../components/ui/Progress';
 import { Avatar } from '../components/ui/Avatar';
 import { Badge } from '../components/ui/Badge';
+import { cn } from '../lib/utils';
 import { StudentForm } from '../components/students/StudentForm';
 import { getStudentById, updateStudent } from '../services/studentsService';
 import { getAttendance, getAttendanceSummary } from '../services/attendanceService';
@@ -64,17 +66,17 @@ export default function StudentDetailPage() {
 
   if (loading) {
     return (
-      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-        <Typography variant="body2" color="text.secondary">Loading student...</Typography>
-      </Box>
+      <div className="mx-auto max-w-[1200px] p-3">
+        <p className="text-sm text-muted-foreground">Loading student...</p>
+      </div>
     );
   }
 
   if (!student) {
     return (
-      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-        <Typography variant="body2" color="text.secondary">Student not found.</Typography>
-      </Box>
+      <div className="mx-auto max-w-[1200px] p-3">
+        <p className="text-sm text-muted-foreground">Student not found.</p>
+      </div>
     );
   }
 
@@ -82,135 +84,118 @@ export default function StudentDetailPage() {
   const displaySummary = summary.totalDays > 0 ? summary : { percentage: 0, present: 0, totalDays: 0 };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
 
       {/* Topbar */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton onClick={() => navigate('/students')} size="small">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Back to students" onClick={() => navigate('/students')}>
             <ArrowLeft size={20} />
-          </IconButton>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          </Button>
+          <h1 className="text-xl font-semibold text-foreground">
             Student — {student.name}
-          </Typography>
-        </Box>
+          </h1>
+        </div>
         <Button
-          variant="outlined"
-          startIcon={<Edit2 size={16} />}
+          variant="outline"
           onClick={() => setIsFormOpen(true)}
         >
+          <Edit2 size={16} />
           Edit Profile
         </Button>
-      </Box>
+      </div>
 
-      <Grid container spacing={3}>
+      <div className="grid gap-3">
         {/* Profile Card */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={0} sx={{ p: 4, border: '1px solid', borderColor: 'divider', borderRadius: 3, textAlign: 'center' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-              <Avatar name={student.name} sx={{ width: 80, height: 80, fontSize: '2rem' }} />
-            </Box>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>{student.name}</Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>{student.email}</Typography>
-            <Badge status={statusForBadge} sx={{ mt: 1, mb: 3 }} />
+        <div className="col-span-12 md:col-span-4">
+          <div className="rounded-lg border bg-card p-4 text-center shadow-sm">
+            <div className="mb-2 flex justify-center">
+              <Avatar name={student.name} className="h-20 w-20 text-2xl" />
+            </div>
+            <h2 className="text-base font-semibold text-foreground">{student.name}</h2>
+            <p className="mb-0.5 text-sm text-muted-foreground">{student.email}</p>
+            <Badge status={statusForBadge} className="mb-3 mt-1" />
 
-            <Divider sx={{ my: 2 }} />
+            <hr className="my-2 border-t" />
 
-            <Box sx={{ textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box>
-                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Roll No</Typography>
-                <Typography variant="body2" sx={{ textTransform: 'uppercase' }}>{student.rollNo || '—'}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Phone</Typography>
-                <Typography variant="body2">{student.phone || '—'}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Batch</Typography>
-                <Typography variant="body2">{student.batch || '—'}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Team</Typography>
-                <Typography variant="body2">{student.teamId?.name || 'Unassigned'}</Typography>
-              </Box>
-            </Box>
-          </Paper>
-        </Grid>
+            <div className="flex flex-col gap-2 text-left">
+              <div>
+                <p className="text-xs font-semibold uppercase text-muted-foreground">Roll No</p>
+                <p className="text-sm uppercase text-foreground">{student.rollNo || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase text-muted-foreground">Phone</p>
+                <p className="text-sm text-foreground">{student.phone || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase text-muted-foreground">Batch</p>
+                <p className="text-sm text-foreground">{student.batch || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase text-muted-foreground">Team</p>
+                <p className="text-sm text-foreground">{student.teamId?.name || 'Unassigned'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Attendance Summary */}
-        <Grid item xs={12} md={8}>
-          <Paper elevation={0} sx={{ p: 4, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <CalendarCheck size={24} color="#2D69EB" />
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>Attendance Summary</Typography>
-            </Box>
+        <div className="col-span-12 md:col-span-8">
+          <div className="rounded-lg border bg-card p-4 shadow-sm">
+            <div className="mb-3 flex items-center gap-2">
+              <CalendarCheck size={24} className="text-clr-blue" />
+              <h2 className="text-base font-semibold text-foreground">Attendance Summary</h2>
+            </div>
 
-            <Box sx={{ display: 'flex', gap: 4, mb: 4 }}>
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Attendance Percentage</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: displaySummary.percentage >= 80 ? 'success.main' : 'warning.main' }}>
+            <div className="mb-4 flex gap-4">
+              <div className="flex-1">
+                <div className="mb-1 flex justify-between">
+                  <p className="text-sm font-semibold text-foreground">Attendance Percentage</p>
+                  <p className={cn('text-sm font-semibold', displaySummary.percentage >= 80 ? 'text-clr-green-dark' : 'text-clr-amber-dark')}>
                     {displaySummary.percentage}%
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={displaySummary.percentage}
-                  sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    bgcolor: 'grey.200',
-                    '& .MuiLinearProgress-bar': {
-                      bgcolor: displaySummary.percentage >= 80 ? 'success.main' : 'warning.main'
-                    }
-                  }}
-                />
-              </Box>
-              <Box sx={{ textAlign: 'center', px: 3, borderLeft: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="h4" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {displaySummary.present} <span style={{ fontSize: '1rem', color: '#828283' }}>/ {displaySummary.totalDays}</span>
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>
+                  </p>
+                </div>
+                <Progress value={displaySummary.percentage} className="h-2" />
+              </div>
+              <div className="border-l px-3 text-center">
+                <p className="text-2xl font-semibold text-foreground">
+                  {displaySummary.present} <span className="text-base text-muted-foreground">/ {displaySummary.totalDays}</span>
+                </p>
+                <p className="text-xs font-semibold uppercase text-muted-foreground">
                   Classes Attended
-                </Typography>
-              </Box>
-            </Box>
+                </p>
+              </div>
+            </div>
 
-            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>Recent History</Typography>
-            <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+            <h3 className="mb-2 text-sm font-semibold text-foreground">Recent History</h3>
+            <div className="overflow-hidden rounded-md border bg-card">
               {history.length === 0 ? (
-                <Box sx={{ p: 3, textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">No attendance records yet.</Typography>
-                </Box>
+                <div className="p-3 text-center">
+                  <p className="text-sm text-muted-foreground">No attendance records yet.</p>
+                </div>
               ) : (
                 history.map((record, index) => (
-                  <Box key={record._id} sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    p: 2,
-                    borderBottom: index < history.length - 1 ? '1px solid' : 'none',
-                    borderColor: 'divider'
-                  }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>{String(record.date).slice(0, 10)}</Typography>
+                  <div key={record._id} className={cn('flex items-center justify-between p-2', index < history.length - 1 && 'border-b')}>
+                    <p className="text-sm font-medium text-foreground">{String(record.date).slice(0, 10)}</p>
                     {record.status === 'present' ? (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'success.main' }}>
+                      <span className="flex items-center gap-1 text-clr-green-dark">
                         <CheckCircle2 size={16} />
-                        <Typography variant="body2" sx={{ fontWeight: 600, textTransform: 'capitalize' }}>Present</Typography>
-                      </Box>
+                        <span className="text-sm font-semibold capitalize">Present</span>
+                      </span>
                     ) : (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
+                      <span className="flex items-center gap-1 text-destructive">
                         <XCircle size={16} />
-                        <Typography variant="body2" sx={{ fontWeight: 600, textTransform: 'capitalize' }}>Absent</Typography>
-                      </Box>
+                        <span className="text-sm font-semibold capitalize">Absent</span>
+                      </span>
                     )}
-                  </Box>
+                  </div>
                 ))
               )}
-            </Paper>
+            </div>
 
-          </Paper>
-        </Grid>
-      </Grid>
+          </div>
+        </div>
+      </div>
 
       <StudentForm
         open={isFormOpen}
@@ -219,6 +204,6 @@ export default function StudentDetailPage() {
         onSubmit={handleUpdate}
         teams={teams}
       />
-    </Box>
+    </div>
   );
 }

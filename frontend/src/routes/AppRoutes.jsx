@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { Box, CircularProgress } from '@mui/material'
+import { Loader2 } from 'lucide-react'
 import { ProtectedRoute } from './ProtectedRoute'
 import { RedirectByRole } from './RedirectByRole'
 
@@ -27,9 +27,9 @@ const StudentProfilePage = lazy(() => import('../pages/StudentProfilePage'))
 
 function PageFallback() {
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <CircularProgress />
-    </Box>
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <Loader2 className="animate-spin text-primary" />
+    </div>
   )
 }
 

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Paper, Typography, Button, CircularProgress } from '@mui/material';
-import { Mail, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Mail, User, Loader2 } from 'lucide-react';
 import { getStudentProfile } from '../services/studentService';
 import { Logo } from '../components/ui/Logo';
+import { Button } from '../components/ui/Button';
 
 export default function StudentProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -25,9 +25,9 @@ export default function StudentProfilePage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 300 }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex min-h-[300px] items-center justify-center">
+        <Loader2 className="animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
@@ -45,142 +45,97 @@ export default function StudentProfilePage() {
   const cnic = student.cnic || 'Not provided';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div className="flex flex-col gap-3">
       {/* Cover Image & Avatar Section */}
-      <Box sx={{ position: 'relative', mb: 8 }}>
-        <Box
-          sx={{
-            height: { xs: 160, sm: 200, md: 240 },
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #c3e6cb 0%, #a4d4f2 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-          }}
-        >
-          <Box sx={{ transform: 'scale(1.5)', opacity: 0.8 }}>
+      <div className="relative mb-8">
+        <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-clr-green-bg to-clr-blue-bg sm:h-50 md:h-60">
+          <div className="scale-150 opacity-80">
             <Logo />
-          </Box>
-        </Box>
-        
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: -60,
-            left: { xs: 24, sm: 40 },
-            width: 120,
-            height: 120,
-            borderRadius: '50%',
-            bgcolor: '#2D69EB',
-            border: '4px solid #ffffff',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#ffffff',
-            fontSize: 48,
-            fontWeight: 600,
-            overflow: 'hidden'
-          }}
-        >
+          </div>
+        </div>
+
+        <div className="absolute -bottom-[60px] left-6 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-full border-4 border-white bg-clr-blue text-[48px] font-semibold text-white shadow-md sm:left-10">
           {student.profileImage ? (
-            <img src={student.profileImage} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={student.profileImage} alt={name} className="h-full w-full object-cover" />
           ) : (
             name.charAt(0).toUpperCase()
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Name and Edit Action */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', px: { xs: 1, sm: 2 } }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#0A0A0A', letterSpacing: '-0.02em' }}>
-            {name}
-          </Typography>
-          <Box sx={{ display: 'inline-flex', mt: 1, px: 1.5, py: 0.5, bgcolor: '#F1F5F9', borderRadius: 1, border: '1px solid #E2E8F0' }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#475569' }}>
-              Student
-            </Typography>
-          </Box>
-        </Box>
-        <Button
-          variant="contained"
-          sx={{
-            bgcolor: '#2D69EB',
-            textTransform: 'none',
-            fontWeight: 600,
-            borderRadius: 1.5,
-            px: 3,
-            '&:hover': { bgcolor: '#1E40AF' }
-          }}
-        >
-          Edit Profile
-        </Button>
-      </Box>
+      <div className="flex items-start justify-between px-1 sm:px-2">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">{name}</h2>
+          <div className="mt-1 inline-flex rounded-md border border-border bg-muted px-1.5 py-0.5">
+            <span className="text-[13px] font-medium text-clr-slate">Student</span>
+          </div>
+        </div>
+        <Button className="rounded-lg px-3 font-semibold">Edit Profile</Button>
+      </div>
 
       {/* Information Cards Grid */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 2fr' }, gap: 3, mt: 2 }}>
-        
+      <div className="mt-2 grid grid-cols-1 gap-3 md:grid-cols-[1fr_2fr]">
+
         {/* Contact Info Card */}
-        <Paper variant="outlined" sx={{ borderRadius: 3, p: 3, bgcolor: '#ffffff' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-            <Mail size={18} color="#2D69EB" />
-            <Typography sx={{ fontWeight: 600, color: '#0A0A0A' }}>Contact Info</Typography>
-          </Box>
-          
-          <Box sx={{ display: 'grid', gap: 2.5 }}>
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Email</Typography>
-              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{email}</Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Phone</Typography>
-              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{phone}</Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Address</Typography>
-              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{address}</Typography>
-            </Box>
-          </Box>
-        </Paper>
+        <div className="rounded-xl border bg-card p-3 shadow-sm">
+          <div className="mb-3 flex items-center gap-1.5">
+            <Mail size={18} className="text-clr-blue" />
+            <h3 className="font-semibold text-foreground">Contact Info</h3>
+          </div>
+
+          <div className="grid gap-2.5">
+            <div>
+              <p className="mb-0.5 text-xs text-muted-foreground">Email</p>
+              <p className="text-sm font-medium text-foreground">{email}</p>
+            </div>
+            <div>
+              <p className="mb-0.5 text-xs text-muted-foreground">Phone</p>
+              <p className="text-sm font-medium text-foreground">{phone}</p>
+            </div>
+            <div>
+              <p className="mb-0.5 text-xs text-muted-foreground">Address</p>
+              <p className="text-sm font-medium text-foreground">{address}</p>
+            </div>
+          </div>
+        </div>
 
         {/* Personal Information Card */}
-        <Paper variant="outlined" sx={{ borderRadius: 3, p: 3, bgcolor: '#ffffff' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-            <User size={18} color="#2D69EB" />
-            <Typography sx={{ fontWeight: 600, color: '#0A0A0A' }}>Personal Information</Typography>
-          </Box>
+        <div className="rounded-xl border bg-card p-3 shadow-sm">
+          <div className="mb-3 flex items-center gap-1.5">
+            <User size={18} className="text-clr-blue" />
+            <h3 className="font-semibold text-foreground">Personal Information</h3>
+          </div>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Roll No</Typography>
-              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500, textTransform: 'uppercase' }}>{rollNo}</Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Gender</Typography>
-              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{gender}</Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Date of Birth</Typography>
-              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{dob}</Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Last Qualification</Typography>
-              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{qualification}</Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>CNIC</Typography>
-              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{cnic}</Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5 }}>Batch</Typography>
-              <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{batch}</Typography>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <p className="mb-0.5 text-xs text-muted-foreground">Roll No</p>
+              <p className="text-sm font-medium uppercase text-foreground">{rollNo}</p>
+            </div>
+            <div>
+              <p className="mb-0.5 text-xs text-muted-foreground">Gender</p>
+              <p className="text-sm font-medium text-foreground">{gender}</p>
+            </div>
+            <div>
+              <p className="mb-0.5 text-xs text-muted-foreground">Date of Birth</p>
+              <p className="text-sm font-medium text-foreground">{dob}</p>
+            </div>
+            <div>
+              <p className="mb-0.5 text-xs text-muted-foreground">Last Qualification</p>
+              <p className="text-sm font-medium text-foreground">{qualification}</p>
+            </div>
+            <div>
+              <p className="mb-0.5 text-xs text-muted-foreground">CNIC</p>
+              <p className="text-sm font-medium text-foreground">{cnic}</p>
+            </div>
+            <div>
+              <p className="mb-0.5 text-xs text-muted-foreground">Batch</p>
+              <p className="text-sm font-medium text-foreground">{batch}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    </Box>
+    </div>
   );
 }

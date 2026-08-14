@@ -1,7 +1,7 @@
-import { Box, Button, Paper, Typography } from '@mui/material'
 import { AlertTriangle } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
 
 export default function AccessDeniedPage() {
   const { logout } = useAuth()
@@ -13,43 +13,20 @@ export default function AccessDeniedPage() {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        bgcolor: '#F8FAFA',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: 2,
-      }}
-    >
-      <Paper variant="outlined" sx={{ width: '100%', maxWidth: 420, p: 4, textAlign: 'center', borderRadius: 2, bgcolor: '#ffffff' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            width: 56,
-            height: 56,
-            mx: 'auto',
-            borderRadius: '50%',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: '#FEF2F2',
-            color: '#DC2626',
-          }}
-        >
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-2">
+      <div className="w-full max-w-[420px] rounded-lg border bg-card p-4 text-center shadow-sm">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-clr-red-bg text-clr-red">
           <AlertTriangle size={26} />
-        </Box>
-        <Typography variant="h5" sx={{ mt: 2, fontWeight: 600, color: '#0A0A0A', letterSpacing: '-0.02em' }}>
-          Access denied
-        </Typography>
-        <Typography variant="body2" sx={{ color: '#828283', mt: 1 }}>
+        </span>
+        <h5 className="mt-3 text-xl font-semibold tracking-tight text-foreground">Access denied</h5>
+        <p className="mt-1 text-sm text-muted-foreground">
           You don't have permission to view this page. Please sign in with an account that has the
           required role.
-        </Typography>
-        <Button variant="contained" fullWidth sx={{ mt: 3, minHeight: 40 }} onClick={handleGoToLogin}>
+        </p>
+        <Button className="mt-4 min-h-10 w-full" onClick={handleGoToLogin}>
           Go to login
         </Button>
-      </Paper>
-    </Box>
+      </div>
+    </div>
   )
 }

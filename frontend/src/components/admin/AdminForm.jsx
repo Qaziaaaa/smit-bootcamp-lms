@@ -1,216 +1,142 @@
-import React, { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
 import * as z from 'zod';
-import { Button, Box, Typography, OutlinedInput, FormHelperText, InputAdornment, IconButton } from '@mui/material';
-import { Modal } from '../ui/Modal';
 import { Eye, EyeOff } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { FormField } from '../ui/FormField';
+import { Input } from '../ui/Input';
+import { Label } from '../ui/Label';
+import { Modal } from '../ui/Modal';
 
 const adminSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(1, "Phone is required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  profileImage: z.string().url("Must be a valid URL").optional().or(z.literal('')),
+  name: z.string().min(2, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(1, 'Phone is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  profileImage: z.string().url('Must be a valid URL').optional().or(z.literal('')),
 });
 
+const emptyValues = { name: '', email: '', phone: '', password: '', profileImage: '' };
+
 export const AdminForm = ({ open, onClose, onSubmit }) => {
-  const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(adminSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      phone: '',
-      password: '',
-      profileImage: '',
-    },
-  });
-
+  const [values, setValues] = useState(emptyValues);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleMouseDownPassword = (event) => event.preventDefault();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
-      reset({
-        name: '',
-        email: '',
-        phone: '',
-        password: '',
-        profileImage: '',
-      });
+      setValues(emptyValues);
+      setErrors({});
       setShowPassword(false);
     }
-  }, [open, reset]);
+  }, [open]);
 
-  const onFormSubmit = async (data) => {
-    await onSubmit(data);
-    onClose();
+  const setField = (name) => (e) => {
+    setValues((v) => ({ ...v, [name]: e.target.value }));
+    setErrors((err) => ({ ...err, [name]: undefined }));
   };
 
-  const actions = (
-    <>
-      <Button 
-        onClick={onClose} 
-        disabled={isSubmitting}
-        variant="outlined"
-        sx={{ 
-          color: '#0A0A0A', 
-          borderColor: '#E2E8F0', 
-          textTransform: 'none', 
-          fontWeight: 600,
-          px: 3,
-          '&:hover': {
-            borderColor: '#CBD5E1',
-            bgcolor: '#F8FAFA'
-          }
-        }}
-      >
-        Cancel
-      </Button>
-      <Button
-        onClick={handleSubmit(onFormSubmit)}
-        color="primary"
-        variant="contained"
-        disabled={isSubmitting}
-        disableElevation
-        sx={{ 
-          bgcolor: '#2D69EB', 
-          textTransform: 'none',
-          fontWeight: 600,
-          px: 3,
-          '&:hover': { 
-            bgcolor: '#0E3B9A' 
-          },
-        }}
-      >
-        {isSubmitting ? 'Creating...' : 'Create Admin'}
-      </Button>
-    </>
-  );
-
-  const Label = ({ children }) => (
-    <Typography 
-      sx={{ 
-        display: 'block',
-        fontSize: '11px',
-        fontWeight: 600,
-        color: '#828283',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
-        mb: 0.75,
-        ml: 0.25
-      }}
-    >
-      {children}
-    </Typography>
-  );
-
-  const inputStyles = {
-    borderRadius: '8px',
-    bgcolor: '#FFFFFF',
-    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
-    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#CBD5E1' },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2D69EB', borderWidth: '1px' },
-    '& .MuiOutlinedInput-input': { fontSize: '14px', color: '#0A0A0A' }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = adminSchema.safeParse(values);
+    if (!result.success) {
+      const next = {};
+      for (const issue of result.error.issues) {
+        if (!next[issue.path[0]]) next[issue.path[0]] = issue.message;
+      }
+      setErrors(next);
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await onSubmit(result.data);
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Create New Admin"
-      actions={actions}
-      hideDividers
-    >
-      <form onSubmit={handleSubmit(onFormSubmit)}>
-        <Box sx={{ mb: 3 }}>
-          <Typography sx={{ fontSize: '14px', color: '#828283' }}>
-            Add a new admin to the LMS platform. (Stored locally for now).
-          </Typography>
-        </Box>
-        
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 2.5 }}>
-          <Box>
-            <Label>Full Name</Label>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput {...field} fullWidth placeholder="e.g. John Doe" error={!!errors.name} sx={inputStyles} />
-              )}
-            />
-            {errors.name && <FormHelperText error sx={{ ml: 0.5 }}>{errors.name.message}</FormHelperText>}
-          </Box>
+    <Modal open={open} onClose={onClose} title="Create New Admin" hideDividers>
+      <form onSubmit={handleSubmit}>
+        <p className="mb-6 text-sm text-muted-foreground">
+          Add a new admin to the LMS platform. (Stored locally for now).
+        </p>
 
-          <Box>
-            <Label>Email Address</Label>
-            <Controller
-              name="email"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput {...field} type="email" fullWidth placeholder="admin@saylani.org" error={!!errors.email} sx={inputStyles} />
-              )}
-            />
-            {errors.email && <FormHelperText error sx={{ ml: 0.5 }}>{errors.email.message}</FormHelperText>}
-          </Box>
+        <div className="space-y-5">
+          <FormField
+            label="Full Name"
+            name="name"
+            value={values.name}
+            onChange={setField('name')}
+            error={errors.name}
+            required
+            placeholder="e.g. John Doe"
+          />
+          <FormField
+            label="Email Address"
+            name="email"
+            type="email"
+            value={values.email}
+            onChange={setField('email')}
+            error={errors.email}
+            required
+            placeholder="admin@saylani.org"
+          />
+          <FormField
+            label="Phone Number"
+            name="phone"
+            value={values.phone}
+            onChange={setField('phone')}
+            error={errors.phone}
+            required
+            placeholder="e.g. 0300 1234567"
+          />
+          <FormField
+            label="Profile Picture URL"
+            name="profileImage"
+            value={values.profileImage}
+            onChange={setField('profileImage')}
+            error={errors.profileImage}
+            placeholder="https://example.com/image.png"
+          />
+          <div className="space-y-1.5">
+            <Label htmlFor="password">
+              Password
+              <span className="text-destructive"> *</span>
+            </Label>
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={values.password}
+                onChange={setField('password')}
+                placeholder="Min. 8 characters"
+                aria-invalid={!!errors.password}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.password && <p className="text-xs font-medium text-destructive">{errors.password}</p>}
+          </div>
+        </div>
 
-          <Box>
-            <Label>Phone Number</Label>
-            <Controller
-              name="phone"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput {...field} fullWidth placeholder="e.g. 0300 1234567" error={!!errors.phone} sx={inputStyles} />
-              )}
-            />
-            {errors.phone && <FormHelperText error sx={{ ml: 0.5 }}>{errors.phone.message}</FormHelperText>}
-          </Box>
-          
-          <Box>
-            <Label>Profile Picture URL</Label>
-            <Controller
-              name="profileImage"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput {...field} fullWidth placeholder="https://example.com/image.png" error={!!errors.profileImage} sx={inputStyles} />
-              )}
-            />
-            {errors.profileImage && <FormHelperText error sx={{ ml: 0.5 }}>{errors.profileImage.message}</FormHelperText>}
-          </Box>
-
-          <Box>
-            <Label>Password</Label>
-            <Controller
-              name="password"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  type={showPassword ? 'text' : 'password'}
-                  fullWidth
-                  placeholder="Min. 8 characters"
-                  error={!!errors.password}
-                  sx={inputStyles}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                        size="small"
-                        sx={{ color: '#828283' }}
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-              )}
-            />
-            {errors.password && <FormHelperText error sx={{ ml: 0.5 }}>{errors.password.message}</FormHelperText>}
-          </Box>
-        </Box>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating...' : 'Create Admin'}
+          </Button>
+        </div>
       </form>
     </Modal>
   );

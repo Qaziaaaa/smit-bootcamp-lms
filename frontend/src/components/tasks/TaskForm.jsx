@@ -1,8 +1,8 @@
-import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
 import * as z from 'zod';
-import { Button, Box, Typography, OutlinedInput, Select, MenuItem, FormHelperText } from '@mui/material';
+import { Button } from '../ui/Button';
+import { FormField } from '../ui/FormField';
+import { Select } from '../ui/Select';
 import { Modal } from '../ui/Modal';
 
 const taskSchema = z.object({
@@ -28,272 +28,150 @@ const STATUS_OPTIONS = [
   { label: 'Completed', value: 'completed' },
 ];
 
-const Label = ({ children }) => (
-  <Typography sx={{ fontSize: '11px', fontWeight: 600, color: '#828283', textTransform: 'uppercase', mb: 0.5 }}>
-    {children}
-  </Typography>
-);
-
-const inputStyles = {
-  borderRadius: '8px',
-  bgcolor: '#FFFFFF',
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#E2E8F0',
-  },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#CBD5E1',
-  },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#2D69EB',
-    borderWidth: '1px',
-  },
-  '& .MuiOutlinedInput-input': {
-    fontSize: '14px',
-    color: '#0A0A0A',
-  },
-  '&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#E2E8F0',
-  }
+const emptyValues = {
+  title: '',
+  description: '',
+  projectId: '',
+  assignedTo: '',
+  priority: 'medium',
+  status: 'in-progress',
+  deadline: '',
 };
 
-function toFormValue(initialData) {
-  if (!initialData) return null;
-  return {
-    ...initialData,
-    projectId: initialData.projectId?._id || initialData.projectId || '',
-    assignedTo: initialData.assignedTo?._id || initialData.assignedTo || '',
-    deadline: initialData.deadline ? String(initialData.deadline).slice(0, 10) : '',
-  };
-}
-
-export const TaskForm = ({
-  open,
-  onClose,
-  onSubmit,
-  initialData = null,
-  lockedProjectId = null,
-  projects = [],
-  students = [],
-}) => {
+export const TaskForm = ({ open, onClose, onSubmit, initialData = null, lockedProjectId = null, projects = [], students = [] }) => {
   const isEditing = !!initialData;
+  const [values, setValues] = useState(emptyValues);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(taskSchema),
-    defaultValues: {
-      title: '',
-      description: '',
-      projectId: lockedProjectId || '',
-      assignedTo: '',
-      priority: 'medium',
-      status: 'in-progress',
-      deadline: '',
-    },
-  });
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
-      reset(
-        toFormValue(initialData) || {
-          title: '',
-          description: '',
-          projectId: lockedProjectId || '',
-          assignedTo: '',
-          priority: 'medium',
-          status: 'in-progress',
-          deadline: '',
-        }
+      setValues(
+        initialData
+          ? {
+              title: initialData.title || '',
+              description: initialData.description || '',
+              projectId: initialData.projectId?._id || initialData.projectId || '',
+              assignedTo: initialData.assignedTo?._id || initialData.assignedTo || '',
+              priority: initialData.priority || 'medium',
+              status: initialData.status || 'in-progress',
+              deadline: initialData.deadline ? String(initialData.deadline).slice(0, 10) : '',
+            }
+          : { ...emptyValues, projectId: lockedProjectId || '' },
       );
+      setErrors({});
     }
-  }, [open, initialData, lockedProjectId, reset]);
+  }, [open, initialData, lockedProjectId]);
 
-  const onFormSubmit = async (data) => {
-    const { assignedTo, deadline, ...rest } = data;
-    await onSubmit({
-      ...rest,
-      assignedTo: assignedTo || undefined,
-      deadline: deadline || undefined,
-    });
-    onClose();
+  const setField = (name) => (e) => {
+    setValues((v) => ({ ...v, [name]: e.target.value }));
+    setErrors((err) => ({ ...err, [name]: undefined }));
   };
 
-  const actions = (
-    <>
-      <Button onClick={onClose} color="inherit" disabled={isSubmitting}>
-        Cancel
-      </Button>
-      <Button
-        onClick={handleSubmit(onFormSubmit)}
-        color="primary"
-        variant="contained"
-        disabled={isSubmitting}
-        disableElevation
-      >
-        {isSubmitting ? 'Saving...' : 'Save Task'}
-      </Button>
-    </>
-  );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = taskSchema.safeParse(values);
+    if (!result.success) {
+      const next = {};
+      for (const issue of result.error.issues) {
+        if (!next[issue.path[0]]) next[issue.path[0]] = issue.message;
+      }
+      setErrors(next);
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const { assignedTo, deadline, ...rest } = result.data;
+      await onSubmit({
+        ...rest,
+        assignedTo: assignedTo || undefined,
+        deadline: deadline || undefined,
+      });
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={isEditing ? 'Edit Task' : 'Add Task'}
-      actions={actions}
-      hideDividers
-    >
-      <form onSubmit={handleSubmit(onFormSubmit)}>
-        <Box sx={{ mb: 3 }}>
-          <Typography sx={{ fontSize: '14px', color: '#828283' }}>
-            Assign a new task to a student and track its completion.
-          </Typography>
-        </Box>
+    <Modal open={open} onClose={onClose} title={isEditing ? 'Edit Task' : 'Add Task'} hideDividers>
+      <form onSubmit={handleSubmit}>
+        <p className="mb-6 text-sm text-muted-foreground">
+          Assign a new task to a student and track its completion.
+        </p>
 
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2.5 }}>
-          <Box sx={{ gridColumn: '1 / -1' }}>
-            <Label>Task Title *</Label>
-            <Controller
-              name="title"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  fullWidth
-                  placeholder="e.g. Implement Login Page"
-                  error={!!errors.title}
-                  sx={inputStyles}
-                />
-              )}
-            />
-            {errors.title && <FormHelperText error sx={{ ml: 0.5 }}>{errors.title.message}</FormHelperText>}
-          </Box>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <FormField
+            label="Task Title"
+            name="title"
+            className="sm:col-span-2"
+            value={values.title}
+            onChange={setField('title')}
+            error={errors.title}
+            required
+            placeholder="e.g. Implement Login Page"
+          />
+          <FormField
+            label="Description"
+            name="description"
+            className="sm:col-span-2"
+            multiline
+            rows={3}
+            value={values.description}
+            onChange={setField('description')}
+            error={errors.description}
+            placeholder="Detailed task description..."
+          />
+          <Select
+            label="Project"
+            value={values.projectId}
+            onChange={(next) => setField('projectId')({ target: { value: next } })}
+            options={projects.map((p) => ({ label: p.title, value: p._id || p.id }))}
+            placeholder="Select project"
+            error={errors.projectId}
+            disabled={!!lockedProjectId}
+            required
+          />
+          <Select
+            label="Assign To (Optional)"
+            value={values.assignedTo}
+            onChange={(next) => setField('assignedTo')({ target: { value: next } })}
+            options={students.map((s) => ({ label: s.name, value: s._id || s.id }))}
+            placeholder="Unassigned"
+            error={errors.assignedTo}
+          />
+          <Select
+            label="Priority"
+            value={values.priority}
+            onChange={(next) => setField('priority')({ target: { value: next } })}
+            options={PRIORITY_OPTIONS}
+            error={errors.priority}
+          />
+          <Select
+            label="Status"
+            value={values.status}
+            onChange={(next) => setField('status')({ target: { value: next } })}
+            options={STATUS_OPTIONS}
+            error={errors.status}
+          />
+          <FormField
+            label="Deadline (Optional)"
+            name="deadline"
+            type="date"
+            value={values.deadline}
+            onChange={setField('deadline')}
+            error={errors.deadline}
+          />
+        </div>
 
-          <Box sx={{ gridColumn: '1 / -1' }}>
-            <Label>Description</Label>
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  fullWidth
-                  multiline
-                  rows={3}
-                  placeholder="Detailed task description..."
-                  error={!!errors.description}
-                  sx={inputStyles}
-                />
-              )}
-            />
-            {errors.description && <FormHelperText error sx={{ ml: 0.5 }}>{errors.description.message}</FormHelperText>}
-          </Box>
-
-          <Box>
-            <Label>Project *</Label>
-            <Controller
-              name="projectId"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  displayEmpty
-                  disabled={!!lockedProjectId}
-                  error={!!errors.projectId}
-                  sx={inputStyles}
-                >
-                  <MenuItem value="" sx={{ fontSize: '14px', fontStyle: 'italic', color: '#828283' }}>Select project</MenuItem>
-                  {projects.map((p) => (
-                    <MenuItem key={p._id || p.id} value={p._id || p.id} sx={{ fontSize: '14px' }}>{p.title}</MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            {errors.projectId && <FormHelperText error sx={{ ml: 0.5 }}>{errors.projectId.message}</FormHelperText>}
-          </Box>
-
-          <Box>
-            <Label>Assign To (Optional)</Label>
-            <Controller
-              name="assignedTo"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  displayEmpty
-                  error={!!errors.assignedTo}
-                  sx={inputStyles}
-                >
-                  <MenuItem value="" sx={{ fontSize: '14px', fontStyle: 'italic', color: '#828283' }}>Unassigned</MenuItem>
-                  {students.map((s) => (
-                    <MenuItem key={s._id || s.id} value={s._id || s.id} sx={{ fontSize: '14px' }}>{s.name}</MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            {errors.assignedTo && <FormHelperText error sx={{ ml: 0.5 }}>{errors.assignedTo.message}</FormHelperText>}
-          </Box>
-
-          <Box>
-            <Label>Priority</Label>
-            <Controller
-              name="priority"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  error={!!errors.priority}
-                  sx={inputStyles}
-                >
-                  {PRIORITY_OPTIONS.map((o) => (
-                    <MenuItem key={o.value} value={o.value} sx={{ fontSize: '14px' }}>{o.label}</MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            {errors.priority && <FormHelperText error sx={{ ml: 0.5 }}>{errors.priority.message}</FormHelperText>}
-          </Box>
-
-          <Box>
-            <Label>Status</Label>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  fullWidth
-                  error={!!errors.status}
-                  sx={inputStyles}
-                >
-                  {STATUS_OPTIONS.map((o) => (
-                    <MenuItem key={o.value} value={o.value} sx={{ fontSize: '14px' }}>{o.label}</MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            {errors.status && <FormHelperText error sx={{ ml: 0.5 }}>{errors.status.message}</FormHelperText>}
-          </Box>
-
-          <Box>
-            <Label>Deadline (Optional)</Label>
-            <Controller
-              name="deadline"
-              control={control}
-              render={({ field }) => (
-                <OutlinedInput
-                  {...field}
-                  type="date"
-                  fullWidth
-                  error={!!errors.deadline}
-                  sx={inputStyles}
-                />
-              )}
-            />
-            {errors.deadline && <FormHelperText error sx={{ ml: 0.5 }}>{errors.deadline.message}</FormHelperText>}
-          </Box>
-        </Box>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Save Task'}
+          </Button>
+        </div>
       </form>
     </Modal>
   );

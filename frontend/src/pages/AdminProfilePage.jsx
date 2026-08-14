@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { Box, Paper, Typography, Button, Avatar } from '@mui/material';
-import { Mail, Phone, Shield, Plus, Key } from 'lucide-react';
+import { Mail, Phone, Shield, Key } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Logo } from '../components/ui/Logo';
 import { Badge } from '../components/ui/Badge';
-import { AdminForm } from '../components/admin/AdminForm';
+import { Avatar } from '../components/ui/Avatar';
 
 export default function AdminProfilePage() {
   const { user } = useAuth();
   
-  // Local state for mock admins. Initialize with the Admin.
   const [admins, setAdmins] = useState([
     {
       id: 'admin-1',
@@ -24,126 +22,95 @@ export default function AdminProfilePage() {
   const superAdmin = admins[0];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div className="flex flex-col gap-3">
       {/* Cover Image & Avatar Section */}
-      <Box sx={{ position: 'relative', mb: 8 }}>
-        <Box
-          sx={{
-            height: { xs: 160, sm: 200, md: 240 },
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #1E40AF 0%, #2D69EB 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-          }}
-        >
-          <Box sx={{ transform: 'scale(1.5)', opacity: 0.9, filter: 'brightness(0) invert(1)' }}>
+      <div className="relative mb-8">
+        <div className="flex h-40 items-center justify-center overflow-hidden rounded-lg sm:h-[200px] md:h-60 bg-[linear-gradient(135deg,hsl(var(--clr-blue-dark)),hsl(var(--clr-blue)))]">
+          <div className="scale-150 opacity-90 brightness-0 invert">
             <Logo />
-          </Box>
-        </Box>
+          </div>
+        </div>
         
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: -60,
-            left: { xs: 24, sm: 40 },
-            width: 120,
-            height: 120,
-            borderRadius: '50%',
-            bgcolor: '#ffffff',
-            border: '4px solid #ffffff',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#2D69EB',
-            fontSize: 48,
-            fontWeight: 700,
-            overflow: 'hidden'
-          }}
-        >
+        <div className="absolute -bottom-15 left-6 flex h-30 w-30 items-center justify-center overflow-hidden rounded-full border-4 border-card bg-card text-5xl font-bold text-clr-blue shadow-md sm:left-10">
           {superAdmin.profileImage ? (
-            <img src={superAdmin.profileImage} alt={superAdmin.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={superAdmin.profileImage} alt={superAdmin.name} className="h-full w-full object-cover" />
           ) : (
             superAdmin.name.charAt(0).toUpperCase()
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Name and Action */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', px: { xs: 1, sm: 2 } }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#0A0A0A', letterSpacing: '-0.02em' }}>
+      <div className="flex items-start justify-between px-1 sm:px-2">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             {superAdmin.name}
-          </Typography>
-          <Box sx={{ display: 'inline-flex', mt: 1, px: 1.5, py: 0.5, bgcolor: '#DBEAFE', borderRadius: 1, border: '1px solid #BFDBFE' }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#1E40AF' }}>
+          </h1>
+          <span className="mt-1 inline-flex rounded-md border border-clr-blue-border bg-clr-blue-bg px-1.5 py-0.5">
+            <span className="text-[13px] font-semibold text-clr-blue-dark">
               {superAdmin.role}
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
+            </span>
+          </span>
+        </div>
+      </div>
 
       {/* Admin Info Card */}
-      <Paper variant="outlined" sx={{ borderRadius: 3, p: 3, bgcolor: '#ffffff', mt: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-          <Shield size={18} color="#2D69EB" />
-          <Typography sx={{ fontWeight: 600, color: '#0A0A0A' }}>Profile Details</Typography>
-        </Box>
+      <div className="mt-2 rounded-lg border bg-card p-3 shadow-sm">
+        <div className="mb-3 flex items-center gap-1.5">
+          <Shield size={18} className="text-clr-blue" />
+          <p className="text-base font-semibold text-foreground">Profile Details</p>
+        </div>
         
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 3 }}>
-          <Box>
-            <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+          <div>
+            <p className="mb-0.5 flex items-center gap-0.5 text-xs text-muted-foreground">
               <Mail size={14} /> Email
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{superAdmin.email}</Typography>
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            </p>
+            <p className="text-sm font-medium text-foreground">{superAdmin.email}</p>
+          </div>
+          <div>
+            <p className="mb-0.5 flex items-center gap-0.5 text-xs text-muted-foreground">
               <Phone size={14} /> Phone
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{superAdmin.phone}</Typography>
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            </p>
+            <p className="text-sm font-medium text-foreground">{superAdmin.phone}</p>
+          </div>
+          <div>
+            <p className="mb-0.5 flex items-center gap-0.5 text-xs text-muted-foreground">
               <Shield size={14} /> Role
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>{superAdmin.role}</Typography>
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            </p>
+            <p className="text-sm font-medium text-foreground">{superAdmin.role}</p>
+          </div>
+          <div>
+            <p className="mb-0.5 flex items-center gap-0.5 text-xs text-muted-foreground">
               <Key size={14} /> Password
-            </Typography>
-            <Typography sx={{ fontSize: 14, color: '#0A0A0A', fontWeight: 500 }}>********</Typography>
-          </Box>
-        </Box>
-      </Paper>
+            </p>
+            <p className="text-sm font-medium text-foreground">********</p>
+          </div>
+        </div>
+      </div>
 
       {/* Management Section for Listed Admins */}
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, px: 1 }}>
+      <div className="mt-2">
+        <h2 className="mb-2 px-1 text-base font-semibold text-foreground">
           Platform Administrators
-        </Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
+        </h2>
+        <div className="grid gap-3 md:grid-cols-3">
           {admins.map((adm) => (
-            <Paper key={adm.id} variant="outlined" sx={{ p: 2.5, borderRadius: 3, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar src={adm.profileImage} sx={{ width: 48, height: 48, bgcolor: adm.role === 'Admin' ? '#1E40AF' : '#2D69EB' }}>
-                {adm.name.charAt(0).toUpperCase()}
-              </Avatar>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography sx={{ fontWeight: 600, fontSize: 15, color: '#0A0A0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div key={adm.id} className="flex items-center gap-2 rounded-lg border bg-card p-2.5 shadow-sm">
+              <Avatar name={adm.name} className="h-12 w-12" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[15px] font-semibold text-foreground">
                   {adm.name}
-                </Typography>
-                <Typography sx={{ fontSize: 12, color: '#828283', mb: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                </p>
+                <p className="mb-0.5 truncate text-xs text-muted-foreground">
                   {adm.email}
-                </Typography>
+                </p>
                 <Badge status={adm.role.toLowerCase()} />
-              </Box>
-            </Paper>
+              </div>
+            </div>
           ))}
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 }

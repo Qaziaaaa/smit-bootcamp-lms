@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, Paper, Grid, IconButton } from '@mui/material';
 import { ArrowLeft, Edit2, Plus, Trash2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { Button } from '../components/ui/Button';
+import { Progress } from '../components/ui/Progress';
 import { Badge } from '../components/ui/Badge';
 import { DataTable } from '../components/ui/DataTable';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -62,9 +63,7 @@ export default function ProjectDetailPage() {
       accessorKey: 'title',
       header: 'TASK',
       cell: ({ getValue }) => (
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {getValue()}
-        </Typography>
+        <p className="text-sm font-semibold text-foreground">{getValue()}</p>
       ),
     },
     {
@@ -81,28 +80,29 @@ export default function ProjectDetailPage() {
       accessorKey: 'assignedTo',
       header: 'ASSIGNED TO',
       cell: ({ getValue }) => (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-muted-foreground">
           {getValue()?.name || '—'}
-        </Typography>
+        </p>
       ),
     },
     {
       accessorKey: 'deadline',
       header: 'DEADLINE',
       cell: ({ getValue }) => (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-muted-foreground">
           {getValue() ? String(getValue()).slice(0, 10) : '—'}
-        </Typography>
+        </p>
       ),
     },
     {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton
-            size="small"
-            color="primary"
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-clr-blue"
             title="Edit task"
             onClick={() => {
               setEditingTask(row.original);
@@ -110,16 +110,17 @@ export default function ProjectDetailPage() {
             }}
           >
             <Edit2 size={18} />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="error"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive"
             title="Delete task"
             onClick={() => setDeleteTaskId(row.original._id)}
           >
             <Trash2 size={18} />
-          </IconButton>
-        </Box>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -191,171 +192,135 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-        <Typography variant="body2" color="text.secondary">Loading project...</Typography>
-      </Box>
+      <div className="mx-auto max-w-[1200px] p-3">
+        <p className="text-sm text-muted-foreground">Loading project...</p>
+      </div>
     );
   }
 
   if (!project) {
     return (
-      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-        <Typography variant="body2" color="text.secondary">Project not found.</Typography>
-      </Box>
+      <div className="mx-auto max-w-[1200px] p-3">
+        <p className="text-sm text-muted-foreground">Project not found.</p>
+      </div>
     );
   }
 
   const completedTasks = tasks.filter((t) => t.status === 'completed').length;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
 
       {/* Topbar — "Project — {title}" + Edit button */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton onClick={() => navigate('/projects')} size="small" title="Back to projects">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/projects')} title="Back to projects">
             <ArrowLeft size={20} />
-          </IconButton>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          </Button>
+          <h1 className="text-xl font-semibold text-foreground">
             Project — {project.title}
-          </Typography>
-        </Box>
+          </h1>
+        </div>
         <Button
-          variant="outlined"
-          startIcon={<Edit2 size={16} />}
+          variant="outline"
           onClick={() => setIsEditProjectOpen(true)}
         >
+          <Edit2 size={16} />
           Edit Project
         </Button>
-      </Box>
+      </div>
 
       {/* Two-column layout: Info card | Tasks subview */}
-      <Grid container spacing={3}>
+      <div className="grid gap-3">
 
         {/* Info card */}
-        <Grid item xs={12} md={4}>
-          <Paper
-            elevation={0}
-            sx={{ p: 4, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}
-          >
-            <Typography
-              variant="subtitle2"
-              color="text.secondary"
-              sx={{ textTransform: 'uppercase', mb: 2, letterSpacing: 1 }}
-            >
+        <div className="col-span-12 md:col-span-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+            <p className="mb-2 text-sm font-medium uppercase tracking-wide text-muted-foreground">
               Project Information
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Title</Typography>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>{project.title}</Typography>
-              </Box>
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <div>
+                <p className="text-xs text-muted-foreground">Title</p>
+                <p className="text-sm font-semibold text-foreground">{project.title}</p>
+              </div>
               {project.description && (
-                <Box>
-                  <Typography variant="caption" color="text.secondary">Description</Typography>
-                  <Typography variant="body2" color="text.primary" sx={{ mt: 0.5 }}>
+                <div>
+                  <p className="text-xs text-muted-foreground">Description</p>
+                  <p className="mt-0.5 text-sm text-foreground">
                     {project.description}
-                  </Typography>
-                </Box>
+                  </p>
+                </div>
               )}
-              <Box>
-                <Typography variant="caption" color="text.secondary">Assigned Team</Typography>
-                <Typography variant="body2">{project.teamId?.name || '—'}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Status</Typography>
-                <Box sx={{ mt: 0.5 }}>
+              <div>
+                <p className="text-xs text-muted-foreground">Assigned Team</p>
+                <p className="text-sm text-foreground">{project.teamId?.name || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Status</p>
+                <div className="mt-0.5">
                   <Badge status={project.status} />
-                </Box>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Deadline</Typography>
-                <Typography variant="body2">{project.deadline ? String(project.deadline).slice(0, 10) : '—'}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Task Progress</Typography>
-                <Typography variant="body2">
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Deadline</p>
+                <p className="text-sm text-foreground">{project.deadline ? String(project.deadline).slice(0, 10) : '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Task Progress</p>
+                <p className="text-sm text-foreground">
                   {completedTasks} / {tasks.length} completed
-                </Typography>
+                </p>
                 {tasks.length > 0 && (
-                  <Box
-                    sx={{
-                      mt: 1,
-                      height: 8,
-                      bgcolor: 'grey.200',
-                      borderRadius: 4,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: `${(completedTasks / tasks.length) * 100}%`,
-                        height: '100%',
-                        bgcolor: 'success.main',
-                        transition: 'width 0.3s ease',
-                      }}
-                    />
-                  </Box>
+                  <Progress
+                    value={(completedTasks / tasks.length) * 100}
+                    className="mt-1 h-2"
+                  />
                 )}
-              </Box>
-            </Box>
-          </Paper>
-        </Grid>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Tasks subview */}
-        <Grid item xs={12} md={8}>
-          <Paper
-            elevation={0}
-            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}
-          >
-            <Box
-              sx={{
-                p: 3,
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                bgcolor: 'grey.50',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+        <div className="col-span-12 md:col-span-8">
+          <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+            <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/50 p-3">
+              <h2 className="text-base font-semibold text-foreground">
                 Tasks ({tasks.length})
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              </h2>
+              <div className="flex gap-1">
                 <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<CheckCircle size={16} />}
+                  variant="outline"
+                  size="sm"
                   onClick={() => setBulkConfirm(true)}
                 >
+                  <CheckCircle size={16} />
                   Mark All Done
                 </Button>
                 <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<Plus size={16} />}
-                  disableElevation
+                  size="sm"
                   onClick={() => {
                     setEditingTask(null);
                     setIsTaskFormOpen(true);
                   }}
                 >
+                  <Plus size={16} />
                   Add Task
                 </Button>
-              </Box>
-            </Box>
+              </div>
+            </div>
 
-            <Box sx={{ p: 2 }}>
+            <div className="p-2">
               <DataTable
                 data={tasks}
                 columns={taskColumns}
                 emptyMessage="No tasks for this project yet"
               />
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Edit Project Modal */}
       <ProjectForm
@@ -400,6 +365,6 @@ export default function ProjectDetailPage() {
         onConfirm={handleMarkAllCompleted}
         onCancel={() => setBulkConfirm(false)}
       />
-    </Box>
+    </div>
   );
 }

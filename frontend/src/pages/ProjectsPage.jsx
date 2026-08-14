@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Button, IconButton, Select, MenuItem, FormControl } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
 import { Eye, Edit2, Trash2, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { Button } from '../components/ui/Button';
 import { DataTable } from '../components/ui/DataTable';
 import { SearchBar } from '../components/ui/SearchBar';
-import { FilterBar } from '../components/ui/FilterBar';
+import { Select } from '../components/ui/Select';
 import { Pagination } from '../components/ui/Pagination';
 import { Badge } from '../components/ui/Badge';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -62,7 +62,7 @@ export default function ProjectsPage() {
     getTeams()
       .then((result) => setTeams(result.teams || []))
       .catch(() => setTeams([]));
-      
+
     getStudents({ limit: 500 })
       .then((result) => setStudents(result.students || []))
       .catch(() => setStudents([]));
@@ -73,23 +73,19 @@ export default function ProjectsPage() {
       accessorKey: 'title',
       header: 'PROJECT',
       cell: ({ row }) => (
-        <Box>
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {row.original.title}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {row.original.description || ''}
-          </Typography>
-        </Box>
+        <div>
+          <p className="text-sm font-semibold text-foreground">{row.original.title}</p>
+          <p className="max-w-[260px] truncate text-xs text-muted-foreground">{row.original.description || ''}</p>
+        </div>
       ),
     },
     {
       accessorKey: 'teamId',
       header: 'TEAM',
       cell: ({ getValue }) => (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-muted-foreground">
           {getValue()?.name || '—'}
-        </Typography>
+        </p>
       ),
     },
     {
@@ -101,26 +97,29 @@ export default function ProjectsPage() {
       accessorKey: 'deadline',
       header: 'DEADLINE',
       cell: ({ getValue }) => (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-muted-foreground">
           {getValue() ? String(getValue()).slice(0, 10) : '—'}
-        </Typography>
+        </p>
       ),
     },
     {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton
-            size="small"
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
             title="View project"
             onClick={() => navigate(`/projects/${row.original._id}`)}
           >
             <Eye size={18} />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="primary"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-clr-blue"
             title="Edit project"
             onClick={() => {
               setEditingProject(row.original);
@@ -128,16 +127,17 @@ export default function ProjectsPage() {
             }}
           >
             <Edit2 size={18} />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="error"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive"
             title="Delete project"
             onClick={() => setDeleteId(row.original._id)}
           >
             <Trash2 size={18} />
-          </IconButton>
-        </Box>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -170,74 +170,43 @@ export default function ProjectsPage() {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
 
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', letterSpacing: '-0.5px' }}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
             Capstones &amp; Projects
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
+          </h1>
+          <p className="text-sm text-muted-foreground">
             Track team deliverables, task milestones, and sprint progress.
-          </Typography>
-        </Box>
+          </p>
+        </div>
         <Button
-          variant="contained"
-          startIcon={<Plus size={18} />}
-          disableElevation
           onClick={() => {
             setEditingProject(null);
             setIsFormOpen(true);
           }}
         >
+          <Plus size={18} />
           Add Project
         </Button>
-      </Box>
+      </div>
 
       {/* Toolbar */}
-      <Box sx={{
-        bgcolor: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #E2E8F0',
-        p: 2.5,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        '& .MuiTextField-root': {
-          flex: 1,
-          maxWidth: '380px',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '8px',
-            bgcolor: '#ffffff',
-            height: '44px',
-          }
-        }
-      }}>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
         <SearchBar value={search} onChange={setSearch} placeholder="Search project..." />
-        <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto', flexWrap: 'wrap' }}>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+        <div className="ml-auto flex flex-wrap gap-2">
+          <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px]">
             <Select
-              displayEmpty
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              sx={{
-                borderRadius: '8px',
-                bgcolor: '#ffffff',
-                height: '44px',
-                '& .MuiSelect-icon': {
-                  color: '#64748B',
-                }
-              }}
-            >
-              <MenuItem value="">All Statuses</MenuItem>
-              {STATUS_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-      </Box>
+              onChange={(next) => setStatusFilter(next)}
+              options={STATUS_OPTIONS}
+              placeholder="All Statuses"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Data Table */}
       <DataTable
@@ -272,6 +241,6 @@ export default function ProjectsPage() {
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
       />
-    </Box>
+    </div>
   );
 }

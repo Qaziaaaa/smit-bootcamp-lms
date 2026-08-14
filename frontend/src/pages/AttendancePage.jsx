@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Paper, TextField, Button, Select, MenuItem, FormControl } from '@mui/material';
 import { CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 import { DataTable } from '../components/ui/DataTable';
 import { SearchBar } from '../components/ui/SearchBar';
+import { FilterBar } from '../components/ui/FilterBar';
 import { Pagination } from '../components/ui/Pagination';
 import { Avatar } from '../components/ui/Avatar';
+import { cn } from '../lib/utils';
 import { getAttendance, markAttendance, updateAttendance } from '../services/attendanceService';
 import { getStudents } from '../services/studentsService';
 
@@ -123,24 +126,24 @@ export default function AttendancePage() {
       accessorKey: 'studentName',
       header: 'STUDENT',
       cell: ({ row }) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <div className="flex items-center gap-2">
           <Avatar name={row.original.studentName} />
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>{row.original.studentName}</Typography>
-            <Typography variant="caption" color="text.secondary">{row.original.studentEmail}</Typography>
-          </Box>
-        </Box>
+          <div>
+            <p className="text-sm font-semibold text-foreground">{row.original.studentName}</p>
+            <p className="text-xs text-muted-foreground">{row.original.studentEmail}</p>
+          </div>
+        </div>
       ),
     },
     {
       accessorKey: 'batch',
       header: 'BATCH',
-      cell: ({ getValue }) => <Typography variant="body2">{getValue() || '—'}</Typography>,
+      cell: ({ getValue }) => <p className="text-sm text-foreground">{getValue() || '—'}</p>,
     },
     {
       accessorKey: 'date',
       header: 'DATE',
-      cell: ({ getValue }) => <Typography variant="body2">{String(getValue()).slice(0, 10)}</Typography>,
+      cell: ({ getValue }) => <p className="text-sm text-foreground">{String(getValue()).slice(0, 10)}</p>,
     },
     {
       accessorKey: 'status',
@@ -149,22 +152,20 @@ export default function AttendancePage() {
         const val = getValue();
         if (!val) {
           return (
-            <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', fontStyle: 'italic' }}>
+            <p className="text-sm font-semibold italic text-muted-foreground">
               Not Marked
-            </Typography>
+            </p>
           );
         }
         return (
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 600,
-              textTransform: 'capitalize',
-              color: val === 'present' ? 'success.main' : 'error.main',
-            }}
+          <p
+            className={cn(
+              'text-sm font-semibold capitalize',
+              val === 'present' ? 'text-clr-green-dark' : 'text-destructive',
+            )}
           >
             {val}
-          </Typography>
+          </p>
         );
       },
     },
@@ -177,126 +178,84 @@ export default function AttendancePage() {
         const isLoading = togglingId === itemKey;
 
         return (
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <div className="flex gap-1">
             <Button
-              size="small"
-              variant={currentStatus === 'present' ? 'contained' : 'outlined'}
-              color="success"
+              size="sm"
+              variant={currentStatus === 'present' ? 'success' : 'outline'}
               disabled={isLoading}
               onClick={() => handleStatusChange(row.original, 'present')}
-              sx={{ minWidth: 70, height: 28, fontSize: 12, textTransform: 'capitalize' }}
+              className="h-7 min-w-[70px] text-xs capitalize"
             >
               Present
             </Button>
             <Button
-              size="small"
-              variant={currentStatus === 'absent' ? 'contained' : 'outlined'}
-              color="error"
+              size="sm"
+              variant={currentStatus === 'absent' ? 'destructive' : 'outline'}
               disabled={isLoading}
               onClick={() => handleStatusChange(row.original, 'absent')}
-              sx={{ minWidth: 70, height: 28, fontSize: 12, textTransform: 'capitalize' }}
+              className="h-7 min-w-[70px] text-xs capitalize"
             >
               Absent
             </Button>
-          </Box>
+          </div>
         );
       },
     },
   ];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
 
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', letterSpacing: '-0.5px' }}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
             Daily Attendance
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
+          </h1>
+          <p className="text-sm text-muted-foreground">
             Manage and track student attendance records.
-          </Typography>
-        </Box>
-      </Box>
+          </p>
+        </div>
+      </div>
 
       {/* Summary Cards */}
-      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-        <Paper elevation={0} sx={{ p: 3, flex: 1, border: '1px solid', borderColor: 'divider', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Total Present</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600, mt: 1 }}>{summary.present}</Typography>
-          </Box>
-          <CalendarCheck size={40} color="#22C55E" opacity={0.2} />
-        </Paper>
-        <Paper elevation={0} sx={{ p: 3, flex: 1, border: '1px solid', borderColor: 'divider', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontWeight: 600 }}>Total Absent</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600, mt: 1 }}>{summary.absent}</Typography>
-          </Box>
-          <CalendarCheck size={40} color="#ef4444" opacity={0.2} />
-        </Paper>
-      </Box>
+      <div className="flex flex-wrap gap-3">
+        <div className="flex flex-1 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Present</p>
+            <p className="mt-1 text-2xl font-semibold text-foreground">{summary.present}</p>
+          </div>
+          <CalendarCheck size={40} className="text-clr-green opacity-20" />
+        </div>
+        <div className="flex flex-1 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Absent</p>
+            <p className="mt-1 text-2xl font-semibold text-foreground">{summary.absent}</p>
+          </div>
+          <CalendarCheck size={40} className="text-destructive opacity-20" />
+        </div>
+      </div>
 
       {/* Toolbar */}
-      <Box sx={{
-        bgcolor: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #E2E8F0',
-        p: 2.5,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        '& .MuiTextField-root': {
-          flex: 1,
-          maxWidth: '380px',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '8px',
-            bgcolor: '#ffffff',
-            height: '44px',
-          }
-        }
-      }}>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
         <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student..." />
-        <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto', flexWrap: 'wrap' }}>
-          <TextField
+        <div className="ml-auto flex flex-wrap gap-2">
+          <Input
             type="date"
-            label="Date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            slotProps={{ inputLabel: { shrink: true } }}
-            sx={{
-              minWidth: '160px',
-              maxWidth: '180px !important',
-              '& .MuiOutlinedInput-root': {
-                height: '44px !important',
-                borderRadius: '8px',
-              }
-            }}
+            className="h-11 w-[160px] max-w-[180px] rounded-md"
           />
           {batchOptions.length > 0 && (
-            <FormControl size="small" sx={{ minWidth: 160 }}>
-              <Select
-                displayEmpty
-                value={batchFilter}
-                onChange={(e) => setBatchFilter(e.target.value)}
-                sx={{
-                  borderRadius: '8px',
-                  bgcolor: '#ffffff',
-                  height: '44px',
-                  '& .MuiSelect-icon': {
-                    color: '#64748B',
-                  }
-                }}
-              >
-                <MenuItem value="">All Batches</MenuItem>
-                {batchOptions.map((b) => (
-                  <MenuItem key={b} value={b}>{b}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <FilterBar
+              label="Batch"
+              value={batchFilter}
+              onChange={(next) => setBatchFilter(next)}
+              options={batchOptions.map((b) => ({ label: b, value: b }))}
+            />
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Data Table */}
       <DataTable
@@ -312,6 +271,6 @@ export default function AttendancePage() {
         totalItems={pagination.total}
         onChange={setPage}
       />
-    </Box>
+    </div>
   );
 }

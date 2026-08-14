@@ -1,99 +1,67 @@
-import React from 'react';
-import {
-  useTable,
-  createCoreRowModel,
-  flexRender,
-} from '@tanstack/react-table';
+import { useTable, createCoreRowModel, flexRender } from '@tanstack/react-table'
+import { cn } from '../../lib/utils'
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from '@mui/material';
-
-import { EmptyState, LoadingState } from './StateComponents';
-
-export const DataTable = ({
-  data,
-  columns,
-  isLoading = false,
-  emptyMessage = "No data found",
-}) => {
+export const DataTable = ({ data, columns, isLoading = false, emptyMessage = 'No data found', className }) => {
   const table = useTable({
     data: data || [],
     columns,
     getCoreRowModel: createCoreRowModel(),
-  });
+  })
 
-  if (isLoading) {
-    return <LoadingState rows={5} />;
-  }
-
-  if (!data || data.length === 0) {
-    return (
-      <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '12px' }}>
-        <EmptyState message={emptyMessage} />
-      </Paper>
-    );
-  }
+  const colCount = table.getAllLeafColumns().length
 
   return (
-    <TableContainer 
-      component={Paper} 
-      elevation={0} 
-      sx={{ 
-        border: '1px solid', 
-        borderColor: 'divider', 
-        borderRadius: '12px',
-        maxWidth: '100%',
-        width: '100%',
-        overflowX: 'auto',
-        WebkitOverflowScrolling: 'touch',
-      }}
-    >
-      <Table sx={{ minWidth: { xs: 500, md: 650 } }} aria-label="data table">
-        <TableHead sx={{ backgroundColor: 'grey.50' }}>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableCell 
-                  key={header.id}
-                  sx={{ 
-                    fontWeight: 600, 
-                    color: 'text.secondary',
-                    whiteSpace: 'nowrap'
-                  }}
+    <div className={cn('rounded-lg border bg-card', className)}>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm" aria-label="data table">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="border-b bg-muted/50">
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className="h-11 whitespace-nowrap px-4 text-left align-middle text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                  >
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody>
+            {isLoading ? (
+              <tr>
+                <td colSpan={colCount} className="px-4 py-6">
+                  <div className="flex flex-col gap-2">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <div key={index} className="h-14 animate-pulse rounded-md bg-muted" />
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            ) : table.getRowModel().rows.length > 0 ? (
+              table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b transition-colors last:border-0 hover:bg-muted/50"
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableHead>
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 }, '&:hover': { backgroundColor: 'action.hover' } }}
-            >
-              {row.getAllCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-};
+                  {row.getAllCells().map((cell) => (
+                    <td key={cell.id} className="px-4 py-3 align-middle">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={colCount} className="px-4 py-12 text-center text-muted-foreground">
+                  {emptyMessage}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}

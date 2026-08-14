@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Button, IconButton, Select, MenuItem, FormControl } from '@mui/material';
 import { UserPlus, Edit2, Trash2, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { Button } from '../components/ui/Button';
 import { DataTable } from '../components/ui/DataTable';
 import { SearchBar } from '../components/ui/SearchBar';
+import { FilterBar } from '../components/ui/FilterBar';
 import { Pagination } from '../components/ui/Pagination';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
@@ -70,30 +71,30 @@ export default function StudentsPage() {
       accessorKey: 'name',
       header: 'STUDENT',
       cell: ({ row }) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <div className="flex items-center gap-2">
           <Avatar name={row.original.name} />
-          <Box>
-            <Typography sx={{ fontWeight: 600, color: '#0F172A', fontSize: '14px' }}>{row.original.name}</Typography>
-            <Typography sx={{ color: '#64748B', fontSize: '13px', mt: 0.25 }}>{row.original.email}</Typography>
-          </Box>
-        </Box>
+          <div>
+            <p className="text-sm font-semibold text-foreground">{row.original.name}</p>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">{row.original.email}</p>
+          </div>
+        </div>
       ),
     },
     {
       accessorKey: 'rollNo',
       header: 'ROLL NO',
-      cell: ({ getValue }) => <Typography sx={{ fontWeight: 600, color: '#0F172A', fontSize: '13px', textTransform: 'uppercase' }}>{getValue() || '—'}</Typography>,
+      cell: ({ getValue }) => <p className="text-[13px] font-semibold uppercase text-foreground">{getValue() || '—'}</p>,
     },
     {
       accessorKey: 'batch',
       header: 'BATCH',
-      cell: ({ getValue }) => <Typography sx={{ fontWeight: 600, color: '#0F172A', fontSize: '13px' }}>{getValue() || '—'}</Typography>,
+      cell: ({ getValue }) => <p className="text-[13px] font-semibold text-foreground">{getValue() || '—'}</p>,
     },
     {
       accessorKey: 'teamId',
       header: 'TEAM',
       cell: ({ getValue }) => (
-        <Typography sx={{ color: '#64748B', fontSize: '13px' }}>{getValue()?.name || 'Unassigned'}</Typography>
+        <p className="text-[13px] text-muted-foreground">{getValue()?.name || 'Unassigned'}</p>
       ),
     },
     {
@@ -105,28 +106,32 @@ export default function StudentsPage() {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton size="small" onClick={() => navigate(`/students/${row.original._id}`)}>
+        <div className="flex gap-1">
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="View student" onClick={() => navigate(`/students/${row.original._id}`)}>
             <Eye size={18} />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="primary"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-clr-blue"
+            aria-label="Edit student"
             onClick={() => {
               setEditingStudent(row.original);
               setIsFormOpen(true);
             }}
           >
             <Edit2 size={18} />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="error"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive"
+            aria-label="Delete student"
             onClick={() => setDeleteId(row.original._id)}
           >
             <Trash2 size={18} />
-          </IconButton>
-        </Box>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -159,163 +164,72 @@ export default function StudentsPage() {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: { xs: 2, sm: 4 }, maxWidth: 1200, mx: 'auto' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 1 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 600, color: '#0F172A', letterSpacing: '-0.5px' }}>
+    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-2 sm:p-4">
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Student Roster
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748B', mt: 0.5 }}>
+          </h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Manage student enrollments, status, and team assignments.
-          </Typography>
-        </Box>
+          </p>
+        </div>
         <Button
-          variant="contained"
-          startIcon={<UserPlus size={18} />}
-          disableElevation
+          variant="default"
+          className="rounded-md px-3 py-1 font-semibold"
           onClick={() => {
             setEditingStudent(null);
             setIsFormOpen(true);
           }}
-          sx={{
-            bgcolor: '#2D69EB',
-            borderRadius: '8px',
-            textTransform: 'none',
-            fontWeight: 600,
-            px: 3,
-            py: 1,
-            '&:hover': { bgcolor: '#1E40AF' }
-          }}
         >
+          <UserPlus size={18} />
           Add New Student
         </Button>
-      </Box>
+      </div>
 
-      {/* Search & Filters Container */}
-      <Box sx={{
-        bgcolor: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #E2E8F0',
-        p: 2.5,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        '& .MuiTextField-root': {
-          flex: 1,
-          maxWidth: '380px',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '8px',
-            bgcolor: '#ffffff',
-            height: '44px',
-          }
-        }
-      }}>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
         <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." />
-        <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto', flexWrap: 'wrap' }}>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <Select
-              displayEmpty
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              sx={{
-                borderRadius: '8px',
-                bgcolor: '#ffffff',
-                height: '44px',
-                color: '#2D69EB',
-                fontWeight: 500,
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#2D69EB',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#2D69EB',
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#2D69EB',
-                },
-                '& .MuiSelect-icon': {
-                  color: '#64748B', // the dropdown icon color in template is greyish
-                }
-              }}
-            >
-              <MenuItem value="">All Statuses</MenuItem>
-              <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="inactive">Inactive</MenuItem>
-              <MenuItem value="graduated">Graduated</MenuItem>
-            </Select>
-          </FormControl>
-          
-          {batchOptions.length > 0 && (
-            <FormControl size="small" sx={{ minWidth: 160 }}>
-              <Select
-                displayEmpty
-                value={batchFilter}
-                onChange={(e) => setBatchFilter(e.target.value)}
-                sx={{
-                  borderRadius: '8px',
-                  bgcolor: '#ffffff',
-                  height: '44px',
-                  '& .MuiSelect-icon': {
-                    color: '#64748B',
-                  }
-                }}
-              >
-                <MenuItem value="">All Batches</MenuItem>
-                {batchOptions.map((b) => (
-                  <MenuItem key={b} value={b}>{b}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-        </Box>
-      </Box>
+        <div className="ml-auto flex flex-wrap gap-2">
+          <FilterBar
+            label="Status"
+            value={statusFilter}
+            onChange={(next) => setStatusFilter(next)}
+            options={[
+              { label: 'Active', value: 'active' },
+              { label: 'Inactive', value: 'inactive' },
+              { label: 'Graduated', value: 'graduated' },
+            ]}
+          />
 
-      {/* Data Table Container */}
-      <Box sx={{
-        bgcolor: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #E2E8F0',
-        overflow: 'hidden',
-        '& .MuiTableContainer-root': {
-          border: 'none',
-          borderRadius: 0,
-          boxShadow: 'none',
-        },
-        '& .MuiTableHead-root': {
-          bgcolor: '#F8FAFC',
-          '& .MuiTableCell-root': {
-            color: '#64748B',
-            fontSize: '11px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            py: 2,
-            borderBottom: '1px solid #E2E8F0',
-          }
-        },
-        '& .MuiTableBody-root': {
-          '& .MuiTableCell-root': {
-            py: 2.5,
-            borderBottom: '1px solid #E2E8F0',
-          }
-        }
-      }}>
+          {batchOptions.length > 0 && (
+            <FilterBar
+              label="Batch"
+              value={batchFilter}
+              onChange={(next) => setBatchFilter(next)}
+              options={batchOptions.map((b) => ({ label: b, value: b }))}
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border bg-card">
         <DataTable
           data={students}
           columns={columns}
           isLoading={loading}
           emptyMessage="No students found"
+          className="border-0 rounded-none"
         />
 
-        {/* Pagination Wrapper */}
-        <Box sx={{ p: 2, borderTop: '1px solid #E2E8F0', bgcolor: '#ffffff' }}>
+        <div className="border-t bg-card p-2">
           <Pagination
             page={pagination.page}
             totalPages={pagination.pages}
             totalItems={pagination.total}
             onChange={setPage}
           />
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       <StudentForm
         open={isFormOpen}
@@ -333,6 +247,6 @@ export default function StudentsPage() {
         onCancel={() => setDeleteId(null)}
       />
 
-    </Box>
+    </div>
   );
 }

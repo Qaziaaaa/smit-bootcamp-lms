@@ -1,4 +1,3 @@
-import { Box, Paper, Typography } from '@mui/material'
 import { TrendingUp } from 'lucide-react'
 
 export function StatCard({
@@ -11,48 +10,40 @@ export function StatCard({
   iconBg,
   iconBorder,
   iconColor,
-  trendColor = '#22C55E',
+  trendColor = 'hsl(var(--clr-green))',
 }) {
   return (
-    <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff' }}>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1.5 }}>
-        <Box>
-          <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
+    <div className="rounded-lg border bg-card p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
             {label}
-          </Typography>
-          <Typography variant="h4" sx={{ mt: 0.5, fontWeight: 500, color: '#0A0A0A', fontVariantNumeric: 'tabular-nums' }}>
-            {value}
-          </Typography>
+          </p>
+          <p className="mt-1 text-2xl font-medium tabular-nums text-foreground">{value}</p>
           {trend && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
-              <TrendingUp size={14} strokeWidth={1.75} style={{ color: trendColor }} />
-              <Typography sx={{ fontSize: 11, fontWeight: 500, color: trendColor }}>{trend}</Typography>
-            </Box>
+            <p className="mt-1 flex items-center gap-1 text-[11px] font-medium" style={{ color: trendColor }}>
+              <TrendingUp size={14} strokeWidth={1.75} />
+              {trend}
+            </p>
           )}
           {subtitle && !trend && (
-            <Typography sx={{ fontSize: 11, mt: 1, color: subtitleColor || '#828283', fontWeight: subtitleColor ? 500 : 400 }}>
+            <p
+              className="mt-1 text-[11px]"
+              style={{ color: subtitleColor || 'hsl(var(--clr-slate))', fontWeight: subtitleColor ? 500 : 400 }}
+            >
               {subtitle}
-            </Typography>
+            </p>
           )}
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            width: 48,
-            height: 48,
-            borderRadius: 2,
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            bgcolor: iconBg,
-            border: 1,
-            borderColor: iconBorder,
-            color: iconColor,
-          }}
-        >
-          <Icon size={24} strokeWidth={1.75} />
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+        {Icon && (
+          <span
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border bg-clr-blue-bg text-clr-blue"
+            style={iconBg ? { backgroundColor: iconBg, borderColor: iconBorder, color: iconColor } : undefined}
+          >
+            <Icon size={24} strokeWidth={1.75} />
+          </span>
+        )}
+      </div>
+    </div>
   )
 }

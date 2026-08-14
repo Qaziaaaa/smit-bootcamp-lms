@@ -1,49 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Box, Paper, Typography } from '@mui/material'
 import { CalendarCheck, CalendarX, CalendarDays, Percent } from 'lucide-react'
 import { getStudentAttendance } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
 import { Badge } from '../components/ui/Badge'
+import { StatCard } from '../components/ui/StatCard'
+import { cn } from '../lib/utils'
 
 // Formats a raw date into a readable label (e.g. Sat, Aug 9, 2026)
 function formatDate(date) {
   return new Date(date).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })
-}
-
-// Metric card: label + value + icon + accent color
-function StatCard({ label, value, icon: Icon, color, bg, borderColor }) {
-  return (
-    <Paper
-      variant="outlined"
-      sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5 }}
-    >
-      <Box>
-        <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-          {label}
-        </Typography>
-        <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#0A0A0A', fontVariantNumeric: 'tabular-nums' }}>
-          {value}
-        </Typography>
-      </Box>
-      <Box
-        sx={{
-          width: 48,
-          height: 48,
-          borderRadius: 2,
-          bgcolor: bg,
-          border: 1,
-          borderColor,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color,
-          flexShrink: 0,
-        }}
-      >
-        <Icon size={24} strokeWidth={1.75} />
-      </Box>
-    </Paper>
-  )
 }
 
 export default function StudentAttendancePage() {
@@ -74,9 +39,9 @@ export default function StudentAttendancePage() {
   // Loading state while fetching data
   if (loading) {
     return (
-      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
-        <Typography color="#828283">Loading attendance...</Typography>
-      </Box>
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-muted-foreground">Loading attendance...</p>
+      </div>
     )
   }
 
@@ -91,75 +56,55 @@ export default function StudentAttendancePage() {
   const percentage = Math.round(summary.percentage ?? 0)
 
   return (
-    <Box sx={{ display: 'grid', gap: 3 }}>
+    <div className="grid gap-3">
       {/* Page header */}
-      <Box>
-        <Typography sx={{ fontWeight: 600, fontSize: 24, color: '#0A0A0A', letterSpacing: '-0.02em' }}>My Attendance</Typography>
-        <Typography sx={{ fontSize: 13, color: '#828283', mt: 0.25 }}>Your class attendance history (read-only).</Typography>
-      </Box>
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">My Attendance</h2>
+        <p className="mt-0.25 text-[13px] text-muted-foreground">Your class attendance history (read-only).</p>
+      </div>
 
       {/* Summary metric cards: present / absent / total days / percentage */}
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' } }}>
-        <StatCard label="Present" value={summary.present} icon={CalendarCheck} color="#22C55E" bg="#E8F5E9" borderColor="rgba(34, 197, 94, 0.3)" />
-        <StatCard label="Absent" value={summary.absent} icon={CalendarX} color="#EF4444" bg="#FEF2F2" borderColor="rgba(239, 68, 68, 0.3)" />
-        <StatCard label="Total Days" value={summary.totalDays} icon={CalendarDays} color="#2D69EB" bg="#F4F9FF" borderColor="rgba(45, 105, 235, 0.2)" />
-        <StatCard label="Attendance" value={`${percentage}%`} icon={Percent} color="#D97706" bg="#FFFBEB" borderColor="#FDE68A" />
-      </Box>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Present" value={summary.present} icon={CalendarCheck} iconBg="hsl(var(--clr-emerald-bg))" iconBorder="hsl(var(--clr-green) / 0.25)" iconColor="hsl(var(--clr-green))" />
+        <StatCard label="Absent" value={summary.absent} icon={CalendarX} iconBg="hsl(var(--clr-rose-bg))" iconBorder="hsl(var(--clr-red) / 0.25)" iconColor="hsl(var(--clr-red))" />
+        <StatCard label="Total Days" value={summary.totalDays} icon={CalendarDays} iconBg="hsl(var(--clr-blue-bg))" iconBorder="hsl(var(--clr-blue) / 0.2)" iconColor="hsl(var(--clr-blue))" />
+        <StatCard label="Attendance" value={`${percentage}%`} icon={Percent} iconBg="hsl(var(--clr-amber-bg))" iconBorder="hsl(var(--clr-amber) / 0.3)" iconColor="hsl(var(--clr-amber))" />
+      </div>
 
       {/* Attendance records table */}
-      <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', overflow: 'hidden' }}>
-        <Box sx={{ p: 2.5, borderBottom: 1, borderColor: 'divider', bgcolor: '#F4F9FF' }}>
-          <Typography sx={{ fontWeight: 600, fontSize: 18, color: '#0A0A0A' }}>Attendance History</Typography>
-          <Typography sx={{ fontSize: 13, color: '#828283', mt: 0.25 }}>Every recorded class session, oldest first.</Typography>
-        </Box>
+      <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+        <div className="border-b border-border bg-clr-blue-bg p-2.5">
+          <h3 className="text-lg font-semibold text-foreground">Attendance History</h3>
+          <p className="mt-0.25 text-[13px] text-muted-foreground">Every recorded class session, oldest first.</p>
+        </div>
 
         {/* Empty state when no attendance records exist */}
         {records.length === 0 ? (
           <EmptyState message="No attendance records yet." icon={CalendarCheck} />
         ) : (
-          <Box>
+          <div>
             {records.map((record, index) => (
-              <Box
+              <div
                 key={record._id}
-                sx={{
-                  p: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 2,
-                  borderBottom: index < records.length - 1 ? 1 : 0,
-                  borderColor: 'divider',
-                  '&:hover': { bgcolor: '#F8FAFA' },
-                }}
+                className={cn(
+                  'flex items-center justify-between gap-2 p-2 hover:bg-muted',
+                  index < records.length - 1 && 'border-b border-border',
+                )}
               >
                 {/* Record date */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                  <Box
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 2,
-                      bgcolor: '#F8FAFA',
-                      border: 1,
-                      borderColor: '#E2E8F0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#828283',
-                      flexShrink: 0,
-                    }}
-                  >
+                <div className="flex items-center gap-1.25">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground">
                     <CalendarDays size={20} strokeWidth={1.75} />
-                  </Box>
-                  <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#0A0A0A' }}>{formatDate(record.date)}</Typography>
-                </Box>
+                  </div>
+                  <span className="text-[13px] font-medium text-foreground">{formatDate(record.date)}</span>
+                </div>
                 {/* Record status pill (present / absent) */}
                 <Badge status={record.status} />
-              </Box>
+              </div>
             ))}
-          </Box>
+          </div>
         )}
-      </Paper>
-    </Box>
+      </div>
+    </div>
   )
 }

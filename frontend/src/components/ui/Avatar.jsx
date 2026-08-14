@@ -1,40 +1,22 @@
-import React from 'react';
-import { Avatar as MuiAvatar } from '@mui/material';
-
-const stringToColor = (string) => {
-  let hash = 0;
-  for (let i = 0; i < string.length; i += 1) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  let color = '#';
-  for (let i = 0; i < 3; i += 1) {
-    const value = (hash >> (i * 8)) & 0xff;
-    color += `00${value.toString(16)}`.slice(-2);
-  }
-  return color;
-};
+import { cn } from '../../lib/utils'
 
 const getInitials = (name) => {
-  if (!name) return '';
-  const parts = name.split(' ');
-  return parts.length > 1 
-    ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
-    : `${parts[0][0]}`.toUpperCase();
-};
+  if (!name) return ''
+  const parts = String(name).trim().split(/\s+/)
+  if (parts.length > 1) {
+    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+  }
+  return `${parts[0][0]}`.toUpperCase()
+}
 
-export const Avatar = ({ name, ...props }) => {
-  return (
-    <MuiAvatar 
-      sx={{ 
-        bgcolor: name ? stringToColor(name) : 'primary.main',
-        width: 40, 
-        height: 40,
-        fontSize: '1rem',
-        fontWeight: 600
-      }} 
-      {...props}
-    >
-      {getInitials(name)}
-    </MuiAvatar>
-  );
-};
+export const Avatar = ({ name, className, ...props }) => (
+  <span
+    className={cn(
+      'inline-flex h-10 w-10 shrink-0 select-none items-center justify-center overflow-hidden rounded-full bg-clr-blue text-sm font-semibold text-white',
+      className,
+    )}
+    {...props}
+  >
+    {getInitials(name)}
+  </span>
+)

@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, Paper, Grid, IconButton, List, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from '../components/ui/Button';
 import { Avatar } from '../components/ui/Avatar';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
@@ -68,110 +68,105 @@ export default function TeamDetailPage() {
 
   if (loading) {
     return (
-      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-        <Typography variant="body2" color="text.secondary">Loading team...</Typography>
-      </Box>
+      <div className="mx-auto max-w-[1200px] p-3">
+        <p className="text-sm text-muted-foreground">Loading team...</p>
+      </div>
     );
   }
 
   if (!team) {
     return (
-      <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-        <Typography variant="body2" color="text.secondary">Team not found.</Typography>
-      </Box>
+      <div className="mx-auto max-w-[1200px] p-3">
+        <p className="text-sm text-muted-foreground">Team not found.</p>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
 
       {/* Topbar */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton onClick={() => navigate('/teams')} size="small">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/teams')} title="Back to teams">
             <ArrowLeft size={20} />
-          </IconButton>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          </Button>
+          <h1 className="text-xl font-semibold text-foreground">
             Team — {team.name}
-          </Typography>
-        </Box>
-        <Button variant="outlined" startIcon={<UserPlus size={16} />} onClick={() => setIsAssignOpen(true)}>
+          </h1>
+        </div>
+        <Button variant="outline" onClick={() => setIsAssignOpen(true)}>
+          <UserPlus size={16} />
           Assign Student
         </Button>
-      </Box>
+      </div>
 
-      <Grid container spacing={3}>
+      <div className="grid gap-3">
         {/* Team Info */}
-        <Grid item xs={12} md={4}>
-          <Paper elevation={0} sx={{ p: 4, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ textTransform: 'uppercase', mb: 2 }}>Team Information</Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Team Name</Typography>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>{team.name}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Batch</Typography>
-                <Typography variant="body2">{team.batch || '—'}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Assigned Project</Typography>
-                <Typography variant="body2">{team.project?.title || 'None'}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Project Status</Typography>
-                <Box sx={{ mt: 0.5 }}>
-                  {team.project ? <Badge status={team.project.status} /> : <Typography variant="body2" color="text.secondary">—</Typography>}
-                </Box>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Team Leader</Typography>
-                <Typography variant="body2">
-                  {team.leader 
-                    ? (team.members.find(m => String(m._id) === String(team.leader))?.name || 'Unknown') 
+        <div className="col-span-12 md:col-span-4">
+          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+            <p className="mb-2 text-sm font-medium uppercase text-muted-foreground">Team Information</p>
+            <div className="flex flex-col gap-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Team Name</p>
+                <p className="text-sm font-semibold text-foreground">{team.name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Batch</p>
+                <p className="text-sm text-foreground">{team.batch || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Assigned Project</p>
+                <p className="text-sm text-foreground">{team.project?.title || 'None'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Project Status</p>
+                <div className="mt-0.5">
+                  {team.project ? <Badge status={team.project.status} /> : <p className="text-sm text-muted-foreground">—</p>}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Team Leader</p>
+                <p className="text-sm text-foreground">
+                  {team.leader
+                    ? (team.members.find((m) => String(m._id) === String(team.leader))?.name || 'Unknown')
                     : '—'}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="caption" color="text.secondary">Members</Typography>
-                <Typography variant="body1" sx={{ fontWeight: 600 }}>{team.members.length}</Typography>
-              </Box>
-            </Box>
-          </Paper>
-        </Grid>
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Members</p>
+                <p className="text-sm font-semibold text-foreground">{team.members.length}</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Members */}
-        <Grid item xs={12} md={8}>
-          <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3, overflow: 'hidden' }}>
-            <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.50' }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>Team Members ({team.members.length})</Typography>
-            </Box>
-            <List disablePadding>
-              {team.members.map((member, index) => (
-                <ListItem
-                  key={member._id}
-                  divider={index < team.members.length - 1}
-                  sx={{ py: 2 }}
-                >
-                  <ListItemAvatar>
-                    <Avatar name={member.name} />
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={<Typography variant="body2" sx={{ fontWeight: 600 }}>{member.name}</Typography>}
-                    secondary={member.email}
-                  />
+        <div className="col-span-12 md:col-span-8">
+          <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+            <div className="border-b border-border bg-muted/50 p-3">
+              <h2 className="text-base font-semibold text-foreground">Team Members ({team.members.length})</h2>
+            </div>
+            <ul className="divide-y divide-border">
+              {team.members.map((member) => (
+                <li key={member._id} className="flex items-center gap-3 px-4 py-2">
+                  <Avatar name={member.name} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground">{member.name}</p>
+                    <p className="text-sm text-muted-foreground">{member.email}</p>
+                  </div>
                   <Badge status={member.status} />
-                </ListItem>
+                </li>
               ))}
               {team.members.length === 0 && (
-                <Box sx={{ p: 4, textAlign: 'center', color: 'text.secondary' }}>
+                <li className="p-4 text-center text-sm text-muted-foreground">
                   No members in this team yet.
-                </Box>
+                </li>
               )}
-            </List>
-          </Paper>
-        </Grid>
-      </Grid>
+            </ul>
+          </div>
+        </div>
+      </div>
 
       {/* Assign Modal */}
       <Modal
@@ -180,26 +175,25 @@ export default function TeamDetailPage() {
         title="Assign Student to Team"
         actions={
           <>
-            <Button onClick={() => setIsAssignOpen(false)} color="inherit">Cancel</Button>
-            <Button onClick={handleAssign} color="primary" variant="contained" disabled={!selectedStudent} disableElevation>Assign</Button>
+            <Button variant="outline" onClick={() => setIsAssignOpen(false)}>Cancel</Button>
+            <Button onClick={handleAssign} disabled={!selectedStudent}>Assign</Button>
           </>
         }
       >
-        <Box sx={{ pt: 1 }}>
+        <div className="pt-1">
           {availableStudents.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">No unassigned students available.</Typography>
+            <p className="text-sm text-muted-foreground">No unassigned students available.</p>
           ) : (
             <FilterBar
               label="Select Student"
               value={selectedStudent}
               onChange={setSelectedStudent}
-              minWidth="100%"
               options={availableStudents.map((s) => ({ label: `${s.name} (${s.email})`, value: s._id }))}
             />
           )}
-        </Box>
+        </div>
       </Modal>
 
-    </Box>
+    </div>
   );
 }

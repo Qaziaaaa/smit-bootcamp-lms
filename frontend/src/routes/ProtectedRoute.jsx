@@ -1,6 +1,6 @@
 import { lazy } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { Box, CircularProgress } from '@mui/material'
+import { Loader2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
 const AccessDeniedPage = lazy(() => import('../pages/AccessDeniedPage'))
@@ -11,9 +11,9 @@ export function ProtectedRoute({ roles, children }) {
 
   if (loading) {
     return (
-      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="animate-spin text-primary" />
+      </div>
     )
   }
 

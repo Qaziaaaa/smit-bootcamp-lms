@@ -1,24 +1,13 @@
-import React from 'react';
-import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Select } from './Select'
 
-export const FilterBar = ({ label, value, onChange, options = [], minWidth = 160 }) => {
-  return (
-    <FormControl size="small" sx={{ minWidth, flex: 1 }}>
-      <InputLabel>{label}</InputLabel>
-      <Select
-        value={value || ''}
-        label={label}
-        onChange={(e) => onChange && onChange(e.target.value)}
-      >
-        <MenuItem value="">
-          <em>All</em>
-        </MenuItem>
-        {options.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  );
-};
+export const FilterBar = ({ label, value, onChange, options = [] }) => (
+  <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px] sm:flex-1">
+    <Select
+      label={label}
+      value={value || ''}
+      onChange={(next) => onChange && onChange(next)}
+      options={options}
+      placeholder="All"
+    />
+  </div>
+)

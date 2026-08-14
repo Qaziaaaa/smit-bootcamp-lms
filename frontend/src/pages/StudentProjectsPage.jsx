@@ -1,63 +1,58 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Box, Paper, Typography, Button } from '@mui/material'
+import { useCallback, useEffect, useState } from 'react'
 import { FolderKanban, Users, Calendar, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { getStudentProjects } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
 import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
 
 // Renders a single project card for the student
 function ProjectCard({ project }) {
   const navigate = useNavigate()
 
   return (
-    <Paper variant="outlined" sx={{ borderRadius: 2, p: 3, bgcolor: '#ffffff', display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
-        <Box>
-          <Typography sx={{ fontSize: 18, fontWeight: 600, color: '#0A0A0A' }}>
-            {project.title}
-          </Typography>
+    <div className="flex flex-col gap-2 rounded-lg border bg-card p-3 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">{project.title}</h3>
           {project.description && (
-            <Typography sx={{ fontSize: 13, color: '#828283', mt: 0.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-              {project.description}
-            </Typography>
+            <p className="mt-0.5 line-clamp-2 text-[13px] text-muted-foreground">{project.description}</p>
           )}
-        </Box>
+        </div>
         <Badge status={project.status} />
-      </Box>
+      </div>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 1 }}>
+      <div className="mt-1 flex flex-wrap gap-3">
         {project.deadline && (
-          <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', color: '#828283', mb: 0.5 }}>Deadline</Typography>
-            <Typography sx={{ fontSize: 13, color: '#0A0A0A', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Calendar size={14} color="#828283" />
+          <div>
+            <p className="mb-0.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Deadline</p>
+            <p className="flex items-center gap-0.5 text-[13px] text-foreground">
+              <Calendar size={14} className="text-muted-foreground" />
               {new Date(project.deadline).toLocaleDateString()}
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
         {project.team && (
-          <Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', color: '#828283', mb: 0.5 }}>Team Assigned</Typography>
-            <Typography sx={{ fontSize: 13, color: '#0A0A0A', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Users size={14} color="#828283" />
+          <div>
+            <p className="mb-0.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Team Assigned</p>
+            <p className="flex items-center gap-0.5 text-[13px] text-foreground">
+              <Users size={14} className="text-muted-foreground" />
               {project.team.name} ({project.team.memberCount || 0} members)
-            </Typography>
-          </Box>
+            </p>
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Box sx={{ mt: 'auto', pt: 2, borderTop: 1, borderColor: 'divider', display: 'flex', justifyContent: 'flex-end' }}>
-        <Button 
-          variant="text" 
-          endIcon={<ArrowRight size={16} />}
+      <div className="mt-auto flex justify-end border-t border-border pt-2">
+        <Button
+          variant="ghost"
+          className="font-semibold"
           onClick={() => navigate(`/student/projects/${project._id || project.id}`)}
-          sx={{ fontWeight: 600 }}
         >
-          View Project
+          View Project <ArrowRight size={16} />
         </Button>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }
 
@@ -85,9 +80,9 @@ export default function StudentProjectsPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
-        <Typography color="#828283">Loading projects...</Typography>
-      </Box>
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-muted-foreground">Loading projects...</p>
+      </div>
     )
   }
 
@@ -100,17 +95,17 @@ export default function StudentProjectsPage() {
   }
 
   return (
-    <Box sx={{ display: 'grid', gap: 3 }}>
-      <Box>
-        <Typography sx={{ fontWeight: 600, fontSize: 24, color: '#0A0A0A', letterSpacing: '-0.02em' }}>My Projects</Typography>
-        <Typography sx={{ fontSize: 13, color: '#828283', mt: 0.25 }}>Track and manage the projects you are working on.</Typography>
-      </Box>
+    <div className="grid gap-3">
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">My Projects</h2>
+        <p className="mt-0.25 text-[13px] text-muted-foreground">Track and manage the projects you are working on.</p>
+      </div>
 
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' } }}>
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         {projects.map((project) => (
           <ProjectCard key={project._id || project.id} project={project} />
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

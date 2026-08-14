@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Box, Button, Paper, Typography } from '@mui/material'
-import { CheckCircle2, CheckSquare, Play, Send } from 'lucide-react'
+import { CheckSquare, Send } from 'lucide-react'
 import { getStudentTasks, updateTaskProgress } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
 import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
+import { cn } from '../lib/utils'
 
 // Formats a raw date into a readable label (e.g. Sat, Aug 9, 2026)
 function formatDate(date) {
@@ -53,9 +54,9 @@ export default function StudentTasksPage() {
   // Loading state while fetching data
   if (loading) {
     return (
-      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
-        <Typography color="#828283">Loading tasks...</Typography>
-      </Box>
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-muted-foreground">Loading tasks...</p>
+      </div>
     )
   }
 
@@ -70,105 +71,85 @@ export default function StudentTasksPage() {
   const inProgressCount = tasks.filter((task) => task.status === 'in-progress' || task.status === 'pending').length
 
   return (
-    <Box sx={{ display: 'grid', gap: 3 }}>
+    <div className="grid gap-3">
       {/* Page header */}
-      <Box>
-        <Typography sx={{ fontWeight: 600, fontSize: 24, color: '#0A0A0A', letterSpacing: '-0.02em' }}>My Tasks</Typography>
-        <Typography sx={{ fontSize: 13, color: '#828283', mt: 0.25 }}>All sprint tasks assigned to you.</Typography>
-      </Box>
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">My Tasks</h2>
+        <p className="mt-0.25 text-[13px] text-muted-foreground">All sprint tasks assigned to you.</p>
+      </div>
 
       {/* Summary cards: pending / in-progress / completed */}
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' } }}>
-        <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff' }}>
-          <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-            In Progress
-          </Typography>
-          <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#1E40AF', fontVariantNumeric: 'tabular-nums' }}>
-            {inProgressCount}
-          </Typography>
-        </Paper>
-        <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff' }}>
-          <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-            In Review
-          </Typography>
-          <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#6B21A8', fontVariantNumeric: 'tabular-nums' }}>
-            {inReviewCount}
-          </Typography>
-        </Paper>
-        <Paper variant="outlined" sx={{ borderRadius: 2, p: 2.5, bgcolor: '#ffffff' }}>
-          <Typography sx={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#828283' }}>
-            Completed
-          </Typography>
-          <Typography sx={{ mt: 0.5, fontSize: 24, fontWeight: 500, color: '#166534', fontVariantNumeric: 'tabular-nums' }}>
-            {completedCount}
-          </Typography>
-        </Paper>
-      </Box>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="rounded-lg border bg-card p-2.5 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">In Progress</p>
+          <p className="mt-0.5 text-2xl font-medium tabular-nums text-clr-blue-dark">{inProgressCount}</p>
+        </div>
+        <div className="rounded-lg border bg-card p-2.5 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">In Review</p>
+          <p className="mt-0.5 text-2xl font-medium tabular-nums text-clr-purple">{inReviewCount}</p>
+        </div>
+        <div className="rounded-lg border bg-card p-2.5 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Completed</p>
+          <p className="mt-0.5 text-2xl font-medium tabular-nums text-clr-green-dark">{completedCount}</p>
+        </div>
+      </div>
 
       {/* Tasks list */}
-      <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', overflow: 'hidden' }}>
-        <Box sx={{ p: 2.5, borderBottom: 1, borderColor: 'divider', bgcolor: '#F4F9FF' }}>
-          <Typography sx={{ fontWeight: 600, fontSize: 18, color: '#0A0A0A' }}>Assigned Tasks</Typography>
-          <Typography sx={{ fontSize: 13, color: '#828283', mt: 0.25 }}>Update your progress as you work on sprint deliverables.</Typography>
-        </Box>
+      <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+        <div className="border-b border-border bg-clr-blue-bg p-2.5">
+          <h3 className="text-lg font-semibold text-foreground">Assigned Tasks</h3>
+          <p className="mt-0.25 text-[13px] text-muted-foreground">Update your progress as you work on sprint deliverables.</p>
+        </div>
 
         {/* Empty state when no tasks are assigned */}
         {tasks.length === 0 ? (
           <EmptyState message="No tasks assigned yet." icon={CheckSquare} />
         ) : (
           tasks.map((task, index) => (
-            <Box
+            <div
               key={task._id}
-              sx={{
-                p: 2,
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                alignItems: { sm: 'center' },
-                justifyContent: 'space-between',
-                gap: 2,
-                borderBottom: index < tasks.length - 1 ? 1 : 0,
-                borderColor: 'divider',
-                '&:hover': { bgcolor: '#F8FAFA' },
-              }}
+              className={cn(
+                'flex flex-col gap-2 p-2 hover:bg-muted sm:flex-row sm:items-center sm:justify-between',
+                index < tasks.length - 1 && 'border-b border-border',
+              )}
             >
               {/* Task info: title + status pill + project + description + meta */}
-              <Box sx={{ minWidth: 0 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 500, color: '#0A0A0A' }}>{task.title}</Typography>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1">
+                  <span className="text-[13px] font-medium text-foreground">{task.title}</span>
                   <Badge status={task.status} />
                   <Badge status={task.priority} />
-                </Box>
-                <Typography sx={{ fontSize: 12, color: '#828283', mt: 0.5 }}>
+                </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {task.description || 'No description provided.'}
-                </Typography>
+                </p>
                 {/* Meta line: linked project + deadline */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', mt: 0.75 }}>
+                <div className="mt-0.75 flex flex-wrap items-center gap-1.5">
                   {task.projectId?.title && (
-                    <Typography sx={{ fontSize: 11, color: '#2D69EB', fontWeight: 500 }}>
+                    <span className="text-[11px] font-medium text-clr-blue">
                       Project: {task.projectId.title}
-                    </Typography>
+                    </span>
                   )}
-                  <Typography sx={{ fontSize: 11, color: '#828283' }}>Deadline: {formatDate(task.deadline)}</Typography>
-                </Box>
-              </Box>
+                  <span className="text-[11px] text-muted-foreground">Deadline: {formatDate(task.deadline)}</span>
+                </div>
+              </div>
               {/* Progress actions hidden once the task is completed or in review */}
               {!['completed', 'review_requested'].includes(task.status) && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                <div className="flex shrink-0 items-center gap-1">
                   <Button
-                    size="small"
-                    startIcon={<Send size={14} />}
+                    size="sm"
+                    className="text-xs"
                     disabled={updatingId === task._id}
                     onClick={() => handleUpdateStatus(task, 'review_requested')}
-                    sx={{ fontSize: 12, minHeight: 32, px: 1.5, bgcolor: '#2D69EB', color: '#ffffff', '&:hover': { bgcolor: '#1E40AF' } }}
                   >
-                    Submit for Review
+                    <Send size={14} /> Submit for Review
                   </Button>
-                </Box>
+                </div>
               )}
-            </Box>
+            </div>
           ))
         )}
-      </Paper>
-    </Box>
+      </div>
+    </div>
   )
 }

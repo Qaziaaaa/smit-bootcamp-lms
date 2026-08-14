@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Button, IconButton, Select, MenuItem, FormControl } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
 import { Edit2, Trash2, Plus, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { Button } from '../components/ui/Button';
 import { DataTable } from '../components/ui/DataTable';
 import { SearchBar } from '../components/ui/SearchBar';
-import { FilterBar } from '../components/ui/FilterBar';
+import { Select } from '../components/ui/Select';
 import { Pagination } from '../components/ui/Pagination';
 import { Badge } from '../components/ui/Badge';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -83,27 +83,25 @@ export default function TasksPage() {
       accessorKey: 'title',
       header: 'TASK',
       cell: ({ getValue }) => (
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {getValue()}
-        </Typography>
+        <p className="text-sm font-semibold text-foreground">{getValue()}</p>
       ),
     },
     {
       accessorKey: 'projectId',
       header: 'PROJECT',
       cell: ({ getValue }) => (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-muted-foreground">
           {getValue()?.title || '—'}
-        </Typography>
+        </p>
       ),
     },
     {
       accessorKey: 'assignedTo',
       header: 'ASSIGNED TO',
       cell: ({ getValue }) => (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-muted-foreground">
           {getValue()?.name || '—'}
-        </Typography>
+        </p>
       ),
     },
     {
@@ -120,20 +118,21 @@ export default function TasksPage() {
       accessorKey: 'deadline',
       header: 'DEADLINE',
       cell: ({ getValue }) => (
-        <Typography variant="body2" color="text.secondary">
+        <p className="text-sm text-muted-foreground">
           {getValue() ? String(getValue()).slice(0, 10) : '—'}
-        </Typography>
+        </p>
       ),
     },
     {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <div className="flex gap-1">
           {row.original.status !== 'completed' && (
-            <IconButton
-              size="small"
-              color="success"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-clr-green"
               title="Mark as Completed"
               onClick={async () => {
                 try {
@@ -146,11 +145,12 @@ export default function TasksPage() {
               }}
             >
               <CheckCircle size={18} />
-            </IconButton>
+            </Button>
           )}
-          <IconButton
-            size="small"
-            color="primary"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-clr-blue"
             title="Edit task"
             onClick={() => {
               setEditingTask(row.original);
@@ -158,16 +158,17 @@ export default function TasksPage() {
             }}
           >
             <Edit2 size={18} />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="error"
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive"
             title="Delete task"
             onClick={() => setDeleteId(row.original._id)}
           >
             <Trash2 size={18} />
-          </IconButton>
-        </Box>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -234,119 +235,70 @@ export default function TasksPage() {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
 
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', letterSpacing: '-0.5px' }}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
             Task Assignments
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
+          </h1>
+          <p className="text-sm text-muted-foreground">
             Assign sprint tasks, track progress, and evaluate student submissions.
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+          </p>
+        </div>
+        <div className="flex gap-2">
           <Button
-            variant="outlined"
-            startIcon={<CheckCircle size={18} />}
+            variant="outline"
             onClick={() => setBulkConfirm(true)}
           >
+            <CheckCircle size={18} />
             Mark All Completed
           </Button>
           <Button
-            variant="contained"
-            startIcon={<Plus size={18} />}
-            disableElevation
             onClick={() => {
               setEditingTask(null);
               setIsFormOpen(true);
             }}
           >
+            <Plus size={18} />
             Add Task
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Toolbar */}
-      <Box sx={{
-        bgcolor: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #E2E8F0',
-        p: 2.5,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        '& .MuiTextField-root': {
-          flex: 1,
-          maxWidth: '380px',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '8px',
-            bgcolor: '#ffffff',
-            height: '44px',
-          }
-        }
-      }}>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
         <SearchBar value={search} onChange={setSearch} placeholder="Search task..." />
-        <Box sx={{ display: 'flex', gap: 2, marginLeft: 'auto', flexWrap: 'wrap' }}>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+        <div className="ml-auto flex flex-wrap gap-2">
+          <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px]">
             <Select
-              displayEmpty
               value={projectFilter}
-              onChange={(e) => setProjectFilter(e.target.value)}
-              sx={{
-                borderRadius: '8px',
-                bgcolor: '#ffffff',
-                height: '44px',
-                '& .MuiSelect-icon': { color: '#64748B' }
-              }}
-            >
-              <MenuItem value="">All Projects</MenuItem>
-              {projects.map((p) => (
-                <MenuItem key={p._id} value={p._id}>{p.title}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+              onChange={(next) => setProjectFilter(next)}
+              options={projects.map((p) => ({ label: p.title, value: p._id }))}
+              placeholder="All Projects"
+            />
+          </div>
+          <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px]">
             <Select
-              displayEmpty
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              sx={{
-                borderRadius: '8px',
-                bgcolor: '#ffffff',
-                height: '44px',
-                '& .MuiSelect-icon': { color: '#64748B' }
-              }}
-            >
-              <MenuItem value="">All Statuses</MenuItem>
-              {STATUS_OPTIONS.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              onChange={(next) => setStatusFilter(next)}
+              options={STATUS_OPTIONS}
+              placeholder="All Statuses"
+            />
+          </div>
           {assignedOptions.length > 0 && (
-            <FormControl size="small" sx={{ minWidth: 160 }}>
+            <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px]">
               <Select
-                displayEmpty
                 value={assignedFilter}
-                onChange={(e) => setAssignedFilter(e.target.value)}
-                sx={{
-                  borderRadius: '8px',
-                  bgcolor: '#ffffff',
-                  height: '44px',
-                  '& .MuiSelect-icon': { color: '#64748B' }
-                }}
-              >
-                <MenuItem value="">All Assignees</MenuItem>
-                {assignedOptions.map((opt) => (
-                  <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                onChange={(next) => setAssignedFilter(next)}
+                options={assignedOptions}
+                placeholder="All Assignees"
+              />
+            </div>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Data Table */}
       <DataTable
@@ -396,6 +348,6 @@ export default function TasksPage() {
         onConfirm={handleMarkAllCompleted}
         onCancel={() => setBulkConfirm(false)}
       />
-    </Box>
+    </div>
   );
 }

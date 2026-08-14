@@ -1,18 +1,4 @@
 import {
-  Box,
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  TextField,
-  InputAdornment,
-} from '@mui/material'
-import {
   ArrowUpRight,
   Award,
   CalendarCheck,
@@ -24,11 +10,14 @@ import {
   Users,
   UserX,
 } from 'lucide-react'
+import { Button } from '../components/ui/Button'
+import { Input } from '../components/ui/Input'
 import { StatCard } from '../components/ui/StatCard'
 import { Avatar } from '../components/ui/Avatar'
 import { Badge } from '../components/ui/Badge'
 import { StudentForm } from '../components/students/StudentForm'
 import { MarkAttendanceModal } from '../components/attendance/MarkAttendanceModal'
+import { cn } from '../lib/utils'
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDashboard } from '../services/dashboardService'
@@ -36,9 +25,9 @@ import { apiClient } from '../services/apiClient'
 import { toast } from 'sonner'
 
 const TASK_STATUS_STYLE = {
-  completed: { icon: Award, iconBg: '#ECFDF5', iconColor: '#22C55E' },
-  'in-progress': { icon: Clock, iconBg: '#DBEAFE', iconColor: '#2D69EB' },
-  pending: { icon: CheckSquare, iconBg: '#FFFBEB', iconColor: '#D97706' },
+  completed: { icon: Award, iconBg: 'bg-clr-emerald-bg', iconColor: 'text-clr-green' },
+  'in-progress': { icon: Clock, iconBg: 'bg-clr-blue-bg', iconColor: 'text-clr-blue' },
+  pending: { icon: CheckSquare, iconBg: 'bg-clr-amber-bg', iconColor: 'text-clr-amber-dark' },
 }
 
 function formatDate(date) {
@@ -109,37 +98,37 @@ export default function DashboardPage() {
       value: counts.students ?? '0',
       trend: '+12% this month',
       icon: Users,
-      iconBg: '#F4F9FF',
-      iconBorder: 'rgba(45, 105, 235, 0.2)',
-      iconColor: '#2D69EB',
+      iconBg: 'hsl(var(--clr-blue-bg))',
+      iconBorder: 'hsl(var(--clr-blue) / 0.2)',
+      iconColor: 'hsl(var(--clr-blue))',
     },
     {
       label: 'Attendance',
       value: `${todayAttendance.present ?? 0}/${counts.students ?? 0}`,
       subtitle: 'Present / Total Students',
       icon: CalendarCheck,
-      iconBg: '#ECFDF5',
-      iconBorder: 'rgba(34, 197, 94, 0.25)',
-      iconColor: '#22C55E',
+      iconBg: 'hsl(var(--clr-emerald-bg))',
+      iconBorder: 'hsl(var(--clr-green) / 0.25)',
+      iconColor: 'hsl(var(--clr-green))',
     },
     {
       label: 'Active Teams',
       value: counts.teams ?? '0',
       subtitle: 'Across 2 Active Batches',
       icon: Layers,
-      iconBg: '#EEF2FF',
-      iconBorder: 'rgba(47, 43, 112, 0.2)',
-      iconColor: '#2F2B70',
+      iconBg: 'hsl(var(--clr-purple-bg))',
+      iconBorder: 'hsl(var(--clr-purple) / 0.2)',
+      iconColor: 'hsl(var(--clr-purple))',
     },
     {
       label: 'Absent Students',
       value: todayAttendance.absent ?? '0',
       subtitle: 'Absent Today',
-      subtitleColor: '#DC2626',
+      subtitleColor: 'hsl(var(--clr-red))',
       icon: UserX,
-      iconBg: '#FEF2F2',
-      iconBorder: 'rgba(239, 68, 68, 0.25)',
-      iconColor: '#EF4444',
+      iconBg: 'hsl(var(--clr-rose-bg))',
+      iconBorder: 'hsl(var(--clr-red) / 0.25)',
+      iconColor: 'hsl(var(--clr-red))',
     },
   ]
 
@@ -157,272 +146,188 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
-        <Typography color="#828283">Loading dashboard...</Typography>
-      </Box>
+      <div className="grid min-h-[300px] place-items-center">
+        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+      </div>
     )
   }
 
   if (error || !dashboard) {
     return (
-      <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 300 }}>
-        <Typography color="#D97706">Failed to load dashboard data</Typography>
-      </Box>
+      <div className="grid min-h-[300px] place-items-center">
+        <p className="text-sm text-clr-amber-dark">Failed to load dashboard data</p>
+      </div>
     )
   }
 
   return (
-    <Box sx={{ display: 'grid', gap: 3, mt: { xs: 0, sm: -1, md: -2 }, mb: { xs: -1, sm: -2, md: -3 } }}>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'flex-start' }, justifyContent: 'space-between', gap: 2, mb: -1 }}>
-        <Box>
-          {/* <Typography
-            component="span"
-            sx={{
-              display: 'inline-flex',
-              px: 1.25,
-              py: 0.25,
-              mb: 1,
-              borderRadius: 9999,
-              fontSize: 11,
-              fontWeight: 500,
-              bgcolor: 'rgba(2, 119, 189, 0.1)',
-              color: '#0277BD',
-            }}
-          >
-            Saylani Mass IT Training (SMIT)
-          </Typography> */}
-          <Typography variant="h4" sx={{ fontWeight: 500, color: '#0A0A0A', letterSpacing: '-0.02em' }}>
+    <div className="grid gap-3 sm:-mt-1 md:-mt-2 -mb-1 sm:-mb-2 md:-mb-3">
+      <div className="flex flex-col items-stretch justify-between gap-2 -mb-1 sm:flex-row sm:items-start">
+        <div>
+          <h1 className="text-2xl font-medium tracking-tight text-foreground">
             SMIT Bootcamp Overview
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
+          </h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Real-time SMIT batch performance, attendance rates, and active team progress.
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5">
           <Button
-            variant="contained"
-            size="small"
-            startIcon={<Plus size={16} />}
-            sx={{ height: 36 }}
+            variant="default"
+            size="sm"
+            className="h-9"
             onClick={() => setIsStudentFormOpen(true)}
           >
+            <Plus size={16} />
             Add Student
           </Button>
-          <Button variant="outlined" size="small" sx={{ height: 36 }} onClick={() => setIsAttendanceModalOpen(true)}>
+          <Button variant="outline" size="sm" className="h-9" onClick={() => setIsAttendanceModalOpen(true)}>
             Mark Attendance
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Box
-        sx={{
-          display: 'grid',
-          gap: 2,
-          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: 'repeat(4, 1fr)' },
-        }}
-      >
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {STAT_CARDS.map((card) => (
           <StatCard key={card.label} {...card} />
         ))}
-      </Box>
+      </div>
 
-      <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' } }}>
-        <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, p: 3 }}>
-            <Box>
-              <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>
+      <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
+        <div className="min-w-0 rounded-lg border bg-card shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">
                 Recent Attendance
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
+              </h3>
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 Latest student attendance records
-              </Typography>
-            </Box>
-            <TextField
-              size="small"
-              placeholder="Search student..."
-              value={attendanceSearch}
-              onChange={(e) => setAttendanceSearch(e.target.value)}
-              sx={{ width: { xs: '100%', sm: 200 } }}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search size={16} color="#828283" />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-          </Box>
-          <TableContainer sx={{ borderTop: 1, borderColor: 'divider', maxWidth: '100%', width: '100%', overflowX: 'auto', height: 420, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <Table sx={{ minWidth: { xs: 450, md: 560 }, tableLayout: 'fixed' }} aria-label="recent attendance table">
-              <TableHead>
-                <TableRow>
-                  <TableCell
-                    sx={{
-                      width: '40%',
-                      py: 1.5,
-                      fontSize: 11,
-                      fontWeight: 500,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: '#828283',
-                    }}
-                  >
+              </p>
+            </div>
+            <div className="relative w-full sm:w-[200px]">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={attendanceSearch}
+                onChange={(e) => setAttendanceSearch(e.target.value)}
+                placeholder="Search student..."
+                className="pl-10"
+              />
+            </div>
+          </div>
+          <div className="h-[420px] w-full max-w-full overflow-x-auto overflow-y-auto border-t">
+            <table
+              className="w-full min-w-[450px] text-sm [table-layout:fixed] md:min-w-[560px]"
+              aria-label="recent attendance table"
+            >
+              <thead>
+                <tr>
+                  <th className="w-[40%] px-4 py-1.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     Student
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: '14%',
-                      py: 1.5,
-                      fontSize: 11,
-                      fontWeight: 500,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: '#828283',
-                    }}
-                  >
+                  </th>
+                  <th className="w-[14%] px-4 py-1.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     Batch
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: '26%',
-                      py: 1.5,
-                      fontSize: 11,
-                      fontWeight: 500,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: '#828283',
-                    }}
-                  >
+                  </th>
+                  <th className="w-[26%] px-4 py-1.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     Date
-                  </TableCell>
-                  <TableCell
-                    align="right"
-                    sx={{
-                      width: '20%',
-                      py: 1.5,
-                      fontSize: 11,
-                      fontWeight: 500,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: '#828283',
-                    }}
-                  >
+                  </th>
+                  <th className="w-[20%] px-4 py-1.5 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     Status
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
                 {recentAttendance.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} align="center" sx={{ py: 3, color: '#828283', fontSize: 13 }}>
+                  <tr>
+                    <td colSpan={4} className="px-4 py-3 text-center text-[13px] text-muted-foreground">
                       No matching attendance records found
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ) : (
                   recentAttendance.map((record) => (
-                    <TableRow
+                    <tr
                       key={record.studentId ?? record._id}
-                      sx={{
-                        height: 56,
-                        '&:last-child td, &:last-child th': { border: 0 },
-                        '&:hover': { bgcolor: '#F8FAFA' },
-                      }}
+                      className="h-14 border-b last:border-0 hover:bg-muted/50"
                     >
-                      <TableCell sx={{ py: 1.25, verticalAlign: 'middle' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-                          <Avatar name={record.studentName} sx={{ width: 32, height: 32, fontSize: 12 }} />
-                          <Box sx={{ minWidth: 0 }}>
-                            <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }} noWrap>
+                      <td className="px-4 py-1.25 align-middle">
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <Avatar name={record.studentName} className="h-8 w-8 text-xs" />
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-medium text-foreground">
                               {record.studentName}
-                            </Typography>
-                            <Typography sx={{ fontSize: 10, color: '#828283' }} noWrap>
+                            </p>
+                            <p className="truncate text-[10px] text-muted-foreground">
                               {record.studentEmail}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ py: 1.25, verticalAlign: 'middle' }}>
-                        <Typography sx={{ fontSize: 12, color: '#0A0A0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-1.25 align-middle">
+                        <p className="truncate text-xs text-foreground">
                           {record.batch}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ py: 1.25, verticalAlign: 'middle' }}>
-                        <Typography sx={{ fontSize: 12, color: '#0A0A0A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        </p>
+                      </td>
+                      <td className="px-4 py-1.25 align-middle">
+                        <p className="truncate text-xs text-foreground">
                           {formatDate(record.date)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right" sx={{ py: 1.25, verticalAlign: 'middle' }}>
+                        </p>
+                      </td>
+                      <td className="px-4 py-1.25 text-right align-middle">
                         <Badge status={record.status} />
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))
                 )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-        <Paper variant="outlined" sx={{ borderRadius: 2, bgcolor: '#ffffff', minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, p: 3 }}>
-            <Box>
-              <Typography sx={{ fontWeight: 600, fontSize: 16, color: '#0A0A0A' }}>Recent Bootcamp Activity</Typography>
-              <Typography variant="body2" sx={{ color: '#828283', mt: 0.5 }}>
+        <div className="min-w-0 rounded-lg border bg-card shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-2 p-3">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">Recent Bootcamp Activity</h3>
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 Latest task completions and team submissions
-              </Typography>
-            </Box>
-            <Button size="small" color="primary" sx={{ fontSize: 12, gap: 0.5, '&:hover': { backgroundColor: '#F0F5FF' } }}>
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" className="gap-0.5 text-xs">
               View All Tasks <ArrowUpRight size={14} />
             </Button>
-          </Box>
-          <Box sx={{ borderTop: 1, borderColor: 'divider' }}>
+          </div>
+          <div className="border-t">
             {ACTIVITY_ITEMS.map((item, index) => (
-              <Box
+              <div
                 key={index}
-                sx={{
-                  px: 3,
-                  py: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 2,
-                  borderBottom: index < ACTIVITY_ITEMS.length - 1 ? 1 : 0,
-                  borderColor: 'divider',
-                  '&:hover': { bgcolor: '#F8FAFA' },
-                }}
+                className={cn(
+                  'flex items-center justify-between gap-2 px-3 py-2 hover:bg-muted/50',
+                  index < ACTIVITY_ITEMS.length - 1 && 'border-b',
+                )}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
-                  <Box
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      bgcolor: item.iconBg,
-                      color: item.iconColor,
-                    }}
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span
+                    className={cn(
+                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                      item.iconBg,
+                      item.iconColor,
+                    )}
                   >
                     <item.icon size={16} strokeWidth={1.75} />
-                  </Box>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#0A0A0A' }} noWrap>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-medium text-foreground">
                       {item.text}
-                    </Typography>
-                    <Typography sx={{ fontSize: 10, color: '#828283' }} noWrap>
+                    </p>
+                    <p className="truncate text-[10px] text-muted-foreground">
                       {item.meta}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Badge status={item.status} sx={{ flexShrink: 0 }} />
-              </Box>
+                    </p>
+                  </div>
+                </div>
+                <Badge status={item.status} className="shrink-0" />
+              </div>
             ))}
-          </Box>
-        </Paper>
-      </Box>
+          </div>
+        </div>
+      </div>
 
       <StudentForm
         open={isStudentFormOpen}
@@ -439,6 +344,6 @@ export default function DashboardPage() {
         onClose={() => setIsAttendanceModalOpen(false)}
         onSuccess={handleAttendanceSuccess}
       />
-    </Box>
+    </div>
   )
 }
