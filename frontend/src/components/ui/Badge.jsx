@@ -5,8 +5,9 @@ const TONE_CLASSES = {
   error: 'border-clr-rose-border bg-clr-rose-bg text-clr-red-dark',
   warning: 'border-clr-amber-border bg-clr-amber-bg text-clr-amber-dark',
   info: 'border-clr-blue-border bg-clr-blue-bg text-clr-blue-dark',
-  secondary: 'border-clr-purple-bg bg-clr-purple-bg text-clr-purple',
-  default: 'border-clr-slate-border bg-clr-slate-light text-clr-slate',
+  secondary: 'border-clr-purple-border bg-clr-purple-bg text-clr-purple',
+  default:
+    'border-clr-slate-border bg-clr-slate-light text-clr-slate dark:border-clr-slate-border dark:bg-clr-gray-light dark:text-clr-gray-dark',
 }
 
 const STATUS_TONE = {
