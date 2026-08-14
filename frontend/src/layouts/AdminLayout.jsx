@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   CalendarCheck,
   CheckSquare,
+  ChevronLeft,
   ChevronRight,
   FolderGit2,
   LayoutDashboard,
@@ -18,6 +20,7 @@ import { useTheme } from '../context/useTheme'
 import { Avatar } from '../components/ui/Avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/DropdownMenu'
 import { Logo } from '../components/ui/Logo'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/Tooltip'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -40,6 +43,7 @@ function SidebarContent({ pathname, onNavigate }) {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
+  const [collapsed, setCollapsed] = useState(false)
 
   async function handleLogout() {
     await logout()
@@ -47,51 +51,79 @@ function SidebarContent({ pathname, onNavigate }) {
   }
 
   return (
-    <div className="flex h-full flex-col border-r bg-sidebar text-sidebar-foreground">
+    <div
+      className={cn(
+        'flex h-full flex-col overflow-y-auto border-r bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out',
+        collapsed ? 'w-[70px]' : 'w-[180px] lg:w-[200px]',
+      )}
+    >
       <div className="flex shrink-0 items-center border-b p-4">
-        <div className="flex flex-1 justify-center">
-          <Logo />
-        </div>
+        {!collapsed && (
+          <div className="flex flex-1 justify-center">
+            <Logo />
+          </div>
+        )}
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="ml-auto rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-clr-blue-bg hover:text-clr-blue-dark dark:hover:bg-[#2a2a2a]"
+        >
+          {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-3">
-        <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-          Management
-        </p>
-        {NAV_ITEMS.map((item) => {
-          const active = isPathActive(pathname, item.to)
-          return (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={onNavigate}
-              className={cn(
-                'mb-1 flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                active
-                  ? 'bg-clr-blue-bg font-semibold text-clr-blue-dark'
-                  : 'font-medium text-muted-foreground hover:bg-clr-blue-bg hover:text-clr-blue-dark',
-              )}
-            >
-              <item.icon size={20} strokeWidth={1.8} className="shrink-0" />
-              <span className="min-w-0 truncate">{item.label}</span>
-            </Link>
-          )
-        })}
+        {!collapsed && (
+          <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+            Management
+          </p>
+        )}
+        <TooltipProvider delayDuration={0}>
+          {NAV_ITEMS.map((item) => {
+            const active = isPathActive(pathname, item.to)
+            return (
+              <Tooltip key={item.to}>
+                <TooltipTrigger asChild>
+                  <Link
+                    to={item.to}
+                    onClick={onNavigate}
+                    className={cn(
+                      'mb-1 flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      collapsed && 'justify-center',
+                      active
+                        ? 'bg-clr-blue-bg font-semibold text-clr-blue-dark'
+                        : 'font-medium text-muted-foreground hover:bg-clr-blue-bg hover:text-clr-blue-dark',
+                    )}
+                  >
+                    <item.icon size={20} strokeWidth={1.8} className="shrink-0" />
+                    {!collapsed && <span className="min-w-0 truncate">{item.label}</span>}
+                  </Link>
+                </TooltipTrigger>
+                {collapsed && <TooltipContent side="right">{item.label}</TooltipContent>}
+              </Tooltip>
+            )
+          })}
+        </TooltipProvider>
       </nav>
 
       <div className="shrink-0 border-t bg-muted/40 p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className="flex w-full items-center gap-2 rounded-lg border bg-card p-2.5 text-left transition-colors hover:border-clr-blue/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className={cn(
+                'flex w-full items-center gap-2 rounded-lg border bg-card p-2.5 text-left transition-colors hover:border-clr-blue/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                collapsed && 'justify-center',
+              )}
             >
               <Avatar name={user?.name || 'A'} className="h-9 w-9 text-sm" />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-medium text-foreground">
-                  {user?.name || 'Admin'}
+              {!collapsed && (
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-medium text-foreground">
+                    {user?.name || 'Admin'}
+                  </span>
+                  <span className="block truncate text-[11px] text-muted-foreground">{user?.email}</span>
                 </span>
-                <span className="block truncate text-[11px] text-muted-foreground">{user?.email}</span>
-              </span>
+              )}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-52" align="end">
@@ -126,7 +158,7 @@ export function AdminLayout() {
 
   return (
     <div className="flex h-screen w-full max-w-full flex-col overflow-hidden bg-background md:flex-row">
-      <aside className="hidden w-[180px] shrink-0 md:block lg:w-[200px]">
+      <aside className="hidden shrink-0 md:block">
         <SidebarContent pathname={pathname} />
       </aside>
 
