@@ -20,7 +20,7 @@ import { toast } from 'react-hot-toast';
 import { toastInfo } from '../../lib/toast';
 
 import { getAttendance, markAttendance } from '../../services/attendanceService';
-import { getStudents } from '../../services/studentService';
+import { getStudents } from '../../services/studentsService';
 
 function todayStr() {
   const d = new Date();
