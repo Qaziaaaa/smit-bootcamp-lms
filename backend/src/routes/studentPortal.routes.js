@@ -12,6 +12,8 @@ router.get('/profile', studentPortalController.getProfile);
 router.get('/attendance', studentPortalController.getAttendance);
 router.get('/team', studentPortalController.getTeam);
 router.get('/tasks', studentPortalController.getTasks);
+router.get('/projects', studentPortalController.getProjects);
+router.get('/projects/:id', studentPortalController.getProjectById);
 router.put('/tasks/:id/progress', validateTaskProgress, studentPortalController.updateTaskProgress);
 
 export default router;

@@ -22,6 +22,16 @@ const getTasks = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, tasks, 'Tasks retrieved successfully');
 });
 
+const getProjects = asyncHandler(async (req, res) => {
+  const projects = await studentPortalService.getStudentProjects(req.user.userId);
+  sendSuccess(res, 200, projects, 'Projects retrieved successfully');
+});
+
+const getProjectById = asyncHandler(async (req, res) => {
+  const project = await studentPortalService.getStudentProjectById(req.user.userId, req.params.id);
+  sendSuccess(res, 200, project, 'Project retrieved successfully');
+});
+
 const updateTaskProgress = asyncHandler(async (req, res) => {
   const task = await studentPortalService.updateTaskProgress(req.user.userId, req.params.id, req.body);
   sendSuccess(res, 200, task, 'Task progress updated successfully');
@@ -32,5 +42,7 @@ export default {
   getAttendance,
   getTeam,
   getTasks,
+  getProjects,
+  getProjectById,
   updateTaskProgress,
 };

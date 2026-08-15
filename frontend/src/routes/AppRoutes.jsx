@@ -22,6 +22,7 @@ const StudentDashboardPage = lazy(() => import('../pages/StudentDashboardPage'))
 const StudentAttendancePage = lazy(() => import('../pages/StudentAttendancePage'))
 const StudentTeamPage = lazy(() => import('../pages/StudentTeamPage'))
 const StudentProjectsPage = lazy(() => import('../pages/StudentProjectsPage'))
+const StudentProjectDetailPage = lazy(() => import('../pages/StudentProjectDetailPage'))
 const StudentTasksPage = lazy(() => import('../pages/StudentTasksPage'))
 const StudentProfilePage = lazy(() => import('../pages/StudentProfilePage'))
 
@@ -71,6 +72,7 @@ export default function AppRoutes() {
           <Route path="/student/attendance" element={<StudentAttendancePage />} />
           <Route path="/student/team" element={<StudentTeamPage />} />
           <Route path="/student/projects" element={<StudentProjectsPage />} />
+          <Route path="/student/projects/:id" element={<StudentProjectDetailPage />} />
           <Route path="/student/tasks" element={<StudentTasksPage />} />
           <Route path="/student/profile" element={<StudentProfilePage />} />
         </Route>
