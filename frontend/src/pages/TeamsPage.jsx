@@ -278,7 +278,7 @@ export default function TeamsPage() {
   ];
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-6 p-3">
+    <div className="flex flex-col gap-6 p-3">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Teams</h1>

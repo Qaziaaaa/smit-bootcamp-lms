@@ -187,7 +187,7 @@ export function AdminLayout() {
         </header>
 
         <div className="w-full flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8">
-          <div className="mx-auto w-full max-w-[1200px]">
+          <div className="w-full">
             <Outlet />
           </div>
         </div>

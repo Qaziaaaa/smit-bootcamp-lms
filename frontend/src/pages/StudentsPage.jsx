@@ -159,7 +159,7 @@ export default function StudentsPage() {
   };
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-2 sm:p-4">
+    <div className="flex flex-col gap-3 p-2 sm:p-4">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">

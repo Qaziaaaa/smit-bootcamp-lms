@@ -220,7 +220,7 @@ export default function AttendancePage() {
   ];
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 p-3">
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">

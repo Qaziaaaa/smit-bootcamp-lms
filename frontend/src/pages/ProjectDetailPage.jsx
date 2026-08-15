@@ -193,7 +193,7 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-[1200px] p-3">
+      <div className="w-full p-3">
         <p className="text-sm text-muted-foreground">Loading project...</p>
       </div>
     );
@@ -201,7 +201,7 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="mx-auto max-w-[1200px] p-3">
+      <div className="w-full p-3">
         <p className="text-sm text-muted-foreground">Project not found.</p>
       </div>
     );
@@ -210,7 +210,7 @@ export default function ProjectDetailPage() {
   const completedTasks = tasks.filter((t) => t.status === 'completed').length;
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 p-3">
 
       {/* Topbar — "Project — {title}" + Edit button */}
       <div className="flex flex-wrap items-center justify-between gap-2">
