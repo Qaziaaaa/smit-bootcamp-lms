@@ -165,7 +165,7 @@ export default function StudentDashboardPage() {
 
       {/* Overview: 3 metric cards (left) + class schedule widget (right) */}
       <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-3">
           {/* Metric card: attendance (present/total + standing subtitle) */}
           <StatCard
             label="My Attendance"
@@ -198,7 +198,7 @@ export default function StudentDashboardPage() {
         </div>
 
         {/* Schedule widget: current week grid, class days highlighted */}
-        <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+        <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
           <div className="px-2 pb-1.5 pt-2">
             <h3 className="flex items-center gap-1 text-base font-semibold text-foreground">
               <CalendarDays size={18} className="text-foreground" /> Class Schedule
