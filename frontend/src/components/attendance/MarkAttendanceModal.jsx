@@ -194,7 +194,7 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
       </p>
 
       {/* Controls Toolbar */}
-      <div className="flex flex-col justify-between gap-1.5 rounded-lg border border-border bg-muted p-1.5 sm:flex-row sm:items-center">
+      <div className="mb-3 flex flex-col justify-between gap-1.5 rounded-lg border border-border bg-muted p-1.5 sm:flex-row sm:items-center">
         <div className="flex flex-1 flex-wrap gap-1.5">
           <Input
             type="date"
@@ -242,7 +242,7 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
       </div>
 
       {/* Stats Pills & Save Button */}
-      <div className="flex flex-wrap items-center justify-between gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-1.5">
         <div className="flex flex-wrap items-center gap-1.25">
           <Badge status="info" label={`Total: ${counts.total}`} icon={Users} />
           <Badge status="success" label={`Present: ${counts.present}`} icon={CheckCircle2} />
