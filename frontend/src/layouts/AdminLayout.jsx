@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   CalendarCheck,
@@ -15,6 +15,7 @@ import {
   Sun,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { toast } from 'react-hot-toast'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../context/useTheme'
 import { Avatar } from '../components/ui/Avatar'
@@ -150,11 +151,19 @@ function SidebarContent({ pathname, onNavigate }) {
 }
 
 export function AdminLayout() {
+  const location = useLocation()
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
   const current = NAV_ITEMS.find((item) => isPathActive(pathname, item.to))
   const title = current?.label || 'Dashboard'
+
+  useEffect(() => {
+    if (location.state?.justLoggedIn) {
+      toast.success('Logged in!')
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location, navigate])
 
   return (
     <div className="flex h-screen w-full max-w-full flex-col overflow-hidden bg-background md:flex-row">

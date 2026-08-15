@@ -20,7 +20,10 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false)
 
   function goHome(user) {
-    navigate(user.role === 'admin' ? '/dashboard' : '/student/dashboard', { replace: true })
+    navigate(user.role === 'admin' ? '/dashboard' : '/student/dashboard', {
+      replace: true,
+      state: { justLoggedIn: true },
+    })
   }
 
   function switchTab(idx) {
@@ -41,7 +44,6 @@ export default function LoginPage() {
     setSubmitting(true)
     try {
       const user = await login(email.trim(), password, isStudent ? 'student' : 'admin')
-      toast.success('Logged in!')
       goHome(user)
     } catch (err) {
       const status = err.response?.status

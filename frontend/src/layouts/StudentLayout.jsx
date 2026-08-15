@@ -14,6 +14,7 @@ import {
   Sun,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { toast } from 'react-hot-toast'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../context/useTheme'
 import { Avatar } from '../components/ui/Avatar'
@@ -150,9 +151,17 @@ function SidebarContent({ pathname, profile, onNavigate }) {
 }
 
 export function StudentLayout() {
+  const location = useLocation()
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
+
+  useEffect(() => {
+    if (location.state?.justLoggedIn) {
+      toast.success('Logged in!')
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location, navigate])
 
   useEffect(() => {
     let cancelled = false
