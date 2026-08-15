@@ -70,6 +70,54 @@ const getStudentTasks = async (userId) => {
   return tasks;
 };
 
+const getStudentProjects = async (userId) => {
+  const student = await Student.findOne({ userId }).lean();
+  if (!student) {
+    throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
+  }
+  if (!student.teamId) {
+    return [];
+  }
+
+  const [projects, team, memberCount] = await Promise.all([
+    Project.find({ teamId: student.teamId }).sort({ createdAt: -1 }).lean(),
+    Team.findById(student.teamId).lean(),
+    Student.countDocuments({ teamId: student.teamId }),
+  ]);
+
+  return projects.map((project) => ({
+    ...project,
+    team: team ? { name: team.name, memberCount } : null,
+  }));
+};
+
+const getStudentProjectById = async (userId, projectId) => {
+  const student = await Student.findOne({ userId }).lean();
+  if (!student) {
+    throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
+  }
+
+  const project = await Project.findById(projectId).lean();
+  if (!project) {
+    throw new ApiError(404, 'Project not found.', ['Project does not exist.']);
+  }
+
+  if (!student.teamId || !project.teamId || project.teamId.toString() !== student.teamId.toString()) {
+    throw new ApiError(403, 'Forbidden.', ['You can only view projects assigned to your team.']);
+  }
+
+  const [tasks, team, memberCount] = await Promise.all([
+    Task.find({ projectId: project._id, assignedTo: student._id })
+      .select('title description status priority deadline')
+      .sort({ createdAt: -1 })
+      .lean(),
+    Team.findById(student.teamId).lean(),
+    Student.countDocuments({ teamId: student.teamId }),
+  ]);
+
+  return { ...project, team: team ? { name: team.name, memberCount } : null, tasks };
+};
+
 const updateTaskProgress = async (userId, taskId, data) => {
   const student = await Student.findOne({ userId }).lean();
   if (!student) {
@@ -96,5 +144,7 @@ export default {
   getStudentAttendance,
   getStudentTeam,
   getStudentTasks,
+  getStudentProjects,
+  getStudentProjectById,
   updateTaskProgress,
 };
