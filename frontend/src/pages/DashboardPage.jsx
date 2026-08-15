@@ -21,6 +21,7 @@ import { cn } from '../lib/utils'
 import { useEffect, useState, useCallback } from 'react'
 import { getDashboard } from '../services/dashboardService'
 import { apiClient } from '../services/apiClient'
+import { createStudent } from '../services/studentsService'
 import { toast } from 'react-hot-toast'
 
 const TASK_STATUS_STYLE = {
@@ -76,6 +77,18 @@ export default function DashboardPage() {
   const handleAttendanceSuccess = () => {
     loadDashboard(false)
     loadRecentAttendance()
+  }
+
+  const handleSaveStudent = async (data) => {
+    try {
+      await createStudent(data)
+      toast.success('Student created successfully')
+      setIsStudentFormOpen(false)
+      loadDashboard(false)
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create student')
+      throw error
+    }
   }
 
   useEffect(() => {
@@ -329,11 +342,7 @@ export default function DashboardPage() {
       <StudentForm
         open={isStudentFormOpen}
         onClose={() => setIsStudentFormOpen(false)}
-        onSubmit={async () => {
-          await new Promise((resolve) => setTimeout(resolve, 500))
-          toast.success('Student created successfully')
-          setIsStudentFormOpen(false)
-        }}
+        onSubmit={handleSaveStudent}
       />
 
       <MarkAttendanceModal
