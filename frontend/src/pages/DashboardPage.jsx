@@ -161,7 +161,7 @@ export default function DashboardPage() {
     <div className="grid gap-3 sm:-mt-1 md:-mt-2 -mb-1 sm:-mb-2 md:-mb-3">
       <div className="flex flex-col items-stretch justify-between gap-2 -mb-1 sm:flex-row sm:items-start">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-medium tracking-tight text-foreground">
             SMIT Bootcamp Overview
           </h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
@@ -184,14 +184,14 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {STAT_CARDS.map((card) => (
           <StatCard key={card.label} {...card} />
         ))}
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
-        <div className="min-w-0 rounded-xl border bg-card shadow-sm">
+        <div className="min-w-0 rounded-lg border bg-card shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2 p-3">
             <div>
               <h3 className="text-base font-semibold text-foreground">
@@ -279,7 +279,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="min-w-0 rounded-xl border bg-card shadow-sm">
+        <div className="min-w-0 rounded-lg border bg-card shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-2 p-3">
             <div>
               <h3 className="text-base font-semibold text-foreground">Recent Bootcamp Activity</h3>
