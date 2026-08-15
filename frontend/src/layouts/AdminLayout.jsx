@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   CalendarCheck,
@@ -157,9 +157,11 @@ export function AdminLayout() {
 
   const current = NAV_ITEMS.find((item) => isPathActive(pathname, item.to))
   const title = current?.label || 'Dashboard'
+  const loginToastShown = useRef(false)
 
   useEffect(() => {
-    if (location.state?.justLoggedIn) {
+    if (location.state?.justLoggedIn && !loginToastShown.current) {
+      loginToastShown.current = true
       toast.success('Logged in!')
       navigate(location.pathname, { replace: true, state: null })
     }
