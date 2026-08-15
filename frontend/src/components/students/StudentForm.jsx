@@ -53,14 +53,21 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = studentSchema.safeParse(values);
+    const nextErrors = {};
     if (!result.success) {
-      const next = {};
       for (const issue of result.error.issues) {
-        if (!next[issue.path[0]]) next[issue.path[0]] = issue.message;
+        if (!nextErrors[issue.path[0]]) nextErrors[issue.path[0]] = issue.message;
       }
-      setErrors(next);
+    }
+    if (!isEditing && (!values.password || values.password.length < 8)) {
+      nextErrors.password = 'Password must be at least 8 characters';
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
+
     setIsSubmitting(true);
     try {
       const { password, ...rest } = result.data;
@@ -68,6 +75,8 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
       if (password) payload.password = password;
       await onSubmit(payload);
       onClose();
+    } catch (err) {
+      console.error('Failed to submit student form:', err);
     } finally {
       setIsSubmitting(false);
     }

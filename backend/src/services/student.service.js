@@ -26,7 +26,8 @@ const createStudent = async (data) => {
     }
   }
 
-  const passwordHash = await bcrypt.hash(password, env.bcryptRounds);
+  const rawPassword = password || 'password123';
+  const passwordHash = await bcrypt.hash(rawPassword, env.bcryptRounds);
 
   const session = await mongoose.startSession();
   session.startTransaction();
