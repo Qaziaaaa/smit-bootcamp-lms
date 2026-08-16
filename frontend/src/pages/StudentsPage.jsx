@@ -190,9 +190,10 @@ export default function StudentsPage() {
             value={statusFilter}
             onChange={(next) => setStatusFilter(next)}
             options={[
-              { label: 'Active', value: 'active' },
-              { label: 'Inactive', value: 'inactive' },
-              { label: 'Graduated', value: 'graduated' },
+              { label: 'Pending', value: 'Pending' },
+              { label: 'Enrolled', value: 'Enrolled' },
+              { label: 'Dropout', value: 'Dropout' },
+              { label: 'Completed', value: 'Completed' },
             ]}
           />
 
