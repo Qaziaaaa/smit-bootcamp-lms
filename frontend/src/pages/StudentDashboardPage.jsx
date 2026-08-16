@@ -21,7 +21,8 @@ import { cn } from '../lib/utils'
 function currentWeek(activeDays = []) {
   const today = new Date()
   const dayOfWeek = today.getDay() // 0 = Sun, 1 = Mon, ..., 6 = Sat
-  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+  // If today is Sunday (weekend/off day), display the upcoming active week starting Monday
+  const mondayOffset = dayOfWeek === 0 ? 1 : 1 - dayOfWeek
   const monday = new Date(today)
   monday.setDate(today.getDate() + mondayOffset)
 
@@ -33,7 +34,8 @@ function currentWeek(activeDays = []) {
 
     return {
       name,
-      date: day.getDate(),
+      date: String(day.getDate()).padStart(2, '0'),
+      isToday: day.toDateString() === today.toDateString(),
       active: activeDays.includes(name),
     }
   })
