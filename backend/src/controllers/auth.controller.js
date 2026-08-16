@@ -17,8 +17,15 @@ const logout = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, { loggedOut: true }, 'Logged out successfully. Remove token on client side.');
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  const { password } = req.body;
+  const result = await authService.changePassword(req.user.userId, password);
+  sendSuccess(res, 200, result, 'Password changed successfully');
+});
+
 export default {
   login,
   getMe,
   logout,
+  changePassword,
 };
