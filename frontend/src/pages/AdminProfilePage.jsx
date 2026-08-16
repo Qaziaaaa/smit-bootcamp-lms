@@ -24,14 +24,14 @@ export default function AdminProfilePage() {
   return (
     <div className="flex flex-col gap-3">
       {/* Cover Image & Avatar Section */}
-      <div className="relative mb-8">
+      <div className="relative mb-16 sm:mb-20">
         <div className="flex h-40 items-center justify-center overflow-hidden rounded-lg sm:h-[200px] md:h-60 bg-[linear-gradient(135deg,hsl(var(--clr-blue-dark)),hsl(var(--clr-blue)))]">
           <div className="scale-150 opacity-90 brightness-0 invert">
             <Logo />
           </div>
         </div>
         
-        <div className="absolute -bottom-15 left-6 flex h-30 w-30 items-center justify-center overflow-hidden rounded-full border-4 border-card bg-card text-5xl font-bold text-clr-blue shadow-md sm:left-10">
+        <div className="absolute -bottom-14 left-6 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-card bg-card text-4xl font-bold text-clr-blue shadow-md sm:-bottom-16 sm:left-10 sm:h-32 sm:w-32 sm:text-5xl">
           {superAdmin.profileImage ? (
             <img src={superAdmin.profileImage} alt={superAdmin.name} className="h-full w-full object-cover" />
           ) : (

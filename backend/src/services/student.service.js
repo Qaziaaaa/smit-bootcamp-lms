@@ -188,7 +188,7 @@ const deleteStudent = async (id) => {
 };
 
 const getStudentAttendance = async (studentId) => {
-  const records = await Attendance.find({ studentId }).sort({ date: 1 }).lean();
+  const records = await Attendance.find({ studentId }).sort({ date: -1, createdAt: -1 }).lean();
 
   const presentCount = records.filter((r) => r.status === 'present').length;
   const absentCount = records.filter((r) => r.status === 'absent').length;
