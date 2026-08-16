@@ -147,17 +147,24 @@ export function MarkAttendanceModal({ open, onClose, onSuccess }) {
   }, [students]);
 
   const handleSave = async () => {
-    const markedStudents = students.filter((s) => s.status === 'present' || s.status === 'absent');
+    const modifiedStudents = students.filter(
+      (s) => (s.status === 'present' || s.status === 'absent') && s.status !== s.originalStatus
+    );
 
-    if (markedStudents.length === 0) {
-      toastInfo('No attendance status selected to save.');
+    if (modifiedStudents.length === 0) {
+      const anyMarked = students.some((s) => s.status === 'present' || s.status === 'absent');
+      if (!anyMarked) {
+        toastInfo('No attendance status selected to save.');
+      } else {
+        toastInfo('No changes detected in attendance records.');
+      }
       onClose();
       return;
     }
 
     setSaving(true);
     try {
-      const recordsToSave = markedStudents.map((s) => ({
+      const recordsToSave = modifiedStudents.map((s) => ({
         studentId: s.studentId,
         date: selectedDate,
         status: s.status,

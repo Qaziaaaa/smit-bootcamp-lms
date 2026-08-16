@@ -19,8 +19,9 @@ import { StudentForm } from '../components/students/StudentForm'
 import { MarkAttendanceModal } from '../components/attendance/MarkAttendanceModal'
 import { cn } from '../lib/utils'
 import { useEffect, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { getDashboard } from '../services/dashboardService'
-import { apiClient } from '../services/apiClient'
+import { getAttendance } from '../services/attendanceService'
 import { createStudent } from '../services/studentsService'
 import { toast } from 'react-hot-toast'
 
@@ -63,8 +64,8 @@ export default function DashboardPage() {
       if (attendanceSearch && attendanceSearch.trim()) {
         params.search = attendanceSearch.trim()
       }
-      const response = await apiClient.get('/attendance', { params })
-      setRecentAttendance(response.data?.data?.records ?? [])
+      const data = await getAttendance(params)
+      setRecentAttendance(data?.records ?? [])
     } catch (error) {
       console.error('Recent attendance error:', error)
     }
@@ -300,8 +301,10 @@ export default function DashboardPage() {
                 Latest task completions and team submissions
               </p>
             </div>
-            <Button variant="ghost" size="sm" className="gap-0.5 text-xs">
-              View All Tasks <ArrowUpRight size={14} />
+            <Button asChild variant="ghost" size="sm" className="gap-0.5 text-xs">
+              <Link to="/tasks">
+                View All Tasks <ArrowUpRight size={14} />
+              </Link>
             </Button>
           </div>
           <div className="border-t">
