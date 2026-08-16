@@ -230,6 +230,35 @@ const validateTaskProgress = [
   handleValidationErrors,
 ];
 
+const validateBatchesQuery = [
+  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
+  handleValidationErrors,
+];
+
+const validateBatchId = [
+  param('id').isMongoId().withMessage('Invalid batch ID.'),
+  handleValidationErrors,
+];
+
+const validateBatchCreate = [
+  body('name').trim().notEmpty().withMessage('Batch name is required.').isLength({ max: 100 }).withMessage('Batch name must be at most 100 characters.'),
+  body('description').optional().trim().isLength({ max: 500 }).withMessage('Description must be at most 500 characters.'),
+  body('startDate').optional().isISO8601().withMessage('Valid start date is required.').toDate(),
+  body('endDate').optional().isISO8601().withMessage('Valid end date is required.').toDate(),
+  body('status').optional().isIn(['active', 'inactive', 'completed']).withMessage('Invalid status.'),
+  handleValidationErrors,
+];
+
+const validateBatchUpdate = [
+  param('id').isMongoId().withMessage('Invalid batch ID.'),
+  body('name').optional().trim().notEmpty().withMessage('Batch name cannot be empty.').isLength({ max: 100 }).withMessage('Batch name must be at most 100 characters.'),
+  body('description').optional().trim().isLength({ max: 500 }).withMessage('Description must be at most 500 characters.'),
+  body('startDate').optional().isISO8601().withMessage('Valid start date is required.').toDate(),
+  body('endDate').optional().isISO8601().withMessage('Valid end date is required.').toDate(),
+  body('status').optional().isIn(['active', 'inactive', 'completed']).withMessage('Invalid status.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -255,4 +284,8 @@ export {
   validateTaskCreate,
   validateTaskUpdate,
   validateTaskProgress,
+  validateBatchesQuery,
+  validateBatchId,
+  validateBatchCreate,
+  validateBatchUpdate,
 };

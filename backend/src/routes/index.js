@@ -8,6 +8,7 @@ import teamRoutes from './team.routes.js';
 import projectRoutes from './project.routes.js';
 import taskRoutes from './task.routes.js';
 import dashboardRoutes from './dashboard.routes.js';
+import batchRoutes from './batch.routes.js';
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use('/teams', teamRoutes);
 router.use('/projects', projectRoutes);
 router.use('/tasks', taskRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/batches', batchRoutes);
 
 export default router;

@@ -7,6 +7,7 @@ import Team from './models/team.model.js';
 import Project from './models/project.model.js';
 import Task from './models/task.model.js';
 import Attendance from './models/attendance.model.js';
+import Batch from './models/batch.model.js';
 import logger from './utils/logger.js';
 
 const ADMIN_EMAIL = 'admin@lms.com';
@@ -14,6 +15,25 @@ const ADMIN_PASSWORD = 'password123';
 
 const DEMO_STUDENT_EMAIL = 'student@lms.com';
 const DEMO_PASSWORD = 'password123';
+
+const BATCH_NAME = 'Batch 2026';
+
+const seedBatch = async () => {
+  const existing = await Batch.findOne({ name: BATCH_NAME });
+  if (existing) {
+    logger.info(`Batch "${BATCH_NAME}" already exists. Skipping batch seed.`);
+    return;
+  }
+
+  await Batch.create({
+    name: BATCH_NAME,
+    description: 'Saylani Mass IT Training Bootcamp 2026 cohort.',
+    startDate: new Date('2026-01-01'),
+    endDate: new Date('2026-12-31'),
+    status: 'active',
+  });
+  logger.info(`Batch seeded: ${BATCH_NAME}`);
+};
 
 const seedAdmin = async () => {
   const existing = await User.findOne({ email: ADMIN_EMAIL });
@@ -53,6 +73,7 @@ const seedDemoStudent = async () => {
     name: 'Ali Ahmed',
     email: DEMO_STUDENT_EMAIL,
     phone: '+92 300 1234567',
+    rollNo: 'ST-001',
     batch: 'Batch 2026',
     teamId: team._id,
     status: 'active',
@@ -95,6 +116,7 @@ const run = async () => {
   try {
     await connectDB();
     await seedAdmin();
+    await seedBatch();
     await seedDemoStudent();
     logger.info('Seeding complete.');
     process.exit(0);
