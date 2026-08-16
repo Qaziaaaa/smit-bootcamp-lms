@@ -17,7 +17,7 @@ const studentSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
 });
 
-const emptyValues = { name: '', email: '', rollNo: '', batch: '', status: 'active', password: '' };
+const emptyValues = { name: '', email: '', rollNo: '', batch: '', status: 'Pending', password: '' };
 
 export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batchOptions = [] }) => {
   const isEditing = !!initialData;
@@ -35,7 +35,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
               email: initialData.email || '',
               rollNo: initialData.rollNo || initialData.rollNumber || '',
               batch: initialData.batch || '',
-              status: initialData.status || 'active',
+              status: initialData.status || 'Pending',
               password: '',
             }
           : emptyValues,
@@ -136,8 +136,10 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
             value={values.status}
             onChange={(next) => setField('status')({ target: { value: next } })}
             options={[
-              { label: 'Active', value: 'active' },
-              { label: 'Inactive', value: 'inactive' },
+              { label: 'Pending', value: 'Pending' },
+              { label: 'Enrolled', value: 'Enrolled' },
+              { label: 'Dropout', value: 'Dropout' },
+              { label: 'Completed', value: 'Completed' },
             ]}
             error={errors.status}
           />

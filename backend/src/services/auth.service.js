@@ -77,6 +77,16 @@ const updateUserPassword = async (userId, newPasswordHash) => {
   return User.findByIdAndUpdate(userId, { passwordHash: newPasswordHash }, { new: true });
 };
 
+const changePassword = async (userId, newPassword) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found.', ['User does not exist.']);
+  }
+  const passwordHash = await bcrypt.hash(newPassword, env.bcryptRounds);
+  await User.findByIdAndUpdate(userId, { passwordHash }, { new: true });
+  return { success: true };
+};
+
 export default {
   login,
   getMe,
@@ -84,5 +94,6 @@ export default {
   findUserByEmail,
   findUserById,
   updateUserPassword,
+  changePassword,
   generateToken,
 };

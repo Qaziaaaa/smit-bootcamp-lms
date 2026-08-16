@@ -20,6 +20,12 @@ const validateLogin = [
   handleValidationErrors,
 ];
 
+const validateChangePassword = [
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters.'),
+  body('confirmPassword').custom((value, { req }) => value === req.body.password).withMessage('Passwords do not match.'),
+  handleValidationErrors,
+];
+
 const validateStudentCreate = [
   body('name').trim().notEmpty().withMessage('Name is required.').isLength({ max: 100 }).withMessage('Name must be at most 100 characters.'),
   body('email').isEmail().withMessage('Valid email is required.').normalizeEmail(),
@@ -261,6 +267,7 @@ const validateBatchUpdate = [
 
 export {
   validateLogin,
+  validateChangePassword,
   validateStudentCreate,
   validateStudentUpdate,
   validateStudentId,
