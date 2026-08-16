@@ -235,7 +235,7 @@ export default function DashboardPage() {
                     Student
                   </th>
                   <th className="w-[14%] px-4 py-1.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Batch
+                    Roll No
                   </th>
                   <th className="w-[26%] px-4 py-1.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     Date
@@ -272,8 +272,8 @@ export default function DashboardPage() {
                         </div>
                       </td>
                       <td className="px-4 py-1.25 align-middle">
-                        <p className="truncate text-xs text-foreground">
-                          {record.batch}
+                        <p className="truncate font-mono text-xs font-semibold uppercase text-foreground">
+                          {record.rollNo || record.rollNumber || ((record.studentId || record._id) ? `STU-${String(record.studentId || record._id).slice(-4).toUpperCase()}` : '—')}
                         </p>
                       </td>
                       <td className="px-4 py-1.25 align-middle">

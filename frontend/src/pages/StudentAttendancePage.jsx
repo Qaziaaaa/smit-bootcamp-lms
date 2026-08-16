@@ -52,7 +52,8 @@ export default function StudentAttendancePage() {
 
   // Derived attendance summary (present / absent / total days / percentage)
   const summary = attendance?.summary ?? { present: 0, absent: 0, totalDays: 0, percentage: 0 }
-  const records = attendance?.records ?? []
+  const rawRecords = attendance?.records ?? []
+  const records = [...rawRecords].sort((a, b) => new Date(b.date) - new Date(a.date))
   const percentage = Math.round(summary.percentage ?? 0)
 
   return (
@@ -75,7 +76,7 @@ export default function StudentAttendancePage() {
       <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
         <div className="border-b border-border bg-clr-blue-bg p-2.5">
           <h3 className="text-lg font-semibold text-foreground">Attendance History</h3>
-          <p className="mt-0.25 text-[13px] text-muted-foreground">Every recorded class session, oldest first.</p>
+          <p className="mt-0.25 text-[13px] text-muted-foreground">Every recorded class session, most recent first.</p>
         </div>
 
         {/* Empty state when no attendance records exist */}
