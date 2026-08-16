@@ -18,22 +18,24 @@ import { Button } from '../components/ui/Button'
 import { StatCard } from '../components/ui/StatCard'
 import { cn } from '../lib/utils'
 
-// Builds the current week (Sun-Sat) and marks specific days as active based on student schedule
 function currentWeek(activeDays = []) {
   const today = new Date()
-  const sundayOffset = -today.getDay()
-  const sunday = new Date(today)
-  sunday.setDate(today.getDate() + sundayOffset)
+  const dayOfWeek = today.getDay() // 0 = Sun, 1 = Mon, ..., 6 = Sat
+  // If today is Sunday (weekend/off day), display the upcoming active week starting Monday
+  const mondayOffset = dayOfWeek === 0 ? 1 : 1 - dayOfWeek
+  const monday = new Date(today)
+  monday.setDate(today.getDate() + mondayOffset)
 
-  const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
   return names.map((name, index) => {
-    const day = new Date(sunday)
-    day.setDate(sunday.getDate() + index)
+    const day = new Date(monday)
+    day.setDate(monday.getDate() + index)
 
     return {
       name,
-      date: day.getDate(),
+      date: String(day.getDate()).padStart(2, '0'),
+      isToday: day.toDateString() === today.toDateString(),
       active: activeDays.includes(name),
     }
   })
@@ -42,9 +44,9 @@ function currentWeek(activeDays = []) {
 // Mock schedule data mapping student emails to their active class days.
 // This will be replaced by backend API data in the future.
 const MOCK_SCHEDULE_DATA = {
-  'student@example.com': ['Fri', 'Sat'],
-  'qari@gmail.com': ['Mon', 'Wed', 'Fri'],
-  'default': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+  'student@example.com': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  'qari@gmail.com': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  'default': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
 }
 
 export default function StudentDashboardPage() {
@@ -221,6 +223,9 @@ export default function StudentDashboardPage() {
                 </div>
               ))}
             </div>
+            <p className="mt-2 text-center text-xs font-semibold text-clr-green-dark">
+              Mon to Sat • 9:00 AM to 2:00 PM
+            </p>
           </div>
         </div>
       </div>

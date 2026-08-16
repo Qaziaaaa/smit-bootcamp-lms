@@ -19,7 +19,7 @@ const getStudentAttendance = async (userId) => {
     throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
   }
 
-  const records = await Attendance.find({ studentId: student._id }).sort({ date: 1 }).lean();
+  const records = await Attendance.find({ studentId: student._id }).sort({ date: -1, createdAt: -1 }).lean();
 
   const presentCount = records.filter((r) => r.status === 'present').length;
   const absentCount = records.filter((r) => r.status === 'absent').length;

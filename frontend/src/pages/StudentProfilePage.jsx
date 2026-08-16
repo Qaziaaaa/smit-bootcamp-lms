@@ -47,14 +47,14 @@ export default function StudentProfilePage() {
   return (
     <div className="flex flex-col gap-3">
       {/* Cover Image & Avatar Section */}
-      <div className="relative mb-8">
+      <div className="relative mb-16 sm:mb-20">
         <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-clr-green-bg to-clr-blue-bg sm:h-50 md:h-60">
           <div className="scale-150 opacity-80">
             <Logo />
           </div>
         </div>
 
-        <div className="absolute -bottom-[60px] left-6 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-full border-4 border-white bg-clr-blue text-[48px] font-semibold text-white shadow-md sm:left-10">
+        <div className="absolute -bottom-14 left-6 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-clr-blue text-4xl font-semibold text-white shadow-md sm:-bottom-16 sm:left-10 sm:h-32 sm:w-32 sm:text-5xl">
           {student.profileImage ? (
             <img src={student.profileImage} alt={name} className="h-full w-full object-cover" />
           ) : (
