@@ -103,11 +103,21 @@ export default function DashboardPage() {
   const counts = dashboard?.counts ?? {}
   const todayAttendance = dashboard?.todayAttendance ?? {}
 
+  const activeBatch = dashboard?.activeBatch
+  let batchProgress = null
+  if (activeBatch?.startDate) {
+    const start = new Date(activeBatch.startDate)
+    const dayMs = 24 * 60 * 60 * 1000
+    const totalDays = 90
+    const elapsedDays = Math.max(1, Math.floor((Date.now() - start) / dayMs) + 1)
+    batchProgress = `Day ${Math.min(elapsedDays, totalDays)} of ${totalDays} days`
+  }
+
   const STAT_CARDS = [
     {
       label: 'Total Students',
       value: counts.students ?? '0',
-      trend: '+12% this month',
+      subtitle: batchProgress,
       icon: Users,
       iconBg: 'hsl(var(--clr-blue-bg))',
       iconBorder: 'hsl(var(--clr-blue) / 0.2)',
@@ -125,7 +135,7 @@ export default function DashboardPage() {
     {
       label: 'Active Teams',
       value: counts.teams ?? '0',
-      subtitle: 'Across 2 Active Batches',
+      subtitle: `${counts.projects ?? 0} active projects`,
       icon: Layers,
       iconBg: 'hsl(var(--clr-purple-bg))',
       iconBorder: 'hsl(var(--clr-purple) / 0.2)',

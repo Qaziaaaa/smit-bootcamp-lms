@@ -2,6 +2,7 @@ import Student from '../models/student.model.js';
 import Team from '../models/team.model.js';
 import Task from '../models/task.model.js';
 import Attendance from '../models/attendance.model.js';
+import Batch from '../models/batch.model.js';
 
 const getDashboardStats = async () => {
   const startOfToday = new Date();
@@ -18,6 +19,7 @@ const getDashboardStats = async () => {
     inProgressTasks,
     completedTasks,
     todayAttendance,
+    activeBatch,
   ] = await Promise.all([
     Student.countDocuments(),
     Team.countDocuments(),
@@ -27,6 +29,7 @@ const getDashboardStats = async () => {
     Task.countDocuments({ status: 'in-progress' }),
     Task.countDocuments({ status: 'completed' }),
     Attendance.find({ date: { $gte: startOfToday, $lt: endOfToday } }).lean(),
+    Batch.findOne({ status: 'active' }).select('name startDate endDate').lean(),
   ]);
 
   const todayPresent = todayAttendance.filter((a) => a.status === 'present').length;
@@ -58,6 +61,7 @@ const getDashboardStats = async () => {
       present: todayPresent,
       absent: todayAbsent,
     },
+    activeBatch,
     recentStudents,
     recentTasks,
   };
