@@ -23,5 +23,6 @@ router.put('/:id', validateStudentUpdate, studentController.updateStudent);
 router.delete('/:id', validateStudentId, studentController.deleteStudent);
 router.get('/:id/attendance', validateStudentId, studentController.getStudentAttendance);
 router.post('/bulk-import', upload.single('file'), studentController.bulkImportStudents);
+router.get('/utils/next-roll-no', studentController.getNextRollNo);
 
 export default router;

@@ -35,6 +35,11 @@ export const bulkImportStudents = async (formData) => {
   return response.data.data
 }
 
+export const getNextRollNo = async () => {
+  const response = await apiClient.get('/students/utils/next-roll-no')
+  return response.data.data
+}
+
 export const resetStudentPassword = async (studentId, newPassword) => {
   const response = await apiClient.post('/auth/reset-student-password', { studentId, newPassword })
   return response.data.data

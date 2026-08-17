@@ -47,6 +47,11 @@ const bulkImportStudents = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, result, 'Bulk import completed');
 });
 
+const getNextRollNo = asyncHandler(async (req, res) => {
+  const rollNo = await studentService.getNextRollNo();
+  sendSuccess(res, 200, { rollNo }, 'Next roll number retrieved');
+});
+
 export default {
   createStudent,
   getStudents,
@@ -55,4 +60,5 @@ export default {
   deleteStudent,
   getStudentAttendance,
   bulkImportStudents,
+  getNextRollNo,
 };

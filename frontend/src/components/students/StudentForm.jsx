@@ -7,6 +7,7 @@ import { Input } from '../ui/Input';
 import { Label } from '../ui/Label';
 import { Select } from '../ui/Select';
 import { Modal } from '../ui/Modal';
+import { getNextRollNo } from '../../services/studentsService';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -28,18 +29,23 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
 
   useEffect(() => {
     if (open) {
-      setValues(
-        initialData
-          ? {
-              name: initialData.name || '',
-              email: initialData.email || '',
-              rollNo: initialData.rollNo || initialData.rollNumber || '',
-              batch: initialData.batch || '',
-              status: initialData.status || 'Pending',
-              password: '',
-            }
-          : emptyValues,
-      );
+      if (initialData) {
+        setValues({
+          name: initialData.name || '',
+          email: initialData.email || '',
+          rollNo: initialData.rollNo || initialData.rollNumber || '',
+          batch: initialData.batch || '',
+          status: initialData.status || 'Pending',
+          password: '',
+        });
+      } else {
+        setValues(emptyValues);
+        getNextRollNo()
+          .then((data) => {
+            setValues((v) => ({ ...v, rollNo: data?.rollNo || '' }));
+          })
+          .catch(() => {});
+      }
       setErrors({});
       setShowPassword(false);
     }

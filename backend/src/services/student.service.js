@@ -283,6 +283,16 @@ const bulkImportStudents = async (students) => {
   return results;
 };
 
+const getNextRollNo = async () => {
+  const students = await Student.find({ rollNo: { $exists: true, $ne: null } }).select('rollNo').lean();
+  let max = 0;
+  for (const s of students) {
+    const num = parseInt(String(s.rollNo).replace(/\D/g, ''), 10);
+    if (!isNaN(num) && num > max) max = num;
+  }
+  return String(max + 1).padStart(3, '0');
+};
+
 export default {
   createStudent,
   getStudents,
@@ -292,4 +302,5 @@ export default {
   getStudentAttendance,
   findStudentByUserId,
   bulkImportStudents,
+  getNextRollNo,
 };
