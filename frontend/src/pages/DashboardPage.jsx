@@ -6,12 +6,11 @@ import {
   Clock,
   Layers,
   Plus,
-  Search,
   Users,
   UserX,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
-import { Input } from '../components/ui/Input'
+import { SearchBar } from '../components/ui/SearchBar'
 import { StatCard } from '../components/ui/StatCard'
 import { Avatar } from '../components/ui/Avatar'
 import { Badge } from '../components/ui/Badge'
@@ -93,12 +92,8 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      loadRecentAttendance()
-    }, 300)
-
-    return () => clearTimeout(handler)
-  }, [attendanceSearch, loadRecentAttendance])
+    loadRecentAttendance()
+  }, [loadRecentAttendance])
 
   const counts = dashboard?.counts ?? {}
   const todayAttendance = dashboard?.todayAttendance ?? {}
@@ -225,15 +220,7 @@ export default function DashboardPage() {
                 Latest student attendance records
               </p>
             </div>
-            <div className="relative w-full sm:w-[200px]">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={attendanceSearch}
-                onChange={(e) => setAttendanceSearch(e.target.value)}
-                placeholder="Search student..."
-                className="pl-10"
-              />
-            </div>
+            <SearchBar value={attendanceSearch} onChange={setAttendanceSearch} placeholder="Search student..." className="w-full sm:w-[200px]" />
           </div>
           <div className="h-[420px] w-full max-w-full overflow-x-auto overflow-y-auto border-t">
             <table

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Users, Eye, Edit2, Trash2, Search } from 'lucide-react';
+import { Users, Eye, Edit2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
@@ -10,7 +10,6 @@ import { Checkbox } from '../components/ui/Checkbox';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { DataTable } from '../components/ui/DataTable';
 import { FormField } from '../components/ui/FormField';
-import { Input } from '../components/ui/Input';
 import { Label } from '../components/ui/Label';
 import { Modal } from '../components/ui/Modal';
 import { Pagination } from '../components/ui/Pagination';
@@ -326,16 +325,14 @@ export default function TeamsPage() {
                 <span className="text-destructive"> *</span>
               </Label>
               <div className="rounded-lg border bg-muted/40 p-3">
-                <div className="relative mb-2">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
+                <div className="mb-2">
+                  <SearchBar
                     value={memberSearch}
-                    onChange={(e) => setMemberSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') e.preventDefault();
-                    }}
+                    onChange={setMemberSearch}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                     placeholder="Search students by name or roll no..."
-                    className="h-9 bg-card pl-9"
+                    delay={0}
+                    className="w-full max-w-none"
                   />
                 </div>
                 <div className="max-h-48 space-y-0.5 overflow-y-auto">
@@ -375,16 +372,14 @@ export default function TeamsPage() {
                 <span className="text-destructive"> *</span>
               </Label>
               <div className="rounded-lg border bg-muted/40 p-3">
-                <div className="relative mb-2">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
+                <div className="mb-2">
+                  <SearchBar
                     value={leaderSearch}
-                    onChange={(e) => setLeaderSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') e.preventDefault();
-                    }}
+                    onChange={setLeaderSearch}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                     placeholder="Search team lead by name or roll no..."
-                    className="h-9 bg-card pl-9"
+                    delay={0}
+                    className="w-full max-w-none"
                   />
                 </div>
                 <div className="max-h-48 space-y-0.5 overflow-y-auto">
