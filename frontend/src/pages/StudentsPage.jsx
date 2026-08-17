@@ -13,7 +13,7 @@ import { Avatar } from '../components/ui/Avatar';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { Modal } from '../components/ui/Modal';
 import { StudentForm } from '../components/students/StudentForm';
-import { getBatches } from '../services/batchesService';
+import { getTeams } from '../services/teamsService';
 import {
   getStudents,
   createStudent,
@@ -27,7 +27,7 @@ export default function StudentsPage() {
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [batchFilter, setBatchFilter] = useState('');
+  const [teamFilter, setTeamFilter] = useState('');
   const [page, setPage] = useState(1);
 
   const [students, setStudents] = useState([]);
@@ -40,16 +40,16 @@ export default function StudentsPage() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [importFile, setImportFile] = useState(null);
   const [importing, setImporting] = useState(false);
-  const [batchOptions, setBatchOptions] = useState([]);
+  const [teams, setTeams] = useState([]);
   const fileInputRef = useRef(null);
 
   const fetchStudents = useCallback(async () => {
     setLoading(true);
     try {
-      const params = { page, limit: 10 };
+      const params = { page, limit: 100 };
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
-      if (batchFilter) params.batch = batchFilter;
+      if (teamFilter) params.teamId = teamFilter;
       const result = await getStudents(params);
       setStudents(result.students || []);
       setPagination(result.pagination || { page: 1, pages: 1, total: 0 });
@@ -58,16 +58,16 @@ export default function StudentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, batchFilter]);
+  }, [page, search, statusFilter, teamFilter]);
 
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
 
   useEffect(() => {
-    getBatches().then((res) => {
-      const list = Array.isArray(res) ? res : res?.batches || [];
-      setBatchOptions(list.map((b) => b.name).filter(Boolean));
+    getTeams().then((res) => {
+      const list = Array.isArray(res) ? res : res?.teams || [];
+      setTeams(list);
     }).catch(() => {});
   }, []);
 
@@ -240,19 +240,17 @@ export default function StudentsPage() {
             value={statusFilter}
             onChange={(next) => setStatusFilter(next)}
             options={[
-              { label: 'Pending', value: 'Pending' },
-              { label: 'Enrolled', value: 'Enrolled' },
-              { label: 'Dropout', value: 'Dropout' },
-              { label: 'Completed', value: 'Completed' },
+              { label: 'Active', value: 'active' },
+              { label: 'Inactive', value: 'inactive' },
             ]}
           />
 
-          {batchOptions.length > 0 && (
+          {teams.length > 0 && (
             <FilterBar
-              label="Batch"
-              value={batchFilter}
-              onChange={(next) => setBatchFilter(next)}
-              options={batchOptions.map((b) => ({ label: b, value: b }))}
+              label="Team"
+              value={teamFilter}
+              onChange={(next) => setTeamFilter(next)}
+              options={teams.map((t) => ({ label: t.name, value: t._id }))}
             />
           )}
         </div>
