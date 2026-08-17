@@ -26,7 +26,6 @@ export default function StudentsPage() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const [teamFilter, setTeamFilter] = useState('');
   const [page, setPage] = useState(1);
 
@@ -48,7 +47,6 @@ export default function StudentsPage() {
     try {
       const params = { page, limit: 100 };
       if (search) params.search = search;
-      if (statusFilter) params.status = statusFilter;
       if (teamFilter) params.teamId = teamFilter;
       const result = await getStudents(params);
       setStudents(result.students || []);
@@ -58,7 +56,7 @@ export default function StudentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, teamFilter]);
+  }, [page, search, teamFilter]);
 
   useEffect(() => {
     fetchStudents();
@@ -235,16 +233,6 @@ export default function StudentsPage() {
       <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
         <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." />
         <div className="ml-auto flex flex-wrap gap-2">
-          <FilterBar
-            label="Status"
-            value={statusFilter}
-            onChange={(next) => setStatusFilter(next)}
-            options={[
-              { label: 'Active', value: 'active' },
-              { label: 'Inactive', value: 'inactive' },
-            ]}
-          />
-
           {teams.length > 0 && (
             <FilterBar
               label="Team"
