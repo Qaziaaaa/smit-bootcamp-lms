@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import { Mail, Phone, Shield, Key } from 'lucide-react';
+import { Mail, Phone, Shield, Key, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { Logo } from '../components/ui/Logo';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/Label';
+import { apiClient } from '../services/apiClient';
 
 export default function AdminProfilePage() {
   const { user } = useAuth();
@@ -20,6 +25,42 @@ export default function AdminProfilePage() {
   ]);
   
   const superAdmin = admins[0];
+
+  const [oldPassword, setOldPassword] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!oldPassword) {
+      toast.error('Current password is required');
+      return;
+    }
+    if (password.length < 8) {
+      toast.error('New password must be at least 8 characters');
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      await apiClient.post('/auth/change-password', { oldPassword, password, confirmPassword });
+      toast.success('Password changed successfully');
+      setOldPassword('');
+      setPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to change password');
+    } finally {
+      setSavingPassword(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -87,6 +128,90 @@ export default function AdminProfilePage() {
             <p className="text-sm font-medium text-foreground">********</p>
           </div>
         </div>
+      </div>
+
+      {/* Change Password Card */}
+      <div className="mt-2 rounded-xl border bg-card p-3 shadow-sm">
+        <div className="mb-3 flex items-center gap-1.5">
+          <Key size={18} className="text-clr-blue" />
+          <h3 className="font-semibold text-foreground">Change Password</h3>
+        </div>
+        <form onSubmit={handleChangePassword} className="grid max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="admin-old-password">
+              Current Password <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Input
+                id="admin-old-password"
+                type={showOld ? 'text' : 'password'}
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                placeholder="Enter current password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowOld((p) => !p)}
+                tabIndex={-1}
+                className="absolute right-2.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent p-0.5 text-muted-foreground"
+              >
+                {showOld ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="admin-new-password">
+              New Password <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Input
+                id="admin-new-password"
+                type={showNew ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter new password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew((p) => !p)}
+                tabIndex={-1}
+                className="absolute right-2.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent p-0.5 text-muted-foreground"
+              >
+                {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="admin-confirm-password">
+              Confirm Password <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Input
+                id="admin-confirm-password"
+                type={showConfirm ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((p) => !p)}
+                tabIndex={-1}
+                className="absolute right-2.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent p-0.5 text-muted-foreground"
+              >
+                {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <Button type="submit" disabled={savingPassword}>
+              {savingPassword ? 'Saving...' : 'Change Password'}
+            </Button>
+          </div>
+        </form>
       </div>
 
       {/* Management Section for Listed Admins */}
