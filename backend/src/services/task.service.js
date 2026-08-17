@@ -1,4 +1,5 @@
 import ApiError from '../utils/ApiError.js';
+import escapeRegex from '../utils/escapeRegex.js';
 import Task from '../models/task.model.js';
 import Project from '../models/project.model.js';
 import Student from '../models/student.model.js';
@@ -19,9 +20,10 @@ const getTasks = async ({ projectId, status, assignedTo, search }, { page = 1, l
   }
 
   if (search) {
+    const escaped = escapeRegex(search);
     query.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
+      { title: { $regex: escaped, $options: 'i' } },
+      { description: { $regex: escaped, $options: 'i' } },
     ];
   }
 

@@ -47,6 +47,9 @@ const getStudentTeam = async (userId) => {
   }
 
   const team = await Team.findById(student.teamId).lean();
+  if (!team) {
+    return null;
+  }
   const members = await Student.find({ teamId: team._id })
     .select('name email batch status')
     .sort({ name: 1 })

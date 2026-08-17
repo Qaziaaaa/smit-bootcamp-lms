@@ -346,9 +346,10 @@ export default function TeamsPage() {
                       return (
                         <div
                           key={sId}
+                          onClick={() => toggleMember(sId)}
                           className="flex w-full cursor-pointer items-center gap-2 rounded px-1.5 py-1.5 text-left hover:bg-accent"
                         >
-                          <Checkbox checked={checked} onCheckedChange={() => toggleMember(sId)} />
+                          <Checkbox checked={checked} />
                           <span className="flex min-w-0 items-center gap-1.5">
                             <span className="text-sm text-foreground">{student.name}</span>
                             {roll && <span className="font-mono text-xs text-muted-foreground">({roll})</span>}

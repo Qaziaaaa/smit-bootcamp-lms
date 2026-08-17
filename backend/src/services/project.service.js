@@ -1,4 +1,5 @@
 import ApiError from '../utils/ApiError.js';
+import escapeRegex from '../utils/escapeRegex.js';
 import Project from '../models/project.model.js';
 import Task from '../models/task.model.js';
 import Team from '../models/team.model.js';
@@ -11,9 +12,10 @@ const getProjects = async ({ status, search }, { page = 1, limit = 10 }) => {
   }
 
   if (search) {
+    const escaped = escapeRegex(search);
     query.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
+      { title: { $regex: escaped, $options: 'i' } },
+      { description: { $regex: escaped, $options: 'i' } },
     ];
   }
 

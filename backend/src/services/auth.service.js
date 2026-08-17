@@ -105,7 +105,7 @@ const resetStudentPassword = async (studentId, newPassword) => {
   }
   const passwordHash = await bcrypt.hash(newPassword, env.bcryptRounds);
   await User.findByIdAndUpdate(user._id, { passwordHash });
-  return { success: true, newPassword };
+  return { success: true };
 };
 
 export default {

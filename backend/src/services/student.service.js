@@ -10,7 +10,7 @@ import ApiError from '../utils/ApiError.js';
 
 const DEFAULT_PASSWORD = 'student123';
 
-const generateEmail = async (name) => {
+const generateEmail = async (name, session = null) => {
   const base = name
     .toLowerCase()
     .replace(/[^a-z\s]/g, '')
@@ -20,7 +20,9 @@ const generateEmail = async (name) => {
   let attempt = 1;
   while (attempt < 100) {
     const email = `${base}${String(attempt).padStart(2, '0')}@lms.com`;
-    const exists = await User.findOne({ email });
+    const query = User.findOne({ email });
+    if (session) query.session(session);
+    const exists = await query;
     if (!exists) return email;
     attempt++;
   }
@@ -189,17 +191,29 @@ const updateStudent = async (id, data) => {
     }
   }
 
-  const updated = await Student.findByIdAndUpdate(
-    id,
-    { ...rest, ...(email && { email: email.toLowerCase() }), ...(rollNo && { rollNo }) },
-    { new: true, runValidators: true }
-  ).populate('teamId', 'name');
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (email) {
-    await User.findByIdAndUpdate(student.userId, { email: email.toLowerCase() });
+  try {
+    const updated = await Student.findByIdAndUpdate(
+      id,
+      { ...rest, ...(email && { email: email.toLowerCase() }), ...(rollNo && { rollNo }) },
+      { new: true, runValidators: true, session }
+    ).populate('teamId', 'name');
+
+    if (email) {
+      await User.findByIdAndUpdate(student.userId, { email: email.toLowerCase() }, { session });
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return updated;
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
   }
-
-  return updated;
 };
 
 const deleteStudent = async (id) => {
@@ -208,10 +222,22 @@ const deleteStudent = async (id) => {
     throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
   }
 
-  await Task.updateMany({ assignedTo: id }, { $unset: { assignedTo: '' } });
-  await Student.findByIdAndDelete(id);
-  await User.findByIdAndDelete(student.userId);
-  await Attendance.deleteMany({ studentId: id });
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    await Task.updateMany({ assignedTo: id }, { $unset: { assignedTo: '' } }, { session });
+    await Student.findByIdAndDelete(id, { session });
+    await User.findByIdAndDelete(student.userId, { session });
+    await Attendance.deleteMany({ studentId: id }, { session });
+
+    await session.commitTransaction();
+    session.endSession();
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
 
   return { success: true };
 };
@@ -257,7 +283,7 @@ const bulkImportStudents = async (students) => {
         continue;
       }
 
-      const email = await generateEmail(name.trim());
+      const email = await generateEmail(name.trim(), session);
       const emailLower = email.toLowerCase();
 
       const existingUser = await User.findOne({ email: emailLower }).session(session);

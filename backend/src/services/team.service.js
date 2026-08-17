@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import ApiError from '../utils/ApiError.js';
+import escapeRegex from '../utils/escapeRegex.js';
 import Team from '../models/team.model.js';
 import Student from '../models/student.model.js';
 import Project from '../models/project.model.js';
@@ -8,7 +9,7 @@ import Task from '../models/task.model.js';
 const getTeams = async ({ search }) => {
   const match = {};
   if (search) {
-    match.name = { $regex: search, $options: 'i' };
+    match.name = { $regex: escapeRegex(search), $options: 'i' };
   }
 
   const teams = await Team.aggregate([

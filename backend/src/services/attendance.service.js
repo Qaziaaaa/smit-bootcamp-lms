@@ -25,6 +25,10 @@ const markAttendanceBulk = async (records) => {
   const results = await Promise.all(
     records.map(async (rec) => {
       const { studentId, date, status, markedBy } = rec;
+
+      const student = await Student.findById(studentId);
+      if (!student) return null;
+
       const attendanceDate = new Date(date);
       attendanceDate.setHours(0, 0, 0, 0);
 
@@ -35,7 +39,7 @@ const markAttendanceBulk = async (records) => {
       ).populate('studentId', 'name email').populate('markedBy', 'email');
     })
   );
-  return results;
+  return results.filter(Boolean);
 };
 
 

@@ -1,11 +1,12 @@
 import ApiError from '../utils/ApiError.js';
+import escapeRegex from '../utils/escapeRegex.js';
 import Batch from '../models/batch.model.js';
 import Student from '../models/student.model.js';
 
 const getBatches = async ({ search }) => {
   const match = {};
   if (search) {
-    match.name = { $regex: search, $options: 'i' };
+    match.name = { $regex: escapeRegex(search), $options: 'i' };
   }
 
   const batches = await Batch.aggregate([
@@ -96,6 +97,7 @@ const deleteBatch = async (id) => {
     throw new ApiError(404, 'Batch not found.', ['Batch does not exist.']);
   }
 
+  await Student.updateMany({ batch: batch.name }, { $unset: { batch: '' } });
   await Batch.findByIdAndDelete(id);
   return { success: true };
 };
