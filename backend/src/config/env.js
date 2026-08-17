@@ -1,7 +1,10 @@
+// Central place for all environment variables.
+// Reads from .env file via dotenv, provides defaults for local development.
 import 'dotenv/config';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+// In production, JWT_SECRET is mandatory (no fallback)
 if (isProduction && !process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is required in production. Refusing to start with an insecure default secret.');
 }

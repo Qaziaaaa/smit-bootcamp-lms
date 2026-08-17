@@ -1,3 +1,4 @@
+// Registers all Mongoose models and re-exports them for easy importing.
 import './user.model.js';
 import './student.model.js';
 import './attendance.model.js';

@@ -1,3 +1,6 @@
+// Axios instance used by all service files.
+// - Attaches JWT token to every request automatically
+// - Redirects to /login on 401 (token expired or invalid)
 import axios from 'axios'
 import { TOKEN_KEY, USER_KEY } from '../constants'
 
@@ -7,6 +10,7 @@ export const apiClient = axios.create({
   baseURL: API_URL,
 })
 
+// Before each request: attach the stored token
 apiClient.interceptors.request.use((config) => {
   const token = sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY)
   if (token) {
@@ -15,6 +19,7 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
+// If any response is 401: clear token and redirect to login
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {

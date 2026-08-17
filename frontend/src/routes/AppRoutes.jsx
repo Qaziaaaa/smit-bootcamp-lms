@@ -1,9 +1,12 @@
+// All page routes — lazy-loaded for faster initial load.
+// Admin routes require 'admin' role, student routes require 'student' role.
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { ProtectedRoute } from './ProtectedRoute'
 import { RedirectByRole } from './RedirectByRole'
 
+// Admin pages (lazy loaded)
 const AdminLayout = lazy(() => import('../layouts/AdminLayout').then((m) => ({ default: m.AdminLayout })))
 const StudentLayout = lazy(() => import('../layouts/StudentLayout').then((m) => ({ default: m.StudentLayout })))
 const LoginPage = lazy(() => import('../pages/LoginPage'))
