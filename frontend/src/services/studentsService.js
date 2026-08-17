@@ -31,9 +31,7 @@ export const getStudentAttendance = async (id) => {
 }
 
 export const bulkImportStudents = async (formData) => {
-  const response = await apiClient.post('/students/bulk-import', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  })
+  const response = await apiClient.post('/students/bulk-import', formData)
   return response.data.data
 }
 
