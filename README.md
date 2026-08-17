@@ -26,3 +26,6 @@ Bootcamp LMS — Admin + Student portal for managing students, attendance, teams
 - `feature/<name>` — personal working branches.
 
 See [Git Workflow](docs/GIT_WORKFLOW.md) before committing anything.
+
+---
+*Last updated: Aug 17, 2026*
