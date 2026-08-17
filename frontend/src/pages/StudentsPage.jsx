@@ -234,14 +234,12 @@ export default function StudentsPage() {
         <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." />
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">Batch 2026</span>
-          {teams.length > 0 && (
-            <FilterBar
-              label="Team"
-              value={teamFilter}
-              onChange={(next) => setTeamFilter(next)}
-              options={teams.map((t) => ({ label: t.name, value: t._id }))}
-            />
-          )}
+          <FilterBar
+            label="Team"
+            value={teamFilter}
+            onChange={(next) => setTeamFilter(next)}
+            options={teams.map((t) => ({ label: t.name, value: t._id }))}
+          />
         </div>
       </div>
 
