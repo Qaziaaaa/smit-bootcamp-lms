@@ -60,6 +60,18 @@ const createTeam = async ({ name, members, leader }) => {
     throw new ApiError(409, 'Team name already exists.', ['A team with this name already exists.']);
   }
 
+  if (Array.isArray(members) && members.length > 0) {
+    const memberObjectIds = members.map((m) => new mongoose.Types.ObjectId(m));
+    const alreadyAssigned = await Student.find({
+      _id: { $in: memberObjectIds },
+      teamId: { $exists: true, $ne: null },
+    }).select('name rollNo');
+    if (alreadyAssigned.length > 0) {
+      const names = alreadyAssigned.map((s) => s.name).join(', ');
+      throw new ApiError(409, 'Some students are already in a team.', [`${names} are already assigned to another team.`]);
+    }
+  }
+
   const teamData = { name };
   if (leader) teamData.leader = leader;
 
@@ -88,6 +100,18 @@ const updateTeam = async (id, { name, members, leader }) => {
 
   if (Array.isArray(members) && leader && !members.includes(leader.toString())) {
     throw new ApiError(400, 'Leader must be a team member.', ['The team leader must be one of the selected team members.']);
+  }
+
+  if (Array.isArray(members)) {
+    const memberObjectIds = members.map((m) => new mongoose.Types.ObjectId(m));
+    const alreadyAssigned = await Student.find({
+      _id: { $in: memberObjectIds },
+      teamId: { $exists: true, $ne: null, $ne: team._id },
+    }).select('name rollNo');
+    if (alreadyAssigned.length > 0) {
+      const names = alreadyAssigned.map((s) => s.name).join(', ');
+      throw new ApiError(409, 'Some students are already in a team.', [`${names} are already assigned to another team.`]);
+    }
   }
 
   const updateData = {};
