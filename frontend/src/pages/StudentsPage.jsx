@@ -232,7 +232,8 @@ export default function StudentsPage() {
 
       <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
         <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." />
-        <div className="ml-auto flex flex-wrap gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-md border border-border bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">Batch 2026</span>
           {teams.length > 0 && (
             <FilterBar
               label="Team"
