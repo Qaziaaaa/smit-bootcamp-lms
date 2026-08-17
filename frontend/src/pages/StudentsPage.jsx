@@ -151,8 +151,9 @@ export default function StudentsPage() {
         toast.success('Student updated successfully');
       } else {
         const result = await createStudent(data);
-        const pwd = result?.generatedPassword || 'N/A';
-        toast.success(`Student created. Password: ${pwd}`, { duration: 10000 });
+        const email = result?.email || 'N/A';
+        const pwd = result?.generatedPassword || 'student123';
+        toast.success(`Created! Email: ${email} | Password: ${pwd}`, { duration: 10000 });
       }
       await fetchStudents();
     } catch (error) {
@@ -279,7 +280,6 @@ export default function StudentsPage() {
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleSaveStudent}
         initialData={editingStudent}
-        batchOptions={batchOptions}
       />
 
       <ConfirmDialog
@@ -298,7 +298,7 @@ export default function StudentsPage() {
       >
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Upload a CSV file with columns: <strong>name</strong>, <strong>email</strong>, and optionally <strong>phone</strong>, <strong>batch</strong>, <strong>rollNo</strong>. All imported students will have the default password.
+            Upload a CSV file with columns: <strong>name</strong> (required), and optionally <strong>phone</strong> and <strong>rollNo</strong>. Email, batch, and password are auto-assigned.
           </p>
           <div className="flex items-center gap-3">
             <Button

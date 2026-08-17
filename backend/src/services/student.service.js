@@ -3,14 +3,39 @@ import User from '../models/user.model.js';
 import Student from '../models/student.model.js';
 import Attendance from '../models/attendance.model.js';
 import Task from '../models/task.model.js';
+import Batch from '../models/batch.model.js';
 import bcrypt from 'bcryptjs';
 import env from '../config/env.js';
 import ApiError from '../utils/ApiError.js';
 
-const DEFAULT_PASSWORD = 'password123';
+const DEFAULT_PASSWORD = 'student123';
+
+const generateEmail = async (name) => {
+  const base = name
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, '')
+    .split(/\s+/)
+    .join('')
+    .slice(0, 10);
+  let attempt = 1;
+  while (attempt < 100) {
+    const email = `${base}${String(attempt).padStart(2, '0')}@lms.com`;
+    const exists = await User.findOne({ email });
+    if (!exists) return email;
+    attempt++;
+  }
+  throw new ApiError(500, 'Could not generate unique email.', ['Try a different name.']);
+};
+
+const getActiveBatchName = async () => {
+  const batch = await Batch.findOne({ status: 'active' }).sort({ createdAt: -1 }).lean();
+  return batch ? batch.name : 'Batch 2026';
+};
 
 const createStudent = async (data) => {
-  const { name, email, password, phone, batch, teamId, rollNo } = data;
+  const { name, phone, teamId, rollNo, email: providedEmail } = data;
+
+  const email = providedEmail || await generateEmail(name);
 
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
@@ -29,8 +54,8 @@ const createStudent = async (data) => {
     }
   }
 
-  const rawPassword = password || 'password123';
-  const passwordHash = await bcrypt.hash(rawPassword, env.bcryptRounds);
+  const batch = await getActiveBatchName();
+  const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, env.bcryptRounds);
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -56,7 +81,7 @@ const createStudent = async (data) => {
     await session.commitTransaction();
     session.endSession();
 
-    return { ...student[0].toObject(), generatedPassword: rawPassword };
+    return { ...student[0].toObject(), generatedPassword: DEFAULT_PASSWORD };
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
@@ -218,28 +243,25 @@ const bulkImportStudents = async (students) => {
   const results = { created: 0, skipped: 0, errors: [] };
   const session = await mongoose.startSession();
   session.startTransaction();
+  const batchName = await getActiveBatchName();
+  let autoIndex = 1;
 
   try {
     for (let i = 0; i < students.length; i++) {
-      const { name, email, phone, batch, rollNo } = students[i];
+      const { name, phone, rollNo } = students[i];
       const row = i + 2;
 
-      if (!name || !email) {
-        results.errors.push(`Row ${row}: Name and email are required.`);
+      if (!name) {
+        results.errors.push(`Row ${row}: Name is required.`);
         results.skipped++;
         continue;
       }
 
-      const emailLower = email.toLowerCase().trim();
+      const email = await generateEmail(name.trim());
+      const emailLower = email.toLowerCase();
+
       const existingUser = await User.findOne({ email: emailLower }).session(session);
       if (existingUser) {
-        results.errors.push(`Row ${row}: Email ${emailLower} already exists.`);
-        results.skipped++;
-        continue;
-      }
-
-      const existingStudent = await Student.findOne({ email: emailLower }).session(session);
-      if (existingStudent) {
         results.errors.push(`Row ${row}: Email ${emailLower} already exists.`);
         results.skipped++;
         continue;
@@ -263,12 +285,13 @@ const bulkImportStudents = async (students) => {
           name: name.trim(),
           email: emailLower,
           phone: phone?.trim() || undefined,
-          batch: batch?.trim() || undefined,
-          rollNo: rollNo?.trim() || undefined,
+          batch: batchName,
+          rollNo: rollNo?.trim() || String(autoIndex).padStart(3, '0'),
         }],
         { session }
       );
 
+      autoIndex++;
       results.created++;
     }
 

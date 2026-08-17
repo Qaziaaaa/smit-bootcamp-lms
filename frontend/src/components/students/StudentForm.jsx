@@ -1,42 +1,33 @@
 import { useEffect, useState } from 'react';
 import * as z from 'zod';
-import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { Label } from '../ui/Label';
-import { Select } from '../ui/Select';
 import { Modal } from '../ui/Modal';
 import { getNextRollNo } from '../../services/studentsService';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name is required'),
-  email: z.string().email('Invalid email address'),
+  phone: z.string().optional(),
   rollNo: z.string().min(1, 'Roll No is required'),
-  batch: z.string().min(1, 'Batch is required'),
-  status: z.string().min(1, 'Status is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
 });
 
-const emptyValues = { name: '', email: '', rollNo: '', batch: '', status: 'Pending', password: '' };
+const emptyValues = { name: '', phone: '', rollNo: '' };
 
-export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batchOptions = [] }) => {
+export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => {
   const isEditing = !!initialData;
   const [values, setValues] = useState(emptyValues);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (open) {
       if (initialData) {
         setValues({
           name: initialData.name || '',
-          email: initialData.email || '',
+          phone: initialData.phone || '',
           rollNo: initialData.rollNo || initialData.rollNumber || '',
-          batch: initialData.batch || '',
-          status: initialData.status || 'Pending',
-          password: '',
         });
       } else {
         setValues(emptyValues);
@@ -47,7 +38,6 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
           .catch(() => {});
       }
       setErrors({});
-      setShowPassword(false);
     }
   }, [open, initialData]);
 
@@ -65,9 +55,6 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
         if (!nextErrors[issue.path[0]]) nextErrors[issue.path[0]] = issue.message;
       }
     }
-    if (!isEditing && (!values.password || values.password.length < 8)) {
-      nextErrors.password = 'Password must be at least 8 characters';
-    }
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -76,10 +63,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
 
     setIsSubmitting(true);
     try {
-      const { password, ...rest } = result.data;
-      const payload = { ...rest };
-      if (password) payload.password = password;
-      await onSubmit(payload);
+      await onSubmit(result.data);
       onClose();
     } catch (err) {
       console.error('Failed to submit student form:', err);
@@ -92,7 +76,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
     <Modal open={open} onClose={onClose} title={isEditing ? 'Edit Student' : 'Add New Student'} hideDividers>
       <form onSubmit={handleSubmit}>
         <p className="mb-6 text-sm text-muted-foreground">
-          Enroll a new student into the bootcamp roster with explicit batch setup.
+          {isEditing ? 'Update student details.' : 'Email, batch, and password are auto-assigned.'}
         </p>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -104,17 +88,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
             onChange={setField('name')}
             error={errors.name}
             required
-            placeholder="e.g. Maya Lin"
-          />
-          <FormField
-            label="Email Address"
-            name="email"
-            type="email"
-            value={values.email}
-            onChange={setField('email')}
-            error={errors.email}
-            required
-            placeholder="maya.lin@student.dev"
+            placeholder="e.g. Ahmed Khan"
           />
           <FormField
             label="Roll No"
@@ -123,59 +97,16 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
             onChange={setField('rollNo')}
             error={errors.rollNo}
             required
-            placeholder="e.g. 112 or WMA-12345"
+            placeholder="e.g. 011"
           />
-          <Select
-            label="Batch"
-            value={values.batch}
-            onChange={(next) => setField('batch')({ target: { value: next } })}
-            options={[
-              ...batchOptions.map((b) => ({ label: b, value: b })),
-              ...(batchOptions.length === 0 ? [{ label: 'Batch 12 - Web Dev', value: 'Batch 12 - Web Dev' }] : []),
-            ]}
-            placeholder="Select Batch"
-            error={errors.batch}
-            required
+          <FormField
+            label="Phone"
+            name="phone"
+            value={values.phone}
+            onChange={setField('phone')}
+            error={errors.phone}
+            placeholder="e.g. +92 300 1234567"
           />
-          <Select
-            label="Status"
-            value={values.status}
-            onChange={(next) => setField('status')({ target: { value: next } })}
-            options={[
-              { label: 'Pending', value: 'Pending' },
-              { label: 'Enrolled', value: 'Enrolled' },
-              { label: 'Dropout', value: 'Dropout' },
-              { label: 'Completed', value: 'Completed' },
-            ]}
-            error={errors.status}
-          />
-          <div className="space-y-1.5 sm:col-span-2">
-            <Label htmlFor="password">
-              {isEditing ? 'Update Password' : 'Initial Password'}
-              <span className="text-destructive"> *</span>
-            </Label>
-            <div className="relative">
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={values.password}
-                onChange={setField('password')}
-                placeholder={isEditing ? 'Leave blank to keep current' : 'Min. 8 characters'}
-                aria-invalid={!!errors.password}
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Toggle password visibility"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            {errors.password && <p className="text-xs font-medium text-destructive">{errors.password}</p>}
-          </div>
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
