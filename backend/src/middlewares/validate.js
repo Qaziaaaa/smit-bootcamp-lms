@@ -21,7 +21,7 @@ const validateLogin = [
 ];
 
 const validateChangePassword = [
-  body('oldPassword').optional().isLength({ min: 1 }).withMessage('Current password is required.'),
+  body('oldPassword').notEmpty().withMessage('Current password is required.'),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters.'),
   body('confirmPassword').custom((value, { req }) => value === req.body.password).withMessage('Passwords do not match.'),
   handleValidationErrors,
@@ -237,6 +237,12 @@ const validateTaskProgress = [
   handleValidationErrors,
 ];
 
+const validateResetStudentPassword = [
+  body('studentId').isMongoId().withMessage('Valid student ID is required.'),
+  body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters.'),
+  handleValidationErrors,
+];
+
 const validateBatchesQuery = [
   query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
   handleValidationErrors,
@@ -296,4 +302,5 @@ export {
   validateBatchId,
   validateBatchCreate,
   validateBatchUpdate,
+  validateResetStudentPassword,
 };

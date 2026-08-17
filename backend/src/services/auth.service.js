@@ -82,11 +82,12 @@ const changePassword = async (userId, oldPassword, newPassword) => {
   if (!user) {
     throw new ApiError(404, 'User not found.', ['User does not exist.']);
   }
-  if (oldPassword) {
-    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
-    if (!isMatch) {
-      throw new ApiError(401, 'Current password is incorrect.', ['The current password you entered is incorrect.']);
-    }
+  if (!oldPassword) {
+    throw new ApiError(400, 'Current password is required.', ['Current password is required.']);
+  }
+  const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+  if (!isMatch) {
+    throw new ApiError(401, 'Current password is incorrect.', ['The current password you entered is incorrect.']);
   }
   const passwordHash = await bcrypt.hash(newPassword, env.bcryptRounds);
   await User.findByIdAndUpdate(userId, { passwordHash }, { new: true });

@@ -18,11 +18,11 @@ router.use(authenticate, authorize('admin'));
 
 router.post('/', validateStudentCreate, studentController.createStudent);
 router.get('/', validateStudentsQuery, studentController.getStudents);
+router.post('/bulk-import', upload.single('file'), studentController.bulkImportStudents);
+router.get('/utils/next-roll-no', studentController.getNextRollNo);
 router.get('/:id', validateStudentId, studentController.getStudentById);
 router.put('/:id', validateStudentUpdate, studentController.updateStudent);
 router.delete('/:id', validateStudentId, studentController.deleteStudent);
 router.get('/:id/attendance', validateStudentId, studentController.getStudentAttendance);
-router.post('/bulk-import', upload.single('file'), studentController.bulkImportStudents);
-router.get('/utils/next-roll-no', studentController.getNextRollNo);
 
 export default router;
