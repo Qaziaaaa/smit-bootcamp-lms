@@ -122,10 +122,13 @@ export default function TeamsPage() {
     const result = teamSchema.safeParse(formValues);
     if (!result.success) {
       const next = {};
+      const messages = [];
       for (const issue of result.error.issues) {
         if (!next[issue.path[0]]) next[issue.path[0]] = issue.message;
+        messages.push(issue.message);
       }
       setFormErrors(next);
+      toast.error(messages[0]);
       return;
     }
     try {
