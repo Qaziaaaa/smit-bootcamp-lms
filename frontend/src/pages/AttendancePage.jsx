@@ -6,7 +6,6 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { DataTable } from '../components/ui/DataTable';
 import { SearchBar } from '../components/ui/SearchBar';
-import { Pagination } from '../components/ui/Pagination';
 import { Avatar } from '../components/ui/Avatar';
 import { cn } from '../lib/utils';
 import { getAttendance, markAttendance, updateAttendance } from '../services/attendanceService';
@@ -24,7 +23,6 @@ export default function AttendancePage() {
   const [dateFilter, setDateFilter] = useState(todayStr());
 
   const [records, setRecords] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [allStudents, setAllStudents] = useState([]);
   const [summary, setSummary] = useState({ present: 0, absent: 0 });
   const [initialLoading, setInitialLoading] = useState(true);
@@ -36,7 +34,6 @@ export default function AttendancePage() {
       const params = { date: dateFilter, page: 1, limit: 500 };
       const result = await getAttendance(params);
       setRecords(result.records || []);
-      setPagination(result.pagination || { page: 1, pages: 1, total: (result.records || []).length });
       if (result.summary) {
         setSummary(result.summary);
       } else {
@@ -249,7 +246,7 @@ export default function AttendancePage() {
 
       {/* Toolbar */}
       <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
-        <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." />
+        <SearchBar value={search} onChange={setSearch} placeholder="Search student by name or roll no..." />
         <div className="ml-auto flex flex-wrap gap-2">
           <Input
             type="date"
@@ -266,13 +263,6 @@ export default function AttendancePage() {
         columns={columns}
         isLoading={initialLoading}
         emptyMessage="No attendance records for the selected date"
-      />
-
-      <Pagination
-        page={pagination.page}
-        totalPages={pagination.pages}
-        totalItems={pagination.total}
-        onChange={setPage}
       />
     </div>
   );
