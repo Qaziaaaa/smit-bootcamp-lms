@@ -140,7 +140,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
             onChange={setField('batch')}
             error={errors.batch}
             required
-            readOnly
+            disabled
           />
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="password">
