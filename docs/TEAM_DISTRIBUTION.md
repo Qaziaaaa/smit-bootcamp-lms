@@ -17,6 +17,9 @@ Files to read and own:
 - `frontend/src/pages/LoginPage.jsx` — email + password login form
 - `frontend/src/pages/DashboardPage.jsx` — admin dashboard with stat cards and charts
 - `frontend/src/pages/AccessDeniedPage.jsx` — "not authorized" page
+- `frontend/src/pages/StudentDashboardPage.jsx` — student portal dashboard (created by Abdullah)
+- `frontend/src/pages/StudentProfilePage.jsx` — student profile + change password (created by Abdullah)
+- `frontend/src/pages/StudentTeamPage.jsx` — student team view (created by Abdullah)
 - `frontend/src/components/ui/Logo.jsx` — SMIT logo component
 
 ---
@@ -40,10 +43,7 @@ Files to read and own:
 
 Student portal pages:
 
-- `frontend/src/pages/StudentDashboardPage.jsx`
-- `frontend/src/pages/StudentProfilePage.jsx`
 - `frontend/src/pages/StudentAttendancePage.jsx`
-- `frontend/src/pages/StudentTeamPage.jsx`
 - `frontend/src/pages/StudentProjectsPage.jsx`
 - `frontend/src/pages/StudentProjectDetailPage.jsx`
 - `frontend/src/pages/StudentTasksPage.jsx`
