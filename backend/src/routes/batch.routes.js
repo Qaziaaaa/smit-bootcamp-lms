@@ -1,3 +1,5 @@
+// Batch routes — admin CRUD for batch management.
+// All routes require admin role.
 import { Router } from 'express';
 import batchController from '../controllers/batch.controller.js';
 import { validateBatchesQuery, validateBatchId, validateBatchCreate, validateBatchUpdate } from '../middlewares/validate.js';

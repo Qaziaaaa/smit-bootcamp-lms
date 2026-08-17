@@ -1,3 +1,5 @@
+// Student Portal routes — read-only endpoints for the student-facing portal.
+// All routes require student role. Uses JWT userId to scope data.
 import { Router } from 'express';
 import studentPortalController from '../controllers/studentPortal.controller.js';
 import { validateTaskProgress } from '../middlewares/validate.js';
@@ -6,7 +8,7 @@ import authorize from '../middlewares/authorize.js';
 
 const router = Router();
 
-router.use(authenticate, authorize('student'));
+router.use(authenticate, authorize('student'));  // student-only routes
 
 router.get('/profile', studentPortalController.getProfile);
 router.get('/attendance', studentPortalController.getAttendance);

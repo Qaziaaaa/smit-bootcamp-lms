@@ -1,8 +1,12 @@
+// Batch service — manages bootcamp batches (e.g. "Batch 2026").
+// Batches have a name, date range, and status (active/inactive/completed).
+// Students are linked to batches by the batch name string.
 import ApiError from '../utils/ApiError.js';
 import escapeRegex from '../utils/escapeRegex.js';
 import Batch from '../models/batch.model.js';
 import Student from '../models/student.model.js';
 
+// List all batches with student count (uses aggregation to join with students)
 const getBatches = async ({ search }) => {
   const match = {};
   if (search) {
@@ -14,20 +18,14 @@ const getBatches = async ({ search }) => {
     {
       $lookup: {
         from: 'students',
-        localField: 'name',
+        localField: 'name',       // batch name matches student.batch string
         foreignField: 'batch',
         as: 'students',
       },
     },
     {
       $project: {
-        name: 1,
-        description: 1,
-        startDate: 1,
-        endDate: 1,
-        status: 1,
-        createdAt: 1,
-        updatedAt: 1,
+        name: 1, description: 1, startDate: 1, endDate: 1, status: 1, createdAt: 1, updatedAt: 1,
         studentCount: { $size: '$students' },
       },
     },
@@ -43,6 +41,7 @@ const getBatchById = async (id) => {
     throw new ApiError(404, 'Batch not found.', ['Batch does not exist.']);
   }
 
+  // Get all students in this batch
   const students = await Student.find({ batch: batch.name })
     .select('name email rollNo status')
     .sort({ name: 1 })
@@ -91,21 +90,15 @@ const updateBatch = async (id, { name, description, startDate, endDate, status }
   return updated;
 };
 
+// Delete batch — unlinks students from this batch first
 const deleteBatch = async (id) => {
   const batch = await Batch.findById(id);
   if (!batch) {
     throw new ApiError(404, 'Batch not found.', ['Batch does not exist.']);
   }
 
+  // Remove batch reference from all students in this batch
   await Student.updateMany({ batch: batch.name }, { $unset: { batch: '' } });
   await Batch.findByIdAndDelete(id);
   return { success: true };
-};
-
-export default {
-  getBatches,
-  getBatchById,
-  createBatch,
-  updateBatch,
-  deleteBatch,
 };

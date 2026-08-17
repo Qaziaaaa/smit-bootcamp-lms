@@ -1,3 +1,5 @@
+// Student Portal controller — handles student self-service requests.
+// All handlers use req.user.userId (from JWT) to scope data to the logged-in student.
 import asyncHandler from '../utils/asyncHandler.js';
 import { sendSuccess } from '../utils/response.js';
 import studentPortalService from '../services/studentPortal.service.js';
@@ -32,17 +34,10 @@ const getProjectById = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, project, 'Project retrieved successfully');
 });
 
+// PUT /student/tasks/:id/progress — student updates their own task status
 const updateTaskProgress = asyncHandler(async (req, res) => {
   const task = await studentPortalService.updateTaskProgress(req.user.userId, req.params.id, req.body);
   sendSuccess(res, 200, task, 'Task progress updated successfully');
 });
 
-export default {
-  getProfile,
-  getAttendance,
-  getTeam,
-  getTasks,
-  getProjects,
-  getProjectById,
-  updateTaskProgress,
-};
+export default { getProfile, getAttendance, getTeam, getTasks, getProjects, getProjectById, updateTaskProgress };

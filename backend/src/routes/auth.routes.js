@@ -1,3 +1,7 @@
+// Auth routes — login, logout, password management.
+// POST /login — public (no auth needed)
+// GET /me, POST /logout, POST /change-password — requires any authenticated user
+// POST /reset-student-password — admin only
 import { Router } from 'express';
 import authController from '../controllers/auth.controller.js';
 import { validateLogin, validateChangePassword, validateResetStudentPassword } from '../middlewares/validate.js';

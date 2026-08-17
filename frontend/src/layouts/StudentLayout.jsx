@@ -1,3 +1,6 @@
+// Student layout — sidebar + header + mobile nav for the student portal.
+// Same structure as AdminLayout but with student-specific nav items.
+// Fetches student profile on mount to display name/email in sidebar.
 import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {

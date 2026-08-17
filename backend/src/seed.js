@@ -1,3 +1,6 @@
+// Seed script — run with `npm run seed` to create initial data.
+// Creates: admin user (admin@lms.com / admin12345) + Batch 2026.
+// Safe to run multiple times — skips if data already exists.
 import bcrypt from 'bcryptjs';
 import connectDB from './config/db.js';
 import env from './config/env.js';
@@ -7,7 +10,6 @@ import logger from './utils/logger.js';
 
 const ADMIN_EMAIL = 'admin@lms.com';
 const ADMIN_PASSWORD = 'admin12345';
-
 const BATCH_NAME = 'Batch 2026';
 
 const seedAdmin = async () => {

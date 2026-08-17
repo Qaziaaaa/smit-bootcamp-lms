@@ -1,3 +1,5 @@
+// Clean script — run with `npm run clean` to drop ALL collections.
+// Useful for starting fresh during development. Run `npm run seed` after.
 import connectDB from './config/db.js';
 import mongoose from 'mongoose';
 import logger from './utils/logger.js';

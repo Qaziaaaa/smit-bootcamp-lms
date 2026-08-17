@@ -1,3 +1,7 @@
+// Admin layout — sidebar + header + mobile nav for the admin portal.
+// Wraps all admin pages via <Outlet />.
+// Sidebar shows navigation links, user dropdown (profile, theme toggle, logout).
+// Mobile: bottom navigation bar instead of sidebar.
 import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {

@@ -1,3 +1,5 @@
+// Project routes — admin CRUD for project management.
+// All routes require admin role.
 import { Router } from 'express';
 import projectController from '../controllers/project.controller.js';
 import { validateProjectsQuery, validateProjectId, validateProjectCreate, validateProjectUpdate } from '../middlewares/validate.js';

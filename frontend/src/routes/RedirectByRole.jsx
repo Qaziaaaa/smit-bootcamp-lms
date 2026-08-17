@@ -1,3 +1,5 @@
+// Redirects logged-in users to their role's dashboard.
+// Used at the "/" route — sends admin to /dashboard, student to /student/dashboard.
 import { Navigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'

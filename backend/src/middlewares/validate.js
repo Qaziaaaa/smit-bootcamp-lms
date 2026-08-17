@@ -1,6 +1,10 @@
+// Validation middleware — validates request bodies, params, and query strings.
+// Uses express-validator for declarative validation rules.
+// Each exported array is a chain of validation rules + a final handler that checks for errors.
 import { body, param, query, validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 
+// Final handler in every validation chain — returns 400 if any rule failed
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -12,6 +16,8 @@ const handleValidationErrors = (req, res, next) => {
   }
   next();
 };
+
+// --- Auth validators ---
 
 const validateLogin = [
   body('email').isEmail().withMessage('Valid email is required.').normalizeEmail(),
@@ -27,15 +33,19 @@ const validateChangePassword = [
   handleValidationErrors,
 ];
 
+const validateResetStudentPassword = [
+  body('studentId').isMongoId().withMessage('Valid student ID is required.'),
+  body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters.'),
+  handleValidationErrors,
+];
+
+// --- Student validators ---
+
 const validateStudentCreate = [
   body('name').trim().notEmpty().withMessage('Name is required.').isLength({ max: 100 }).withMessage('Name must be at most 100 characters.'),
   body('email').isEmail().withMessage('Valid email is required.').normalizeEmail(),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters.'),
-  body('phone')
-    .optional()
-    .trim()
-    .custom((value) => /^[+\d][\d\s-]{9,14}$/.test(value))
-    .withMessage('Valid phone number is required.'),
+  body('phone').optional().trim().custom((value) => /^[+\d][\d\s-]{9,14}$/.test(value)).withMessage('Valid phone number is required.'),
   body('batch').optional().trim().isLength({ max: 100 }).withMessage('Batch must be at most 100 characters.'),
   body('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
   handleValidationErrors,
@@ -45,11 +55,7 @@ const validateStudentUpdate = [
   param('id').isMongoId().withMessage('Invalid student ID.'),
   body('name').optional().trim().notEmpty().withMessage('Name cannot be empty.').isLength({ max: 100 }).withMessage('Name must be at most 100 characters.'),
   body('email').optional().isEmail().withMessage('Valid email is required.').normalizeEmail(),
-  body('phone')
-    .optional()
-    .trim()
-    .custom((value) => /^[+\d][\d\s-]{9,14}$/.test(value))
-    .withMessage('Valid phone number is required.'),
+  body('phone').optional().trim().custom((value) => /^[+\d][\d\s-]{9,14}$/.test(value)).withMessage('Valid phone number is required.'),
   body('batch').optional().trim().isLength({ max: 100 }).withMessage('Batch must be at most 100 characters.'),
   body('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
   body('status').optional().isIn(['active', 'inactive']).withMessage('Invalid status.'),
@@ -61,7 +67,20 @@ const validateStudentId = [
   handleValidationErrors,
 ];
 
+const validateStudentsQuery = [
+  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
+  query('batch').optional().trim().isLength({ max: 100 }).withMessage('Batch must be at most 100 characters.'),
+  query('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
+  query('status').optional().isIn(['active', 'inactive']).withMessage('Invalid status.'),
+  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
+  query('limit').optional().isInt({ min: 1, max: 500 }).withMessage('Limit must be between 1 and 500.').toInt(),
+  handleValidationErrors,
+];
+
+// --- Attendance validators ---
+
 const validateAttendanceMark = [
+  // Handle bulk attendance (array of records)
   (req, res, next) => {
     if (req.body && Array.isArray(req.body.records)) {
       const { records } = req.body;
@@ -83,6 +102,7 @@ const validateAttendanceMark = [
     }
     next();
   },
+  // Handle single attendance mark
   body('studentId').optional().isMongoId().withMessage('Valid student ID is required.'),
   body('date').optional().isISO8601().withMessage('Valid date in YYYY-MM-DD format is required.').toDate(),
   body('status').optional().isIn(['present', 'absent']).withMessage('Status must be present or absent.'),
@@ -106,25 +126,12 @@ const validateAttendanceQuery = [
   handleValidationErrors,
 ];
 
-const validateStudentsQuery = [
-  query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
-  query('batch').optional().trim().isLength({ max: 100 }).withMessage('Batch must be at most 100 characters.'),
-  query('teamId').optional().isMongoId().withMessage('Invalid team ID.'),
-  query('status').optional().isIn(['active', 'inactive']).withMessage('Invalid status.'),
-  query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer.').toInt(),
-  query('limit').optional().isInt({ min: 1, max: 500 }).withMessage('Limit must be between 1 and 500.').toInt(),
-  handleValidationErrors,
-];
-
-const validateMongoId = [
-  param('id').isMongoId().withMessage('Invalid ID.'),
-  handleValidationErrors,
-];
-
 const validateAttendanceSummaryQuery = [
   query('batch').optional().trim().isLength({ max: 100 }).withMessage('Batch must be at most 100 characters.'),
   handleValidationErrors,
 ];
+
+// --- Team validators ---
 
 const validateTeamsQuery = [
   query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
@@ -153,13 +160,11 @@ const validateTeamUpdate = [
 
 const validateTeamStudentsAssign = [
   param('id').isMongoId().withMessage('Invalid team ID.'),
-  body('studentIds')
-    .isArray({ min: 1 })
-    .withMessage('studentIds must be a non-empty array.')
-    .custom((value) => value.every((id) => mongoose.isValidObjectId(id)))
-    .withMessage('Each student ID must be a valid ObjectId.'),
+  body('studentIds').isArray({ min: 1 }).withMessage('studentIds must be a non-empty array.').custom((value) => value.every((id) => mongoose.isValidObjectId(id))).withMessage('Each student ID must be a valid ObjectId.'),
   handleValidationErrors,
 ];
+
+// --- Project validators ---
 
 const validateProjectsQuery = [
   query('status').optional().isIn(['active', 'completed', 'on-hold']).withMessage('Invalid status.'),
@@ -192,6 +197,8 @@ const validateProjectUpdate = [
   body('deadline').optional().isISO8601().withMessage('Valid deadline date is required.').toDate(),
   handleValidationErrors,
 ];
+
+// --- Task validators ---
 
 const validateTasksQuery = [
   query('projectId').optional().isMongoId().withMessage('Invalid project ID.'),
@@ -237,11 +244,7 @@ const validateTaskProgress = [
   handleValidationErrors,
 ];
 
-const validateResetStudentPassword = [
-  body('studentId').isMongoId().withMessage('Valid student ID is required.'),
-  body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters.'),
-  handleValidationErrors,
-];
+// --- Batch validators ---
 
 const validateBatchesQuery = [
   query('search').optional().trim().isLength({ max: 100 }).withMessage('Search term must be at most 100 characters.'),
@@ -272,35 +275,9 @@ const validateBatchUpdate = [
   handleValidationErrors,
 ];
 
-export {
-  validateLogin,
-  validateChangePassword,
-  validateStudentCreate,
-  validateStudentUpdate,
-  validateStudentId,
-  validateAttendanceMark,
-  validateAttendanceUpdate,
-  validateAttendanceQuery,
-  validateStudentsQuery,
-  validateMongoId,
-  validateAttendanceSummaryQuery,
-  validateTeamsQuery,
-  validateTeamId,
-  validateTeamCreate,
-  validateTeamUpdate,
-  validateTeamStudentsAssign,
-  validateProjectsQuery,
-  validateProjectId,
-  validateProjectCreate,
-  validateProjectUpdate,
-  validateTasksQuery,
-  validateTaskId,
-  validateTaskCreate,
-  validateTaskUpdate,
-  validateTaskProgress,
-  validateBatchesQuery,
-  validateBatchId,
-  validateBatchCreate,
-  validateBatchUpdate,
-  validateResetStudentPassword,
-};
+// --- Generic validators ---
+
+const validateMongoId = [
+  param('id').isMongoId().withMessage('Invalid ID.'),
+  handleValidationErrors,
+];

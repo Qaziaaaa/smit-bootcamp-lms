@@ -1,3 +1,4 @@
+// Batch controller — handles CRUD for batch management.
 import asyncHandler from '../utils/asyncHandler.js';
 import { sendSuccess } from '../utils/response.js';
 import batchService from '../services/batch.service.js';
@@ -28,10 +29,4 @@ const deleteBatch = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, { deleted: true }, 'Batch deleted successfully');
 });
 
-export default {
-  getBatches,
-  getBatchById,
-  createBatch,
-  updateBatch,
-  deleteBatch,
-};
+export default { getBatches, getBatchById, createBatch, updateBatch, deleteBatch };

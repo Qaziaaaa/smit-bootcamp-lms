@@ -1,3 +1,6 @@
+// Standard API response helpers — ensures consistent JSON format across all endpoints.
+// All responses follow: { success: bool, data: ..., message: ..., errors: [...] }
+
 const sendSuccess = (res, statusCode, data, message) => {
   res.status(statusCode).json({
     success: true,

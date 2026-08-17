@@ -1,31 +1,40 @@
+// Teams API calls — CRUD operations for managing teams.
 import { apiClient } from './apiClient'
 
-export const getTeams = async (params = {}) => {
+// List all teams (with optional search)
+export async function getTeams(params = {}) {
   const response = await apiClient.get('/teams', { params })
-  return response.data.data
+  return response.data.data   // { teams: [...] }
 }
 
-export const getTeamById = async (id) => {
+// Get a single team with members and project
+export async function getTeam(id) {
   const response = await apiClient.get(`/teams/${id}`)
   return response.data.data
 }
 
-export const createTeam = async (data) => {
+export const getTeamById = getTeam
+
+// Assign students to a team
+export async function assignStudentsToTeam(teamId, studentIds) {
+  const response = await apiClient.post(`/teams/${teamId}/students`, { studentIds })
+  return response.data.data
+}
+
+// Create a new team
+export async function createTeam(data) {
   const response = await apiClient.post('/teams', data)
   return response.data.data
 }
 
-export const updateTeam = async (id, data) => {
+// Update a team
+export async function updateTeam(id, data) {
   const response = await apiClient.put(`/teams/${id}`, data)
   return response.data.data
 }
 
-export const deleteTeam = async (id) => {
+// Delete a team
+export async function deleteTeam(id) {
   const response = await apiClient.delete(`/teams/${id}`)
-  return response.data.data
-}
-
-export const assignStudentsToTeam = async (teamId, studentIds) => {
-  const response = await apiClient.post(`/teams/${teamId}/students`, { studentIds })
   return response.data.data
 }

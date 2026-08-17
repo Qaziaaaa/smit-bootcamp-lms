@@ -1,21 +1,26 @@
+// Attendance API calls — mark, list, update attendance records.
 import { apiClient } from './apiClient'
 
-export const getAttendance = async (params = {}) => {
-  const response = await apiClient.get('/attendance', { params })
-  return response.data.data
-}
-
-export const markAttendance = async (data) => {
+// Mark attendance (single or bulk)
+export async function markAttendance(data) {
   const response = await apiClient.post('/attendance', data)
   return response.data.data
 }
 
-export const updateAttendance = async (id, data) => {
-  const response = await apiClient.put(`/attendance/${id}`, data)
+// Get attendance records with filters (date, batch, status, search)
+export async function getAttendance(params = {}) {
+  const response = await apiClient.get('/attendance', { params })
+  return response.data.data   // { records: [...], summary: {...}, pagination: {...} }
+}
+
+// Update a single attendance record's status
+export async function updateAttendance(id, status) {
+  const response = await apiClient.put(`/attendance/${id}`, { status })
   return response.data.data
 }
 
-export const getAttendanceSummary = async (params = {}) => {
+// Get attendance summary across all students
+export async function getAttendanceSummary(params = {}) {
   const response = await apiClient.get('/attendance/summary', { params })
   return response.data.data
 }

@@ -1,16 +1,20 @@
+// Task model — a unit of work within a project.
+// Each task belongs to one project (projectId) and is optionally assigned to one student (assignedTo).
+// Status flow: pending -> in-progress -> in_review -> review_requested -> completed.
+// Priority: low, medium, or high.
 import mongoose from 'mongoose';
 
 const taskSchema = new mongoose.Schema(
   {
     projectId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Project',
+      ref: 'Project',     // which project this task belongs to
       required: true,
       index: true,
     },
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Student',
+      ref: 'Student',     // which student is working on this task (null = unassigned)
       index: true,
     },
     title: {
