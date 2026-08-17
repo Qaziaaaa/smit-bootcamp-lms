@@ -209,25 +209,27 @@ export default function StudentsPage() {
             Manage student enrollments, status, and team assignments.
           </p>
         </div>
-        <Button
-          variant="default"
-          className="rounded-md px-3 py-1 font-semibold"
-          onClick={() => {
-            setEditingStudent(null);
-            setIsFormOpen(true);
-          }}
-        >
-          <UserPlus size={18} />
-          Add New Student
-        </Button>
-        <Button
-          variant="outline"
-          className="rounded-md px-3 py-1 font-semibold"
-          onClick={() => setIsImportOpen(true)}
-        >
-          <Upload size={18} />
-          Import CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="default"
+            className="rounded-md px-3 py-1 font-semibold"
+            onClick={() => {
+              setEditingStudent(null);
+              setIsFormOpen(true);
+            }}
+          >
+            <UserPlus size={18} />
+            Add New Student
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-md px-3 py-1 font-semibold"
+            onClick={() => setIsImportOpen(true)}
+          >
+            <Upload size={18} />
+            Import CSV
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">

@@ -41,7 +41,7 @@ function currentWeek(activeDays = []) {
   })
 }
 
-const DEFAULT_ACTIVE_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const DEFAULT_ACTIVE_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function StudentDashboardPage() {
   // Local state: profile/attendance/tasks fetched from API, plus UI states (loading, error, progress update, toast)

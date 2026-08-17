@@ -64,7 +64,7 @@ export default function LoginPage() {
             alt="SMIT – Saylani Mass IT Training"
             className="mx-auto inline-block h-auto w-24"
           />
-          <p className="mt-1.5 text-base font-semibold text-clr-navy">Student Portal</p>
+          <p className="mt-1.5 text-base font-semibold text-clr-navy">Bootcamp LMS</p>
         </div>
 
         <div className="mb-2.5 flex gap-0.5 rounded-lg bg-muted p-1">
