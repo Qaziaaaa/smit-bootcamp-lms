@@ -14,11 +14,10 @@ const studentSchema = z.object({
   phone: z.string().optional(),
   rollNo: z.string().min(1, 'Roll No is required'),
   batch: z.string().min(1, 'Batch is required'),
-  status: z.string().min(1, 'Status is required'),
   password: z.string().optional(),
 });
 
-const emptyValues = { name: '', email: '', phone: '', rollNo: '', batch: 'Batch 2026', status: 'Pending', password: 'student123' };
+const emptyValues = { name: '', email: '', phone: '', rollNo: '', batch: 'Batch 2026', password: 'student123' };
 
 export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => {
   const isEditing = !!initialData;
@@ -36,7 +35,6 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
           phone: initialData.phone || '',
           rollNo: initialData.rollNo || initialData.rollNumber || '',
           batch: initialData.batch || 'Batch 2026',
-          status: initialData.status || 'Pending',
           password: '',
         });
       } else {
@@ -142,13 +140,6 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
             onChange={setField('batch')}
             error={errors.batch}
             required
-          />
-          <FormField
-            label="Status"
-            name="status"
-            value={values.status}
-            onChange={setField('status')}
-            error={errors.status}
           />
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="password">
