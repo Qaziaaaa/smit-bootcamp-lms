@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { UserPlus, Edit2, Trash2, Eye } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { UserPlus, Edit2, Trash2, Eye, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
@@ -11,12 +11,14 @@ import { Pagination } from '../components/ui/Pagination';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { Modal } from '../components/ui/Modal';
 import { StudentForm } from '../components/students/StudentForm';
 import {
   getStudents,
   createStudent,
   updateStudent,
   deleteStudent,
+  bulkImportStudents,
 } from '../services/studentsService';
 
 export default function StudentsPage() {
@@ -34,6 +36,10 @@ export default function StudentsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
 
   const fetchStudents = useCallback(async () => {
     setLoading(true);
@@ -137,8 +143,9 @@ export default function StudentsPage() {
         await updateStudent(editingStudent._id, data);
         toast.success('Student updated successfully');
       } else {
-        await createStudent(data);
-        toast.success('Student created successfully');
+        const result = await createStudent(data);
+        const pwd = result?.generatedPassword || data.password || 'password123';
+        toast.success(`Student created successfully. Password: ${pwd}`, { duration: 10000 });
       }
       await fetchStudents();
     } catch (error) {
@@ -155,6 +162,31 @@ export default function StudentsPage() {
       await fetchStudents();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete student');
+    }
+  };
+
+  const handleBulkImport = async () => {
+    if (!importFile) {
+      toast.error('Please select a CSV file');
+      return;
+    }
+    setImporting(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', importFile);
+      const result = await bulkImportStudents(formData);
+      const msg = `Imported ${result.created} students.` + (result.errors?.length ? ` ${result.errors.length} errors.` : '');
+      toast.success(msg, { duration: 8000 });
+      if (result.errors?.length) {
+        console.warn('Import errors:', result.errors);
+      }
+      setIsImportOpen(false);
+      setImportFile(null);
+      await fetchStudents();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to import students');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -179,6 +211,14 @@ export default function StudentsPage() {
         >
           <UserPlus size={18} />
           Add New Student
+        </Button>
+        <Button
+          variant="outline"
+          className="rounded-md px-3 py-1 font-semibold"
+          onClick={() => setIsImportOpen(true)}
+        >
+          <Upload size={18} />
+          Import CSV
         </Button>
       </div>
 
@@ -242,6 +282,51 @@ export default function StudentsPage() {
         onConfirm={handleDeleteStudent}
         onCancel={() => setDeleteId(null)}
       />
+
+      <Modal
+        open={isImportOpen}
+        onClose={() => { setIsImportOpen(false); setImportFile(null); }}
+        title="Import Students from CSV"
+        hideDividers
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Upload a CSV file with columns: <strong>name</strong>, <strong>email</strong>, and optionally <strong>phone</strong>, <strong>batch</strong>, <strong>rollNo</strong>. All imported students will have the default password <code className="rounded bg-muted px-1 py-0.5 text-xs">password123</code>.
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {importFile ? importFile.name : 'Choose CSV File'}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+            />
+            {importFile && (
+              <button
+                type="button"
+                onClick={() => setImportFile(null)}
+                className="text-sm text-destructive hover:underline"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => { setIsImportOpen(false); setImportFile(null); }} disabled={importing}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkImport} disabled={!importFile || importing}>
+              {importing ? 'Importing...' : 'Import Students'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
     </div>
   );

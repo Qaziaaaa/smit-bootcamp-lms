@@ -18,9 +18,15 @@ const logout = asyncHandler(async (req, res) => {
 });
 
 const changePassword = asyncHandler(async (req, res) => {
-  const { password } = req.body;
-  const result = await authService.changePassword(req.user.userId, password);
+  const { oldPassword, password } = req.body;
+  const result = await authService.changePassword(req.user.userId, oldPassword, password);
   sendSuccess(res, 200, result, 'Password changed successfully');
+});
+
+const resetStudentPassword = asyncHandler(async (req, res) => {
+  const { studentId, newPassword } = req.body;
+  const result = await authService.resetStudentPassword(studentId, newPassword);
+  sendSuccess(res, 200, result, 'Student password reset successfully');
 });
 
 export default {
@@ -28,4 +34,5 @@ export default {
   getMe,
   logout,
   changePassword,
+  resetStudentPassword,
 };

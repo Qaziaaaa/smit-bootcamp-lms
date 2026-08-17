@@ -2,9 +2,12 @@ import mongoose from 'mongoose';
 import User from '../models/user.model.js';
 import Student from '../models/student.model.js';
 import Attendance from '../models/attendance.model.js';
+import Task from '../models/task.model.js';
 import bcrypt from 'bcryptjs';
 import env from '../config/env.js';
 import ApiError from '../utils/ApiError.js';
+
+const DEFAULT_PASSWORD = 'password123';
 
 const createStudent = async (data) => {
   const { name, email, password, phone, batch, teamId, rollNo } = data;
@@ -53,7 +56,7 @@ const createStudent = async (data) => {
     await session.commitTransaction();
     session.endSession();
 
-    return student[0];
+    return { ...student[0].toObject(), generatedPassword: rawPassword };
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
@@ -180,6 +183,7 @@ const deleteStudent = async (id) => {
     throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
   }
 
+  await Task.updateMany({ assignedTo: id }, { $unset: { assignedTo: '' } });
   await Student.findByIdAndDelete(id);
   await User.findByIdAndDelete(student.userId);
   await Attendance.deleteMany({ studentId: id });
@@ -210,6 +214,75 @@ const findStudentByUserId = async (userId) => {
   return Student.findOne({ userId }).populate('teamId', 'name').lean();
 };
 
+const bulkImportStudents = async (students) => {
+  const results = { created: 0, skipped: 0, errors: [] };
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    for (let i = 0; i < students.length; i++) {
+      const { name, email, phone, batch, rollNo } = students[i];
+      const row = i + 2;
+
+      if (!name || !email) {
+        results.errors.push(`Row ${row}: Name and email are required.`);
+        results.skipped++;
+        continue;
+      }
+
+      const emailLower = email.toLowerCase().trim();
+      const existingUser = await User.findOne({ email: emailLower }).session(session);
+      if (existingUser) {
+        results.errors.push(`Row ${row}: Email ${emailLower} already exists.`);
+        results.skipped++;
+        continue;
+      }
+
+      const existingStudent = await Student.findOne({ email: emailLower }).session(session);
+      if (existingStudent) {
+        results.errors.push(`Row ${row}: Email ${emailLower} already exists.`);
+        results.skipped++;
+        continue;
+      }
+
+      if (rollNo) {
+        const existingRoll = await Student.findOne({ rollNo: rollNo.trim() }).session(session);
+        if (existingRoll) {
+          results.errors.push(`Row ${row}: Roll No ${rollNo} already exists.`);
+          results.skipped++;
+          continue;
+        }
+      }
+
+      const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, env.bcryptRounds);
+      const user = await User.create([{ email: emailLower, passwordHash, role: 'student' }], { session });
+
+      await Student.create(
+        [{
+          userId: user[0]._id,
+          name: name.trim(),
+          email: emailLower,
+          phone: phone?.trim() || undefined,
+          batch: batch?.trim() || undefined,
+          rollNo: rollNo?.trim() || undefined,
+        }],
+        { session }
+      );
+
+      results.created++;
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
+
+  return results;
+};
+
 export default {
   createStudent,
   getStudents,
@@ -218,4 +291,5 @@ export default {
   deleteStudent,
   getStudentAttendance,
   findStudentByUserId,
+  bulkImportStudents,
 };

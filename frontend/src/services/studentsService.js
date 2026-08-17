@@ -29,3 +29,15 @@ export const getStudentAttendance = async (id) => {
   const response = await apiClient.get(`/students/${id}/attendance`)
   return response.data.data
 }
+
+export const bulkImportStudents = async (formData) => {
+  const response = await apiClient.post('/students/bulk-import', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return response.data.data
+}
+
+export const resetStudentPassword = async (studentId, newPassword) => {
+  const response = await apiClient.post('/auth/reset-student-password', { studentId, newPassword })
+  return response.data.data
+}

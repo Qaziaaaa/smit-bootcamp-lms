@@ -3,6 +3,7 @@ import ApiError from '../utils/ApiError.js';
 import Team from '../models/team.model.js';
 import Student from '../models/student.model.js';
 import Project from '../models/project.model.js';
+import Task from '../models/task.model.js';
 
 const getTeams = async ({ search }) => {
   const match = {};
@@ -84,6 +85,10 @@ const updateTeam = async (id, { name, members, leader }) => {
     }
   }
 
+  if (Array.isArray(members) && leader && !members.includes(leader.toString())) {
+    throw new ApiError(400, 'Leader must be a team member.', ['The team leader must be one of the selected team members.']);
+  }
+
   const updateData = {};
   if (name) updateData.name = name;
   if (leader !== undefined) updateData.leader = leader || null;
@@ -108,6 +113,12 @@ const deleteTeam = async (id) => {
   const team = await Team.findById(id);
   if (!team) {
     throw new ApiError(404, 'Team not found.', ['Team does not exist.']);
+  }
+
+  const projects = await Project.find({ teamId: id }).select('_id');
+  const projectIds = projects.map((p) => p._id);
+  if (projectIds.length > 0) {
+    await Task.deleteMany({ projectId: { $in: projectIds } });
   }
 
   await Student.updateMany({ teamId: id }, { $unset: { teamId: '' } });

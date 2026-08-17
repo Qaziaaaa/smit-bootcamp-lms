@@ -10,11 +10,13 @@ import { Label } from '../components/ui/Label';
 export default function StudentProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [oldPassword, setOldPassword] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -54,8 +56,12 @@ export default function StudentProfilePage() {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
+    if (!oldPassword) {
+      toast.error('Current password is required');
+      return;
+    }
     if (password.length < 8) {
-      toast.error('Password must be at least 8 characters');
+      toast.error('New password must be at least 8 characters');
       return;
     }
     if (password !== confirmPassword) {
@@ -64,8 +70,9 @@ export default function StudentProfilePage() {
     }
     setSavingPassword(true);
     try {
-      await changeStudentPassword({ password, confirmPassword });
+      await changeStudentPassword({ oldPassword, password, confirmPassword });
       toast.success('Password changed successfully');
+      setOldPassword('');
       setPassword('');
       setConfirmPassword('');
     } catch (error) {
@@ -174,6 +181,30 @@ export default function StudentProfilePage() {
           <h3 className="font-semibold text-foreground">Change Password</h3>
         </div>
         <form onSubmit={handleChangePassword} className="grid max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="old-password">
+              Current Password <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Input
+                id="old-password"
+                type={showOldPassword ? 'text' : 'password'}
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                placeholder="Enter current password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowOldPassword((p) => !p)}
+                tabIndex={-1}
+                aria-label={showOldPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-2.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent p-0.5 text-muted-foreground"
+              >
+                {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="new-password">
               New Password <span className="text-destructive">*</span>

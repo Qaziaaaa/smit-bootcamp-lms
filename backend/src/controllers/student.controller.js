@@ -36,6 +36,17 @@ const getStudentAttendance = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, result, 'Student attendance retrieved successfully');
 });
 
+const bulkImportStudents = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'No file uploaded.' });
+  }
+  const { parse } = await import('csv-parse/sync');
+  const csvContent = req.file.buffer.toString('utf-8');
+  const records = parse(csvContent, { columns: true, skip_empty_lines: true, trim: true });
+  const result = await studentService.bulkImportStudents(records);
+  sendSuccess(res, 200, result, 'Bulk import completed');
+});
+
 export default {
   createStudent,
   getStudents,
@@ -43,4 +54,5 @@ export default {
   updateStudent,
   deleteStudent,
   getStudentAttendance,
+  bulkImportStudents,
 };
