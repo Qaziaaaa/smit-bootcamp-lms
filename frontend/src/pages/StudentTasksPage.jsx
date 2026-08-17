@@ -67,7 +67,7 @@ export default function StudentTasksPage() {
 
   // Derived task counts by status for the summary cards
   const completedCount = tasks.filter((task) => task.status === 'completed').length
-  const inReviewCount = tasks.filter((task) => task.status === 'review_requested').length
+  const inReviewCount = tasks.filter((task) => task.status === 'review_requested' || task.status === 'in_review').length
   const inProgressCount = tasks.filter((task) => task.status === 'in-progress' || task.status === 'pending').length
 
   return (
@@ -134,13 +134,13 @@ export default function StudentTasksPage() {
                 </div>
               </div>
               {/* Progress actions hidden once the task is completed or in review */}
-              {!['completed', 'review_requested'].includes(task.status) && (
+              {!['completed', 'review_requested', 'in_review'].includes(task.status) && (
                 <div className="flex shrink-0 items-center gap-1">
                   <Button
                     size="sm"
                     className="text-xs"
                     disabled={updatingId === task._id}
-                    onClick={() => handleUpdateStatus(task, 'review_requested')}
+                    onClick={() => handleUpdateStatus(task, 'in_review')}
                   >
                     <Send size={14} /> Submit for Review
                   </Button>

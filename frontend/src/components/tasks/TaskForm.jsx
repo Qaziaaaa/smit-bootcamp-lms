@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Select } from '../ui/Select';
 import { Modal } from '../ui/Modal';
+import { StudentSearchSelect } from '../ui/StudentSearchSelect';
 
 const taskSchema = z.object({
   title: z.string().min(2, 'Title is required'),
@@ -11,7 +12,7 @@ const taskSchema = z.object({
   projectId: z.string().min(1, 'Project is required'),
   assignedTo: z.string().optional(),
   priority: z.enum(['low', 'medium', 'high']).default('medium'),
-  status: z.enum(['pending', 'in-progress', 'review_requested', 'completed']).default('in-progress'),
+  status: z.enum(['pending', 'in-progress', 'in_review', 'review_requested', 'completed']).default('in-progress'),
   deadline: z.string().optional(),
 });
 
@@ -24,7 +25,7 @@ const PRIORITY_OPTIONS = [
 const STATUS_OPTIONS = [
   { label: 'Pending', value: 'pending' },
   { label: 'In Progress', value: 'in-progress' },
-  { label: 'Review Requested', value: 'review_requested' },
+  { label: 'In Review ', value: 'in_review' },
   { label: 'Completed', value: 'completed' },
 ];
 
@@ -51,7 +52,7 @@ export const TaskForm = ({ open, onClose, onSubmit, initialData = null, lockedPr
           ? {
               title: initialData.title || '',
               description: initialData.description || '',
-              projectId: initialData.projectId?._id || initialData.projectId || '',
+              projectId: initialData.projectId?._id || initialData.projectId || lockedProjectId || '',
               assignedTo: initialData.assignedTo?._id || initialData.assignedTo || '',
               priority: initialData.priority || 'medium',
               status: initialData.status || 'in-progress',
@@ -132,12 +133,12 @@ export const TaskForm = ({ open, onClose, onSubmit, initialData = null, lockedPr
             disabled={!!lockedProjectId}
             required
           />
-          <Select
+          <StudentSearchSelect
             label="Assign To (Optional)"
             value={values.assignedTo}
             onChange={(next) => setField('assignedTo')({ target: { value: next } })}
-            options={students.map((s) => ({ label: s.name, value: s._id || s.id }))}
-            placeholder="Unassigned"
+            students={students}
+            placeholder="Search student by name or roll no..."
             error={errors.assignedTo}
           />
           <Select

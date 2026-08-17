@@ -18,7 +18,7 @@ import { getStudents } from '../services/studentsService';
 const STATUS_OPTIONS = [
   { label: 'Pending', value: 'pending' },
   { label: 'In Progress', value: 'in-progress' },
-  { label: 'Review Requested', value: 'review_requested' },
+  { label: 'In Review', value: 'in_review' },
   { label: 'Completed', value: 'completed' },
 ];
 
@@ -76,7 +76,7 @@ export default function TasksPage() {
     (tasks || [])
       .map((t) => t.assignedTo)
       .filter(Boolean)
-      .map((a) => [a._id, { label: a.name, value: a._id }])
+      .map((a) => [a._id, { label: a.rollNo ? `${a.name} (${a.rollNo})` : a.name, value: a._id }])
   ).values()];
 
   const columns = [
@@ -99,11 +99,18 @@ export default function TasksPage() {
     {
       accessorKey: 'assignedTo',
       header: 'ASSIGNED TO',
-      cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">
-          {getValue()?.name || '—'}
-        </p>
-      ),
+      cell: ({ getValue }) => {
+        const student = getValue();
+        if (!student) return <p className="text-sm text-muted-foreground">—</p>;
+        return (
+          <div className="flex flex-col">
+            <p className="text-sm font-medium text-foreground">{student.name}</p>
+            {student.rollNo && (
+              <span className="text-[11px] font-mono text-muted-foreground">{student.rollNo}</span>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'priority',

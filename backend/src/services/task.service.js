@@ -30,7 +30,7 @@ const getTasks = async ({ projectId, status, assignedTo, search }, { page = 1, l
   const [tasks, total] = await Promise.all([
     Task.find(query)
       .populate('projectId', 'title')
-      .populate('assignedTo', 'name email')
+      .populate('assignedTo', 'name email rollNo')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -52,7 +52,7 @@ const getTasks = async ({ projectId, status, assignedTo, search }, { page = 1, l
 const getTaskById = async (id) => {
   const task = await Task.findById(id)
     .populate('projectId', 'title')
-    .populate('assignedTo', 'name email')
+    .populate('assignedTo', 'name email rollNo')
     .lean();
 
   if (!task) {
@@ -103,7 +103,7 @@ const updateTask = async (id, data) => {
 
   const updated = await Task.findByIdAndUpdate(id, data, { new: true, runValidators: true })
     .populate('projectId', 'title')
-    .populate('assignedTo', 'name email');
+    .populate('assignedTo', 'name email rollNo');
 
   return updated;
 };

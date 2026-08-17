@@ -33,6 +33,7 @@ const STATUS_TONE = {
   warning: 'warning',
   pending: 'warning',
   'in-review': 'warning',
+  in_review: 'warning',
   review: 'warning',
   onhold: 'warning',
   paused: 'warning',

@@ -47,7 +47,7 @@ const getProjectById = async (id) => {
   }
 
   const tasks = await Task.find({ projectId: project._id })
-    .select('title description status priority deadline assignedTo')
+    .populate('assignedTo', 'name email rollNo')
     .sort({ createdAt: -1 })
     .lean();
 
