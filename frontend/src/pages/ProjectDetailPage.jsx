@@ -80,11 +80,18 @@ export default function ProjectDetailPage() {
     {
       accessorKey: 'assignedTo',
       header: 'ASSIGNED TO',
-      cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">
-          {getValue()?.name || '—'}
-        </p>
-      ),
+      cell: ({ getValue }) => {
+        const student = getValue();
+        if (!student) return <p className="text-sm text-muted-foreground">—</p>;
+        return (
+          <div className="flex flex-col">
+            <p className="text-sm font-medium text-foreground">{student.name}</p>
+            {student.rollNo && (
+              <span className="text-[11px] font-mono text-muted-foreground">{student.rollNo}</span>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'deadline',
