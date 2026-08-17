@@ -41,13 +41,7 @@ function currentWeek(activeDays = []) {
   })
 }
 
-// Mock schedule data mapping student emails to their active class days.
-// This will be replaced by backend API data in the future.
-const MOCK_SCHEDULE_DATA = {
-  'student@example.com': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-  'qari@gmail.com': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-  'default': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-}
+const DEFAULT_ACTIVE_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
 export default function StudentDashboardPage() {
   // Local state: profile/attendance/tasks fetched from API, plus UI states (loading, error, progress update, toast)
@@ -138,8 +132,7 @@ export default function StudentDashboardPage() {
   const activeCount = tasks.length - completedCount
 
   // Week days used by the class schedule widget
-  const studentEmail = profile?.email || 'default'
-  const activeDays = MOCK_SCHEDULE_DATA[studentEmail] || MOCK_SCHEDULE_DATA['default']
+  const activeDays = DEFAULT_ACTIVE_DAYS
   const week = currentWeek(activeDays)
 
   return (

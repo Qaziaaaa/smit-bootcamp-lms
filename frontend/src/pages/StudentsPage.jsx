@@ -144,8 +144,8 @@ export default function StudentsPage() {
         toast.success('Student updated successfully');
       } else {
         const result = await createStudent(data);
-        const pwd = result?.generatedPassword || data.password || 'password123';
-        toast.success(`Student created successfully. Password: ${pwd}`, { duration: 10000 });
+        const pwd = result?.generatedPassword || 'N/A';
+        toast.success(`Student created. Password: ${pwd}`, { duration: 10000 });
       }
       await fetchStudents();
     } catch (error) {
@@ -291,7 +291,7 @@ export default function StudentsPage() {
       >
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Upload a CSV file with columns: <strong>name</strong>, <strong>email</strong>, and optionally <strong>phone</strong>, <strong>batch</strong>, <strong>rollNo</strong>. All imported students will have the default password <code className="rounded bg-muted px-1 py-0.5 text-xs">password123</code>.
+            Upload a CSV file with columns: <strong>name</strong>, <strong>email</strong>, and optionally <strong>phone</strong>, <strong>batch</strong>, <strong>rollNo</strong>. All imported students will have the default password.
           </p>
           <div className="flex items-center gap-3">
             <Button
