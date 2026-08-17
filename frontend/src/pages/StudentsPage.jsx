@@ -13,6 +13,7 @@ import { Avatar } from '../components/ui/Avatar';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { Modal } from '../components/ui/Modal';
 import { StudentForm } from '../components/students/StudentForm';
+import { getBatches } from '../services/batchesService';
 import {
   getStudents,
   createStudent,
@@ -39,6 +40,7 @@ export default function StudentsPage() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [importFile, setImportFile] = useState(null);
   const [importing, setImporting] = useState(false);
+  const [batchOptions, setBatchOptions] = useState([]);
   const fileInputRef = useRef(null);
 
   const fetchStudents = useCallback(async () => {
@@ -62,7 +64,12 @@ export default function StudentsPage() {
     fetchStudents();
   }, [fetchStudents]);
 
-  const batchOptions = [...new Set(students.map((s) => s.batch).filter(Boolean))];
+  useEffect(() => {
+    getBatches().then((res) => {
+      const list = Array.isArray(res) ? res : res?.batches || [];
+      setBatchOptions(list.map((b) => b.name).filter(Boolean));
+    }).catch(() => {});
+  }, []);
 
   const columns = [
     {

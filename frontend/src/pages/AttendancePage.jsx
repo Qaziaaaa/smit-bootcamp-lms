@@ -6,7 +6,6 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { DataTable } from '../components/ui/DataTable';
 import { SearchBar } from '../components/ui/SearchBar';
-import { FilterBar } from '../components/ui/FilterBar';
 import { Pagination } from '../components/ui/Pagination';
 import { Avatar } from '../components/ui/Avatar';
 import { cn } from '../lib/utils';
@@ -22,9 +21,7 @@ function todayStr() {
 
 export default function AttendancePage() {
   const [search, setSearch] = useState('');
-  const [batchFilter, setBatchFilter] = useState('');
   const [dateFilter, setDateFilter] = useState(todayStr());
-  const [page, setPage] = useState(1);
 
   const [records, setRecords] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
@@ -63,8 +60,6 @@ export default function AttendancePage() {
       .then((result) => setAllStudents(result.students || []))
       .catch(() => setAllStudents([]));
   }, []);
-
-  const batchOptions = [...new Set(allStudents.map((s) => s.batch).filter(Boolean))];
 
   const filteredRecords = records
     .filter((r) => {
