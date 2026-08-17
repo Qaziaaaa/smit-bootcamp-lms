@@ -109,3 +109,5 @@ const deleteProject = async (id) => {
 
   return { success: true };
 };
+
+export default { getProjects, getProjectById, createProject, updateProject, deleteProject };

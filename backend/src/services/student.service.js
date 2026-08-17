@@ -318,3 +318,8 @@ const getNextRollNo = async () => {
   }
   return String(max + 1).padStart(3, '0');
 };
+
+export default {
+  createStudent, getStudents, getStudentById, updateStudent, deleteStudent,
+  getStudentAttendance, findStudentByUserId, bulkImportStudents, getNextRollNo,
+};

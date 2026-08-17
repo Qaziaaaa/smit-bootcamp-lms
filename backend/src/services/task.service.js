@@ -111,3 +111,5 @@ const deleteTask = async (id) => {
   await Task.findByIdAndDelete(id);
   return { success: true };
 };
+
+export default { getTasks, getTaskById, createTask, updateTask, deleteTask };

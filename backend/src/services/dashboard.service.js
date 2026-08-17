@@ -63,3 +63,5 @@ const getDashboardStats = async () => {
     recentTasks,
   };
 };
+
+export default { getDashboardStats };

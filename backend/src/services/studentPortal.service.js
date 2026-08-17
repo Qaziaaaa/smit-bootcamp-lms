@@ -148,3 +148,8 @@ const updateTaskProgress = async (userId, taskId, data) => {
 
   return task;
 };
+
+export default {
+  getStudentProfile, getStudentAttendance, getStudentTeam,
+  getStudentTasks, getStudentProjects, getStudentProjectById, updateTaskProgress,
+};

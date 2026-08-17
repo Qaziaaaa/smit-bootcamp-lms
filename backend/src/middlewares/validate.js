@@ -281,3 +281,14 @@ const validateMongoId = [
   param('id').isMongoId().withMessage('Invalid ID.'),
   handleValidationErrors,
 ];
+
+export {
+  validateLogin, validateChangePassword, validateResetStudentPassword,
+  validateStudentCreate, validateStudentUpdate, validateStudentId, validateStudentsQuery,
+  validateAttendanceMark, validateAttendanceUpdate, validateAttendanceQuery, validateAttendanceSummaryQuery,
+  validateTeamsQuery, validateTeamId, validateTeamCreate, validateTeamUpdate, validateTeamStudentsAssign,
+  validateProjectsQuery, validateProjectId, validateProjectCreate, validateProjectUpdate,
+  validateTasksQuery, validateTaskId, validateTaskCreate, validateTaskUpdate, validateTaskProgress,
+  validateBatchesQuery, validateBatchId, validateBatchCreate, validateBatchUpdate,
+  validateMongoId,
+};

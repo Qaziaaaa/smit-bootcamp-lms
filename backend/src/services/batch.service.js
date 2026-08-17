@@ -102,3 +102,5 @@ const deleteBatch = async (id) => {
   await Batch.findByIdAndDelete(id);
   return { success: true };
 };
+
+export default { getBatches, getBatchById, createBatch, updateBatch, deleteBatch };

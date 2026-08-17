@@ -187,3 +187,5 @@ const assignStudentsToTeam = async (id, studentIds) => {
 
   return { team: { id: team._id, name: team.name }, members };
 };
+
+export default { getTeams, getTeamById, createTeam, updateTeam, deleteTeam, assignStudentsToTeam };

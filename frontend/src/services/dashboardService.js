@@ -6,6 +6,6 @@ export async function getDashboard() {
 }
 
 export async function getDashboardStats() {
-  const response = await apiClient.get('/dashboard/stats')
+  const response = await apiClient.get('/dashboard')
   return response.data.data   // { counts, taskStatus, todayAttendance, activeBatch, recentStudents, recentTasks }
 }
