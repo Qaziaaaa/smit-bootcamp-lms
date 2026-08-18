@@ -19,14 +19,16 @@ router.get('/health', (req, res) => {
 });
 
 // Feature routes — each one handles a specific domain
-router.use('/auth', authRoutes);              // login, register, change-password
-router.use('/students', studentRoutes);       // admin CRUD for students
-router.use('/attendance', attendanceRoutes);  // admin mark/view attendance
-router.use('/student', studentPortalRoutes);  // student self-service (profile, tasks, team)
-router.use('/teams', teamRoutes);             // admin manage teams
-router.use('/projects', projectRoutes);       // admin manage projects
-router.use('/tasks', taskRoutes);             // admin manage tasks
-router.use('/dashboard', dashboardRoutes);    // admin dashboard stats
-router.use('/batches', batchRoutes);          // admin manage batches
+// Hakim — auth, students, attendance
+// Shafqat — teams, projects, tasks, dashboard, batches, studentPortal
+router.use('/auth', authRoutes);              // Hakim — login, register, change-password
+router.use('/students', studentRoutes);       // Hakim — admin CRUD for students
+router.use('/attendance', attendanceRoutes);  // Hakim — admin mark/view attendance
+router.use('/student', studentPortalRoutes);  // Shafqat — student self-service (profile, tasks, team)
+router.use('/teams', teamRoutes);             // Shafqat — admin manage teams
+router.use('/projects', projectRoutes);       // Shafqat — admin manage projects
+router.use('/tasks', taskRoutes);             // Shafqat — admin manage tasks
+router.use('/dashboard', dashboardRoutes);    // Shafqat — admin dashboard stats
+router.use('/batches', batchRoutes);          // Shafqat — admin manage batches
 
 export default router;
