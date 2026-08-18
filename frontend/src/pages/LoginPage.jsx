@@ -67,7 +67,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-card px-4 py-6">
-      <div className="w-full max-w-[420px] bg-red-600">
+      <div className="w-full max-w-[420px]">
         <div className="mb-5 text-center">
           <img
             src="/logo.png"
