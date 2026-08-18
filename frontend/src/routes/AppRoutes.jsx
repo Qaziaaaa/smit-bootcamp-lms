@@ -6,7 +6,8 @@ import { Loader2 } from 'lucide-react'
 import { ProtectedRoute } from './ProtectedRoute'
 import { RedirectByRole } from './RedirectByRole'
 
-// Admin pages (lazy loaded)
+// Abdullah — Auth, Layouts, Dashboard, Student Portal (Dashboard, Profile, Team)
+// Shahzad — Students, Attendance, Teams, Projects, Tasks, Student Portal (Attendance, Projects, Tasks)
 const AdminLayout = lazy(() => import('../layouts/AdminLayout').then((m) => ({ default: m.AdminLayout })))
 const StudentLayout = lazy(() => import('../layouts/StudentLayout').then((m) => ({ default: m.StudentLayout })))
 const LoginPage = lazy(() => import('../pages/LoginPage'))
@@ -41,10 +42,12 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<RedirectByRole />} />
-        <Route path="/access-denied" element={<AccessDeniedPage />} />
+        {/* Shared routes — no auth required */}
+        <Route path="/login" element={<LoginPage />} /> {/* Abdullah */}
+        <Route path="/" element={<RedirectByRole />} /> {/* Abdullah */}
+        <Route path="/access-denied" element={<AccessDeniedPage />} /> {/* Abdullah */}
 
+        {/* Admin routes — requires 'admin' role */}
         <Route
           element={
             <ProtectedRoute roles={['admin']}>
@@ -52,18 +55,19 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/students" element={<StudentsPage />} />
-          <Route path="/students/:id" element={<StudentDetailPage />} />
-          <Route path="/attendance" element={<AttendancePage />} />
-          <Route path="/teams" element={<TeamsPage />} />
-          <Route path="/teams/:id" element={<TeamDetailPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
-          <Route path="/projects/:id" element={<ProjectDetailPage />} />
-          <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/profile" element={<AdminProfilePage />} />
+          <Route path="/dashboard" element={<DashboardPage />} /> {/* Abdullah */}
+          <Route path="/students" element={<StudentsPage />} /> {/* Shahzad */}
+          <Route path="/students/:id" element={<StudentDetailPage />} /> {/* Shahzad */}
+          <Route path="/attendance" element={<AttendancePage />} /> {/* Shahzad */}
+          <Route path="/teams" element={<TeamsPage />} /> {/* Shahzad */}
+          <Route path="/teams/:id" element={<TeamDetailPage />} /> {/* Shahzad */}
+          <Route path="/projects" element={<ProjectsPage />} /> {/* Shahzad */}
+          <Route path="/projects/:id" element={<ProjectDetailPage />} /> {/* Shahzad */}
+          <Route path="/tasks" element={<TasksPage />} /> {/* Shahzad */}
+          <Route path="/profile" element={<AdminProfilePage />} /> {/* Abdullah */}
         </Route>
 
+        {/* Student routes — requires 'student' role */}
         <Route
           element={
             <ProtectedRoute roles={['student']}>
@@ -71,13 +75,13 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route path="/student/dashboard" element={<StudentDashboardPage />} />
-          <Route path="/student/attendance" element={<StudentAttendancePage />} />
-          <Route path="/student/team" element={<StudentTeamPage />} />
-          <Route path="/student/projects" element={<StudentProjectsPage />} />
-          <Route path="/student/projects/:id" element={<StudentProjectDetailPage />} />
-          <Route path="/student/tasks" element={<StudentTasksPage />} />
-          <Route path="/student/profile" element={<StudentProfilePage />} />
+          <Route path="/student/dashboard" element={<StudentDashboardPage />} /> {/* Abdullah */}
+          <Route path="/student/attendance" element={<StudentAttendancePage />} /> {/* Shahzad */}
+          <Route path="/student/team" element={<StudentTeamPage />} /> {/* Abdullah */}
+          <Route path="/student/projects" element={<StudentProjectsPage />} /> {/* Shahzad */}
+          <Route path="/student/projects/:id" element={<StudentProjectDetailPage />} /> {/* Shahzad */}
+          <Route path="/student/tasks" element={<StudentTasksPage />} /> {/* Shahzad */}
+          <Route path="/student/profile" element={<StudentProfilePage />} /> {/* Abdullah */}
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
