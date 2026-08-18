@@ -14,8 +14,8 @@ export async function getAttendance(params = {}) {
 }
 
 // Update a single attendance record's status
-export async function updateAttendance(id, status) {
-  const response = await apiClient.put(`/attendance/${id}`, { status })
+export async function updateAttendance(id, data) {
+  const response = await apiClient.put(`/attendance/${id}`, data)
   return response.data.data
 }
 

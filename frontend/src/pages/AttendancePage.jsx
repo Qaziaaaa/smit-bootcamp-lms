@@ -212,7 +212,7 @@ export default function AttendancePage() {
   ];
 
   return (
-    <div className="flex flex-col gap-3 p-3">
+    <div className="flex h-[calc(100vh-64px)] flex-col gap-2">
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -263,6 +263,7 @@ export default function AttendancePage() {
         columns={columns}
         isLoading={initialLoading}
         emptyMessage="No attendance records for the selected date"
+        className="flex-1 min-h-0"
       />
     </div>
   );
