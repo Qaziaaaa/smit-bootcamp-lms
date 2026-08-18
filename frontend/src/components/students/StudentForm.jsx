@@ -41,7 +41,11 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
         setValues({ ...emptyValues });
         getNextRollNo()
           .then((data) => {
-            setValues((v) => ({ ...v, rollNo: data?.rollNo || '' }));
+            setValues((v) => {
+              const roll = data?.rollNo || '';
+              const base = v.name.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).join('').slice(0, 10);
+              return { ...v, rollNo: roll, email: base && roll ? `${base}${roll}@lms.com` : v.email };
+            });
           })
           .catch(() => {});
       }
@@ -53,9 +57,12 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => 
   const setField = (name) => (e) => {
     setValues((v) => {
       const next = { ...v, [name]: e.target.value };
-      if (name === 'name' && !isEditing) {
-        const base = e.target.value.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).join('').slice(0, 10);
-        next.email = base ? `${base}01@lms.com` : '';
+      if (!isEditing && (name === 'name' || name === 'rollNo')) {
+        const base = name === 'name'
+          ? e.target.value.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).join('').slice(0, 10)
+          : v.name.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).join('').slice(0, 10);
+        const roll = name === 'rollNo' ? e.target.value : v.rollNo;
+        next.email = base && roll ? `${base}${roll}@lms.com` : base ? `${base}@lms.com` : '';
       }
       return next;
     });

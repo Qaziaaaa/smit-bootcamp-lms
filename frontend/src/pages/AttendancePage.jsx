@@ -24,7 +24,7 @@ export default function AttendancePage() {
 
   const [records, setRecords] = useState([]);
   const [allStudents, setAllStudents] = useState([]);
-  const [summary, setSummary] = useState({ present: 0, absent: 0 });
+  const [summary, setSummary] = useState({ present: 0, absent: 0, notMarked: 0 });
   const [initialLoading, setInitialLoading] = useState(true);
   const [togglingId, setTogglingId] = useState(null);
 
@@ -33,20 +33,19 @@ export default function AttendancePage() {
     try {
       const params = { date: dateFilter, page: 1, limit: 500 };
       const result = await getAttendance(params);
-      setRecords(result.records || []);
-      if (result.summary) {
-        setSummary(result.summary);
-      } else {
-        const p = (result.records || []).filter((r) => r.status === 'present').length;
-        const a = (result.records || []).filter((r) => r.status === 'absent').length;
-        setSummary({ present: p, absent: a });
-      }
+      const marked = result.records || [];
+      setRecords(marked);
+
+      const present = marked.filter((r) => r.status === 'present').length;
+      const absent = marked.filter((r) => r.status === 'absent').length;
+      const notMarked = Math.max(0, allStudents.length - present - absent);
+      setSummary({ present, absent, notMarked });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to load attendance');
     } finally {
       setInitialLoading(false);
     }
-  }, [dateFilter]);
+  }, [dateFilter, allStudents.length]);
 
   useEffect(() => {
     fetchRecords();
@@ -58,14 +57,28 @@ export default function AttendancePage() {
       .catch(() => setAllStudents([]));
   }, []);
 
-  const filteredRecords = records
+  // Merge all students with attendance records — unmarked students appear with status: null
+  const mergedRecords = allStudents.map((s) => {
+    const record = records.find((r) => String(r.studentId || r._id) === String(s._id));
+    return {
+      studentId: s._id,
+      studentName: s.name,
+      studentEmail: s.email,
+      rollNo: s.rollNo,
+      batch: s.batch,
+      date: dateFilter,
+      status: record?.status || null,
+      _id: record?._id || null,
+    };
+  });
+
+  const filteredRecords = mergedRecords
     .filter((r) => {
       if (search && search.trim()) {
         const q = search.trim().toLowerCase();
-        const studentObj = allStudents.find((s) => String(s._id || s.id) === String(r.studentId || r._id));
-        const roll = (r.rollNo || r.rollNumber || studentObj?.rollNo || studentObj?.rollNumber || ((r.studentId || r._id) ? `STU-${String(r.studentId || r._id).slice(-4).toUpperCase()}` : '')).toLowerCase();
         const name = (r.studentName || '').toLowerCase();
         const email = (r.studentEmail || '').toLowerCase();
+        const roll = (r.rollNo || '').toLowerCase();
         return name.includes(q) || roll.includes(q) || email.includes(q);
       }
       return true;
@@ -74,15 +87,12 @@ export default function AttendancePage() {
       if (search && search.trim()) {
         const q = search.trim().toLowerCase();
         const getPriority = (item) => {
-          const studentObj = allStudents.find((s) => String(s._id || s.id) === String(item.studentId || item._id));
-          const roll = (item.rollNo || item.rollNumber || studentObj?.rollNo || studentObj?.rollNumber || ((item.studentId || item._id) ? `STU-${String(item.studentId || item._id).slice(-4).toUpperCase()}` : '')).toLowerCase();
           const name = (item.studentName || '').toLowerCase();
-
+          const roll = (item.rollNo || '').toLowerCase();
           if (name.startsWith(q) || roll.startsWith(q)) return 1;
           if (name.includes(q) || roll.includes(q)) return 2;
           return 3;
         };
-
         const pA = getPriority(a);
         const pB = getPriority(b);
         if (pA !== pB) return pA - pB;
@@ -110,11 +120,13 @@ export default function AttendancePage() {
       setSummary((prev) => {
         let p = prev.present;
         let a = prev.absent;
-        if (oldStatus === 'present') p = Math.max(0, p - 1);
-        if (oldStatus === 'absent') a = Math.max(0, a - 1);
+        let nm = prev.notMarked;
+        if (!oldStatus) nm = Math.max(0, nm - 1);
+        else if (oldStatus === 'present') p = Math.max(0, p - 1);
+        else if (oldStatus === 'absent') a = Math.max(0, a - 1);
         if (targetStatus === 'present') p += 1;
-        if (targetStatus === 'absent') a += 1;
-        return { present: p, absent: a };
+        else if (targetStatus === 'absent') a += 1;
+        return { present: p, absent: a, notMarked: nm };
       });
       toast.success(`Marked as ${targetStatus}`);
     } catch (error) {
@@ -142,9 +154,7 @@ export default function AttendancePage() {
       accessorKey: 'rollNo',
       header: 'ROLL NO',
       cell: ({ row }) => {
-        const r = row.original;
-        const studentObj = allStudents.find((s) => String(s._id || s.id) === String(r.studentId || r._id));
-        const roll = r.rollNo || r.rollNumber || studentObj?.rollNo || studentObj?.rollNumber || ((r.studentId || r._id) ? `STU-${String(r.studentId || r._id).slice(-4).toUpperCase()}` : '—');
+        const roll = row.original.rollNo || '—';
         return <p className="text-sm font-semibold font-mono uppercase text-foreground">{roll}</p>;
       },
     },
@@ -160,20 +170,22 @@ export default function AttendancePage() {
         const val = getValue();
         if (!val) {
           return (
-            <p className="text-sm font-semibold italic text-muted-foreground">
+            <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
               Not Marked
-            </p>
+            </span>
           );
         }
         return (
-          <p
+          <span
             className={cn(
-              'text-sm font-semibold capitalize',
-              val === 'present' ? 'text-clr-green-dark' : 'text-destructive',
+              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
+              val === 'present'
+                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
             )}
           >
-            {val}
-          </p>
+            {val === 'present' ? 'Present' : 'Absent'}
+          </span>
         );
       },
     },
@@ -231,16 +243,23 @@ export default function AttendancePage() {
         <div className="flex flex-1 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Present</p>
-            <p className="mt-1 text-2xl font-semibold text-foreground">{summary.present}</p>
+            <p className="mt-1 text-2xl font-semibold text-clr-green-dark">{summary.present}</p>
           </div>
           <CalendarCheck size={40} className="text-clr-green opacity-20" />
         </div>
         <div className="flex flex-1 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Absent</p>
-            <p className="mt-1 text-2xl font-semibold text-foreground">{summary.absent}</p>
+            <p className="mt-1 text-2xl font-semibold text-destructive">{summary.absent}</p>
           </div>
           <CalendarCheck size={40} className="text-destructive opacity-20" />
+        </div>
+        <div className="flex flex-1 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Not Marked</p>
+            <p className="mt-1 text-2xl font-semibold text-muted-foreground">{summary.notMarked}</p>
+          </div>
+          <CalendarCheck size={40} className="text-muted-foreground opacity-20" />
         </div>
       </div>
 
