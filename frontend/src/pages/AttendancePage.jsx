@@ -224,7 +224,7 @@ export default function AttendancePage() {
   ];
 
   return (
-    <div className="flex h-[calc(100vh-64px)] flex-col gap-2">
+    <div className="flex h-[calc(100vh-64px)] w-full min-w-0 max-w-full flex-col gap-2">
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -239,27 +239,27 @@ export default function AttendancePage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="flex flex-wrap gap-3">
-        <div className="flex flex-1 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Present</p>
+      <div className="grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="flex min-w-0 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Present</p>
             <p className="mt-1 text-2xl font-semibold text-clr-green-dark">{summary.present}</p>
           </div>
-          <CalendarCheck size={40} className="text-clr-green opacity-20" />
+          <CalendarCheck size={36} className="shrink-0 text-clr-green opacity-20" />
         </div>
-        <div className="flex flex-1 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Absent</p>
+        <div className="flex min-w-0 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Absent</p>
             <p className="mt-1 text-2xl font-semibold text-destructive">{summary.absent}</p>
           </div>
-          <CalendarCheck size={40} className="text-destructive opacity-20" />
+          <CalendarCheck size={36} className="shrink-0 text-destructive opacity-20" />
         </div>
-        <div className="flex flex-1 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Not Marked</p>
+        <div className="flex min-w-0 items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">Not Marked</p>
             <p className="mt-1 text-2xl font-semibold text-muted-foreground">{summary.notMarked}</p>
           </div>
-          <CalendarCheck size={40} className="text-muted-foreground opacity-20" />
+          <CalendarCheck size={36} className="shrink-0 text-muted-foreground opacity-20" />
         </div>
       </div>
 
