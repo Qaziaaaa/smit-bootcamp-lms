@@ -84,7 +84,7 @@ export default function StudentDetailPage() {
   const displaySummary = summary.totalDays > 0 ? summary : { percentage: 0, present: 0, totalDays: 0 };
 
   return (
-    <div className="flex flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 p-3 overflow-x-hidden">
 
       {/* Topbar */}
       <div className="flex items-center justify-between">
@@ -105,95 +105,123 @@ export default function StudentDetailPage() {
         </Button>
       </div>
 
-      <div className="grid gap-3">
-        {/* Profile Card */}
-        <div className="col-span-12 md:col-span-4">
-          <div className="rounded-lg border bg-card p-4 text-center shadow-sm">
-            <div className="mb-2 flex justify-center">
-              <Avatar name={student.name} className="h-20 w-20 text-2xl" />
+      {/* Top Profile Card */}
+      <div className="w-full min-w-0 max-w-full rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 lg:items-center">
+          {/* Profile */}
+          <div className="col-span-2 flex min-w-0 items-center gap-3 sm:col-span-3 lg:col-span-2">
+            <Avatar
+              name={student.name}
+              className="h-12 w-12 shrink-0 text-lg sm:h-14 sm:w-14 sm:text-xl"
+            />
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Student</p>
+              <p className="truncate text-sm font-semibold text-foreground">
+                {student.name}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {student.email}
+              </p>
             </div>
-            <h2 className="text-base font-semibold text-foreground">{student.name}</h2>
-            <p className="mb-0.5 text-sm text-muted-foreground">{student.email}</p>
-            <Badge status={statusForBadge} className="mb-3 mt-1" />
+          </div>
 
-            <hr className="my-2 border-t" />
+          {/* Roll No */}
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">Roll No</p>
+            <p className="mt-1 truncate font-mono text-sm font-semibold text-foreground">
+              {student.rollNo ||
+                student.rollNumber ||
+                (student._id
+                  ? `STU-${String(student._id).slice(-4).toUpperCase()}`
+                  : '—')}
+            </p>
+          </div>
 
-            <div className="flex flex-col gap-2 text-left">
-              <div>
-                <p className="text-xs font-semibold uppercase text-muted-foreground">Roll No</p>
-                <p className="text-sm font-semibold uppercase font-mono text-foreground">{student.rollNo || student.rollNumber || (student._id ? `STU-${String(student._id).slice(-4).toUpperCase()}` : '—')}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase text-muted-foreground">Phone</p>
-                <p className="text-sm text-foreground">{student.phone || '—'}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase text-muted-foreground">Batch</p>
-                <p className="text-sm text-foreground">{student.batch || '—'}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase text-muted-foreground">Team</p>
-                <p className="text-sm text-foreground">{student.teamId?.name || 'Unassigned'}</p>
-              </div>
+          {/* Phone */}
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">Phone</p>
+            <p className="mt-1 truncate text-sm text-foreground">
+              {student.phone || '—'}
+            </p>
+          </div>
+
+          {/* Batch */}
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">Batch</p>
+            <p className="mt-1 truncate text-sm text-foreground">
+              {student.batch || '—'}
+            </p>
+          </div>
+
+          {/* Team */}
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">Team</p>
+            <p className="mt-1 truncate text-sm text-foreground">
+              {student.teamId?.name || 'Unassigned'}
+            </p>
+          </div>
+
+          {/* Status */}
+          <div className="col-span-2 min-w-0 sm:col-span-1">
+            <p className="text-xs text-muted-foreground">Status</p>
+            <div className="mt-1">
+              <Badge status={statusForBadge} />
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Attendance Summary */}
-        <div className="col-span-12 md:col-span-8">
-          <div className="rounded-lg border bg-card p-4 shadow-sm">
-            <div className="mb-3 flex items-center gap-2">
-              <CalendarCheck size={24} className="text-clr-blue" />
-              <h2 className="text-base font-semibold text-foreground">Attendance Summary</h2>
+      {/* Attendance Summary — matches information card width */}
+      <div className="w-full min-w-0 max-w-full rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
+        <div className="mb-3 flex items-center gap-2">
+          <CalendarCheck size={22} className="text-clr-blue" />
+          <h2 className="text-base font-semibold text-foreground">Attendance Summary</h2>
+        </div>
+
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex justify-between">
+              <p className="text-sm font-semibold text-foreground">Attendance Percentage</p>
+              <p className={cn('text-sm font-semibold', displaySummary.percentage >= 80 ? 'text-clr-green-dark' : 'text-clr-amber-dark')}>
+                {displaySummary.percentage}%
+              </p>
             </div>
-
-            <div className="mb-4 flex gap-4">
-              <div className="flex-1">
-                <div className="mb-1 flex justify-between">
-                  <p className="text-sm font-semibold text-foreground">Attendance Percentage</p>
-                  <p className={cn('text-sm font-semibold', displaySummary.percentage >= 80 ? 'text-clr-green-dark' : 'text-clr-amber-dark')}>
-                    {displaySummary.percentage}%
-                  </p>
-                </div>
-                <Progress value={displaySummary.percentage} className="h-2" />
-              </div>
-              <div className="border-l px-3 text-center">
-                <p className="text-2xl font-semibold text-foreground">
-                  {displaySummary.present} <span className="text-base text-muted-foreground">/ {displaySummary.totalDays}</span>
-                </p>
-                <p className="text-xs font-semibold uppercase text-muted-foreground">
-                  Classes Attended
-                </p>
-              </div>
-            </div>
-
-            <h3 className="mb-2 text-sm font-semibold text-foreground">Recent History</h3>
-            <div className="overflow-hidden rounded-md border bg-card">
-              {history.length === 0 ? (
-                <div className="p-3 text-center">
-                  <p className="text-sm text-muted-foreground">No attendance records yet.</p>
-                </div>
-              ) : (
-                history.map((record, index) => (
-                  <div key={record._id} className={cn('flex items-center justify-between p-2', index < history.length - 1 && 'border-b')}>
-                    <p className="text-sm font-medium text-foreground">{String(record.date).slice(0, 10)}</p>
-                    {record.status === 'present' ? (
-                      <span className="flex items-center gap-1 text-clr-green-dark">
-                        <CheckCircle2 size={16} />
-                        <span className="text-sm font-semibold capitalize">Present</span>
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-destructive">
-                        <XCircle size={16} />
-                        <span className="text-sm font-semibold capitalize">Absent</span>
-                      </span>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-
+            <Progress value={displaySummary.percentage} className="h-2" />
           </div>
+          <div className="shrink-0 text-center sm:border-l sm:pl-4 sm:pr-2">
+            <p className="text-2xl font-semibold text-foreground">
+              {displaySummary.present} <span className="text-base text-muted-foreground">/ {displaySummary.totalDays}</span>
+            </p>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">
+              Classes Attended
+            </p>
+          </div>
+        </div>
+
+        <h3 className="mb-2 text-sm font-semibold text-foreground">Recent History</h3>
+        <div className="max-h-60 overflow-y-auto overflow-x-hidden rounded-md border bg-card">
+          {history.length === 0 ? (
+            <div className="p-3 text-center">
+              <p className="text-sm text-muted-foreground">No attendance records yet.</p>
+            </div>
+          ) : (
+            history.map((record, index) => (
+              <div key={record._id || index} className={cn('flex items-center justify-between p-2.5', index < history.length - 1 && 'border-b')}>
+                <p className="text-sm font-medium text-foreground">{record.date ? new Date(record.date).toLocaleDateString() : '—'}</p>
+                {record.status === 'present' ? (
+                  <span className="flex items-center gap-1 text-clr-green-dark">
+                    <CheckCircle2 size={16} />
+                    <span className="text-sm font-semibold capitalize">Present</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-destructive">
+                    <XCircle size={16} />
+                    <span className="text-sm font-semibold capitalize">Absent</span>
+                  </span>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
 
