@@ -12,7 +12,7 @@ export const DataTable = ({ data, columns, isLoading = false, emptyMessage = 'No
 
   return (
     <div className={cn('rounded-lg border bg-card', className)}>
-      <div className="overflow-x-auto">
+      <div className="max-h-[calc(100vh-280px)] overflow-auto">
         <table className="w-full text-sm" aria-label="data table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (

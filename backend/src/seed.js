@@ -34,7 +34,7 @@ const seedBatch = async () => {
   await Batch.create({
     name: BATCH_NAME,
     description: 'Saylani Mass IT Training Bootcamp 2026 cohort.',
-    startDate: new Date('2026-01-01'),
+    startDate: new Date('2026-07-26'),
     endDate: new Date('2026-12-31'),
     status: 'active',
   });
