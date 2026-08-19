@@ -33,9 +33,11 @@ export async function deleteStudent(id) {
   return response.data.data
 }
 
-// Bulk import students from CSV file
-export async function bulkImportStudents(students) {
-  const response = await apiClient.post('/students/bulk-import', { students })
+// Bulk import students from CSV file — sends FormData directly (multer expects multipart/form-data)
+export async function bulkImportStudents(formData) {
+  const response = await apiClient.post('/students/bulk-import', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
   return response.data.data
 }
 
