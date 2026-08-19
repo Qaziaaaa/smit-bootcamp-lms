@@ -202,7 +202,6 @@ const updateStudent = async (id, data) => {
     session.endSession();
     throw err;
   }
-  }
 };
 
 // Delete student — removes from tasks, attendance, and deletes both Student + User documents

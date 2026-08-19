@@ -3,6 +3,7 @@
 // today's attendance, active batch info, and recent items.
 import Student from '../models/student.model.js';
 import Team from '../models/team.model.js';
+import Project from '../models/project.model.js';
 import Task from '../models/task.model.js';
 import Attendance from '../models/attendance.model.js';
 import Batch from '../models/batch.model.js';
@@ -28,8 +29,8 @@ const getDashboardStats = async () => {
   ] = await Promise.all([
     Student.countDocuments(),
     Team.countDocuments(),
-    // Count distinct teamIds that are assigned to students (only teams with members)
-    Student.distinct('teamId').then((ids) => ids.filter(Boolean).length),
+    // Count actual projects from the Project collection
+    Project.countDocuments(),
     Task.countDocuments(),
     Task.countDocuments({ status: 'pending' }),
     Task.countDocuments({ status: 'in-progress' }),
