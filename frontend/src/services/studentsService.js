@@ -33,11 +33,10 @@ export async function deleteStudent(id) {
   return response.data.data
 }
 
-// Bulk import students from CSV file — sends FormData directly (multer expects multipart/form-data)
+// Bulk import students from CSV file — sends FormData directly (multer expects multipart/form-data).
+// Do NOT set Content-Type manually — Axios auto-generates the boundary needed by multer.
 export async function bulkImportStudents(formData) {
-  const response = await apiClient.post('/students/bulk-import', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  })
+  const response = await apiClient.post('/students/bulk-import', formData)
   return response.data.data
 }
 
