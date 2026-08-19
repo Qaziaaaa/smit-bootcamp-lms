@@ -39,8 +39,8 @@ export async function getStudentProjectById(id) {
 }
 
 // Update task status (student can only update their own tasks)
-export async function updateTaskProgress(taskId, data) {
-  const response = await apiClient.patch(`/student/tasks/${taskId}/progress`, data)
+export async function updateTaskProgress(taskId, status) {
+  const response = await apiClient.put(`/student/tasks/${taskId}/progress`, { status })
   return response.data.data
 }
 
