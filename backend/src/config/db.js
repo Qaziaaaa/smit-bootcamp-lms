@@ -10,6 +10,7 @@ const connectDB = async () => {
     logger.info(`MongoDB connected at ${mongoose.connection.host}`);
   } catch (err) {
     logger.error(`MongoDB connection failed: ${err.message}`);
+    if (process.env.VERCEL) return; // don't crash in serverless — handler will retry
     process.exit(1); // can't run without database
   }
 };
