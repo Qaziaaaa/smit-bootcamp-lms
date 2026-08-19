@@ -214,15 +214,15 @@ export function AdminLayout() {
         </header>
 
         {/* Page content — renders the active admin page via React Router's Outlet */}
-        <div className="w-full flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-5">
-          <div className="w-full">
+        <div className="w-full min-w-0 max-w-full flex-1 overflow-y-auto overflow-x-hidden p-3 pb-20 sm:p-4 sm:pb-20 md:p-5 md:pb-5">
+          <div className="w-full min-w-0 max-w-full">
             <Outlet />
           </div>
         </div>
 
         {/* Mobile bottom navigation — 6-column grid with icon + label for each nav item.
             Hidden on desktop (md+), visible on mobile. Replaces sidebar on small screens. */}
-        <nav className="mobile-bottom-nav grid grid-cols-6 border-t bg-card shadow-[0_-2px_10px_rgba(0,0,0,0.08)] md:hidden">
+        <nav className="mobile-bottom-nav shrink-0 grid grid-cols-6 border-t bg-card shadow-[0_-2px_10px_rgba(0,0,0,0.08)] md:hidden">
           {NAV_ITEMS.map((item) => {
             const active = isPathActive(pathname, item.to)
             return (

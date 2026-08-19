@@ -202,13 +202,13 @@ export function StudentLayout() {
           <span className="hidden text-xs font-medium text-muted-foreground md:block">{todayLabel()}</span>
         </header>
 
-        <div className="w-full flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8">
-          <div className="w-full">
+        <div className="w-full min-w-0 max-w-full flex-1 overflow-y-auto overflow-x-hidden p-3 pb-20 sm:p-4 sm:pb-20 md:p-6 md:pb-6">
+          <div className="w-full min-w-0 max-w-full">
             <Outlet />
           </div>
         </div>
 
-        <nav className="mobile-bottom-nav grid grid-cols-5 border-t bg-card shadow-[0_-2px_10px_rgba(0,0,0,0.08)] md:hidden">
+        <nav className="mobile-bottom-nav shrink-0 grid grid-cols-5 border-t bg-card shadow-[0_-2px_10px_rgba(0,0,0,0.08)] md:hidden">
           {NAV_ITEMS.map((item) => {
             const active = isPathActive(pathname, item.to)
             return (

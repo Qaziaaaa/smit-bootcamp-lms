@@ -11,9 +11,9 @@ export const DataTable = ({ data, columns, isLoading = false, emptyMessage = 'No
   const colCount = table.getAllLeafColumns().length
 
   return (
-    <div className={cn('rounded-lg border bg-card', className)}>
-      <div className="max-h-[calc(100vh-280px)] overflow-auto">
-        <table className="w-full text-sm" aria-label="data table">
+    <div className={cn('w-full min-w-0 max-w-full overflow-hidden rounded-lg border bg-card shadow-sm', className)}>
+      <div className="w-full min-w-0 max-w-full overflow-x-auto overflow-y-auto max-h-[calc(100vh-280px)]">
+        <table className="w-full min-w-full text-sm [border-collapse:collapse]" aria-label="data table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="border-b bg-muted/50">

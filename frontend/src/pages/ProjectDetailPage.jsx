@@ -64,28 +64,36 @@ export default function ProjectDetailPage() {
       accessorKey: 'title',
       header: 'TASK',
       cell: ({ getValue }) => (
-        <p className="text-sm font-semibold text-foreground">{getValue()}</p>
+        <p className="min-w-[140px] text-sm font-semibold text-foreground">{getValue()}</p>
       ),
     },
     {
       accessorKey: 'status',
       header: 'STATUS',
-      cell: ({ getValue }) => <Badge status={getValue()} />,
+      cell: ({ getValue }) => (
+        <div className="whitespace-nowrap">
+          <Badge status={getValue()} />
+        </div>
+      ),
     },
     {
       accessorKey: 'priority',
       header: 'PRIORITY',
-      cell: ({ getValue }) => <Badge status={getValue()} label={getValue()} />,
+      cell: ({ getValue }) => (
+        <div className="whitespace-nowrap">
+          <Badge status={getValue()} label={getValue()} />
+        </div>
+      ),
     },
     {
       accessorKey: 'assignedTo',
       header: 'ASSIGNED TO',
       cell: ({ getValue }) => {
         const student = getValue();
-        if (!student) return <p className="text-sm text-muted-foreground">—</p>;
+        if (!student) return <p className="whitespace-nowrap text-sm text-muted-foreground">—</p>;
         return (
-          <div className="flex flex-col">
-            <p className="text-sm font-medium text-foreground">{student.name}</p>
+          <div className="flex flex-col min-w-[120px] whitespace-nowrap">
+            <p className="truncate text-sm font-medium text-foreground">{student.name}</p>
             {student.rollNo && (
               <span className="text-[11px] font-mono text-muted-foreground">{student.rollNo}</span>
             )}
@@ -97,7 +105,7 @@ export default function ProjectDetailPage() {
       accessorKey: 'deadline',
       header: 'DEADLINE',
       cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">
+        <p className="whitespace-nowrap text-sm text-muted-foreground">
           {getValue() ? String(getValue()).slice(0, 10) : '—'}
         </p>
       ),
@@ -106,7 +114,7 @@ export default function ProjectDetailPage() {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <div className="flex gap-1">
+        <div className="flex items-center gap-1 whitespace-nowrap">
           <Button
             variant="ghost"
             size="icon"

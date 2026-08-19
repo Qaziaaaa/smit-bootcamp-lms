@@ -74,11 +74,11 @@ export default function StudentsPage() {
       accessorKey: 'name',
       header: 'STUDENT',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-[160px]">
           <Avatar name={row.original.name} />
-          <div>
-            <p className="text-sm font-semibold text-foreground">{row.original.name}</p>
-            <p className="mt-0.5 text-[13px] text-muted-foreground">{row.original.email}</p>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-foreground">{row.original.name}</p>
+            <p className="truncate text-[13px] text-muted-foreground">{row.original.email}</p>
           </div>
         </div>
       ),
@@ -88,31 +88,35 @@ export default function StudentsPage() {
       header: 'ROLL NO',
       cell: ({ row }) => {
         const roll = row.original.rollNo || row.original.rollNumber || (row.original._id ? `STU-${String(row.original._id).slice(-4).toUpperCase()}` : '—');
-        return <p className="text-[13px] font-semibold uppercase font-mono text-foreground">{roll}</p>;
+        return <p className="whitespace-nowrap text-[13px] font-semibold uppercase font-mono text-foreground">{roll}</p>;
       },
     },
     {
       accessorKey: 'batch',
       header: 'BATCH',
-      cell: ({ getValue }) => <p className="text-[13px] font-semibold text-foreground">{getValue() || '—'}</p>,
+      cell: ({ getValue }) => <p className="whitespace-nowrap text-[13px] font-semibold text-foreground">{getValue() || '—'}</p>,
     },
     {
       accessorKey: 'teamId',
       header: 'TEAM',
       cell: ({ getValue }) => (
-        <p className="text-[13px] text-muted-foreground">{getValue()?.name || 'Unassigned'}</p>
+        <p className="whitespace-nowrap text-[13px] text-muted-foreground">{getValue()?.name || 'Unassigned'}</p>
       ),
     },
     {
       accessorKey: 'status',
       header: 'STATUS',
-      cell: ({ getValue }) => <Badge status={getValue()} />,
+      cell: ({ getValue }) => (
+        <div className="whitespace-nowrap">
+          <Badge status={getValue()} />
+        </div>
+      ),
     },
     {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <div className="flex gap-1">
+        <div className="flex items-center gap-1 whitespace-nowrap">
           <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="View student" onClick={() => navigate(`/students/${row.original._id}`)}>
             <Eye size={18} />
           </Button>
@@ -230,9 +234,9 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
-        <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." />
-        <div className="ml-auto flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-2.5 sm:flex-row sm:items-center">
+        <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." className="w-full sm:max-w-xs" />
+        <div className="grid w-full grid-cols-2 gap-2 sm:ml-auto sm:flex sm:w-auto sm:flex-wrap">
           <FilterBar
             label="Batch"
             value="Batch 2026"

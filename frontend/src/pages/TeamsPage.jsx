@@ -231,13 +231,13 @@ export default function TeamsPage() {
     {
       accessorKey: 'name',
       header: 'TEAM NAME',
-      cell: ({ getValue }) => <span className="text-sm font-semibold text-foreground">{getValue()}</span>,
+      cell: ({ getValue }) => <span className="min-w-[140px] text-sm font-semibold text-foreground">{getValue()}</span>,
     },
     {
       accessorKey: 'memberCount',
       header: 'MEMBERS',
       cell: ({ getValue }) => (
-        <span className="flex items-center gap-1 text-sm text-muted-foreground">
+        <span className="flex items-center gap-1 whitespace-nowrap text-sm text-muted-foreground">
           <Users size={16} />
           {getValue() || 0} students
         </span>
@@ -248,23 +248,23 @@ export default function TeamsPage() {
       header: 'TEAM LEADER',
       cell: ({ getValue }) => {
         const leaderId = getValue();
-        if (!leaderId) return <span className="text-sm text-muted-foreground">—</span>;
+        if (!leaderId) return <span className="whitespace-nowrap text-sm text-muted-foreground">—</span>;
         const leader = students.find((s) => (s._id || s.id) === leaderId);
-        return <span className="text-sm text-foreground">{leader ? leader.name : 'Unknown'}</span>;
+        return <span className="whitespace-nowrap text-sm text-foreground">{leader ? leader.name : 'Unknown'}</span>;
       },
     },
     {
       accessorKey: 'projectId',
       header: 'PROJECT',
       cell: ({ getValue }) => (
-        <span className="text-sm text-foreground">{getValue() ? projectMap[getValue()] || '—' : '—'}</span>
+        <span className="whitespace-nowrap text-sm text-foreground">{getValue() ? projectMap[getValue()] || '—' : '—'}</span>
       ),
     },
     {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <div className="flex gap-1">
+        <div className="flex items-center gap-1 whitespace-nowrap">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/teams/${row.original._id}`)} aria-label="View team">
             <Eye size={18} />
           </Button>

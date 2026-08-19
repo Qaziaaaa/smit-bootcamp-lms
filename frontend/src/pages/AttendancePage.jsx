@@ -141,11 +141,11 @@ export default function AttendancePage() {
       accessorKey: 'studentName',
       header: 'STUDENT',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-[160px]">
           <Avatar name={row.original.studentName} />
-          <div>
-            <p className="text-sm font-semibold text-foreground">{row.original.studentName}</p>
-            <p className="text-xs text-muted-foreground">{row.original.studentEmail}</p>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-foreground">{row.original.studentName}</p>
+            <p className="truncate text-xs text-muted-foreground">{row.original.studentEmail}</p>
           </div>
         </div>
       ),
@@ -155,13 +155,13 @@ export default function AttendancePage() {
       header: 'ROLL NO',
       cell: ({ row }) => {
         const roll = row.original.rollNo || '—';
-        return <p className="text-sm font-semibold font-mono uppercase text-foreground">{roll}</p>;
+        return <p className="whitespace-nowrap text-sm font-semibold font-mono uppercase text-foreground">{roll}</p>;
       },
     },
     {
       accessorKey: 'date',
       header: 'DATE',
-      cell: ({ getValue }) => <p className="text-sm text-foreground">{String(getValue()).slice(0, 10)}</p>,
+      cell: ({ getValue }) => <p className="whitespace-nowrap text-sm text-foreground">{String(getValue()).slice(0, 10)}</p>,
     },
     {
       accessorKey: 'status',
@@ -170,7 +170,7 @@ export default function AttendancePage() {
         const val = getValue();
         if (!val) {
           return (
-            <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+            <span className="inline-flex whitespace-nowrap items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
               Not Marked
             </span>
           );
@@ -178,7 +178,7 @@ export default function AttendancePage() {
         return (
           <span
             className={cn(
-              'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
+              'inline-flex whitespace-nowrap items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
               val === 'present'
                 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                 : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
@@ -198,7 +198,7 @@ export default function AttendancePage() {
         const isLoading = togglingId === itemKey;
 
         return (
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
             <Button
               size="sm"
               variant={currentStatus === 'present' ? 'success' : 'outline'}
@@ -224,7 +224,7 @@ export default function AttendancePage() {
   ];
 
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full min-w-0 max-w-full flex-col gap-2">
+    <div className="flex w-full min-w-0 max-w-full flex-col gap-4">
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -264,14 +264,14 @@ export default function AttendancePage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
-        <SearchBar value={search} onChange={setSearch} placeholder="Search student by name or roll no..." />
-        <div className="ml-auto flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-2.5 sm:flex-row sm:items-center">
+        <SearchBar value={search} onChange={setSearch} placeholder="Search student by name or roll no..." className="w-full sm:max-w-xs" />
+        <div className="flex w-full min-w-0 items-center sm:ml-auto sm:w-auto">
           <Input
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="h-11 w-[160px] max-w-[180px] rounded-md"
+            className="h-11 w-full min-w-0 sm:w-[160px] rounded-md"
           />
         </div>
       </div>
@@ -282,7 +282,6 @@ export default function AttendancePage() {
         columns={columns}
         isLoading={initialLoading}
         emptyMessage="No attendance records for the selected date"
-        className="flex-1 min-h-0"
       />
     </div>
   );
