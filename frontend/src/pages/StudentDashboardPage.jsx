@@ -138,7 +138,7 @@ export default function StudentDashboardPage() {
   return (
     <div className="grid gap-3">
       {/* Welcome banner: greeting + batch/team summary + shortcut to sprint tasks */}
-      <div style={{ background: 'linear-gradient(135deg, #61bb46 0%, #61bb46 15%, #0873b9 65%)' }} className="flex flex-col gap-2 rounded-xl p-3 text-white shadow-md md:flex-row md:items-center md:justify-between">
+      <div style={{ background: 'linear-gradient(135deg, #61bb46 0%, #0873b9 30%)' }} className="flex flex-col gap-2 rounded-xl p-3 text-white shadow-md md:flex-row md:items-center md:justify-between">
         <div className="min-w-0">
           {/* SMIT badge */}
           <div className="mb-1 inline-flex items-center gap-0.75 rounded-full bg-white/20 px-1.5 py-0.5 text-xs font-semibold backdrop-blur">
