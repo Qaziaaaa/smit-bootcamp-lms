@@ -27,15 +27,23 @@ export default function StudentDetailPage() {
     try {
       const [studentRes, attendanceRes, summaryRes] = await Promise.all([
         getStudentById(id),
-        getAttendance({ studentId: id, limit: 10 }),
+        getAttendance({ studentId: id, limit: 100 }),
         getAttendanceSummary(),
       ]);
       setStudent(studentRes);
-      const ownSummary = (summaryRes.students || []).find((s) => String(s.studentId) === String(id));
+      const ownSummary = (summaryRes?.students || []).find((s) => String(s.studentId) === String(id));
+      let currentSummary = ownSummary;
+      if (!currentSummary && attendanceRes?.records && attendanceRes.records.length > 0) {
+        const present = attendanceRes.records.filter((r) => r.status === 'present').length;
+        const absent = attendanceRes.records.filter((r) => r.status === 'absent').length;
+        const totalDays = attendanceRes.records.length;
+        const percentage = totalDays > 0 ? Number(((present / totalDays) * 100).toFixed(2)) : 0;
+        currentSummary = { present, absent, totalDays, percentage };
+      }
       setSummary(
-        ownSummary || { percentage: 0, present: 0, totalDays: 0, absent: 0 }
+        currentSummary || { percentage: 0, present: 0, totalDays: 0, absent: 0 }
       );
-      setHistory(attendanceRes.records || []);
+      setHistory(attendanceRes?.records || []);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to load student');
     } finally {

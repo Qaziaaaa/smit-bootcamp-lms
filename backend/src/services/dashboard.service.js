@@ -41,7 +41,8 @@ const getDashboardStats = async () => {
   ]);
 
   const todayPresent = todayAttendance.filter((a) => a.status === 'present').length;
-  const todayAbsent = totalStudents - todayPresent;
+  const todayAbsent = todayAttendance.filter((a) => a.status === 'absent').length;
+  const todayNotMarked = Math.max(0, totalStudents - todayPresent - todayAbsent);
 
   // Get the 5 most recent students and tasks for the dashboard list
   const [recentStudents, recentTasks] = await Promise.all([
@@ -57,7 +58,11 @@ const getDashboardStats = async () => {
   return {
     counts: { students: totalStudents, teams: totalTeams, projects: totalProjects, tasks: totalTasks },
     taskStatus: { pending: pendingTasks, inProgress: inProgressTasks, completed: completedTasks },
-    todayAttendance: { present: todayPresent, absent: todayAbsent },
+    todayAttendance: {
+      present: todayPresent,
+      absent: todayAbsent,
+      notMarked: todayNotMarked,
+    },
     activeBatch,
     recentStudents,
     recentTasks,

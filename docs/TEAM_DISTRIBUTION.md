@@ -21,6 +21,9 @@ Files to read and own:
 - `frontend/src/pages/StudentProfilePage.jsx` — student profile + change password (created by Abdullah)
 - `frontend/src/pages/StudentTeamPage.jsx` — student team view (created by Abdullah)
 - `frontend/src/components/ui/Logo.jsx` — SMIT logo component
+- `frontend/src/components/ui/SearchBar.jsx` — search bar component
+- `frontend/src/components/attendance/MarkAttendanceModal.jsx` — attendance form modal
+- `frontend/src/services/dashboardService.js` — dashboard stats API
 
 ---
 
@@ -32,7 +35,6 @@ Files to read and own:
 - `frontend/src/pages/StudentDetailPage.jsx` — single student detail view
 - `frontend/src/components/students/StudentForm.jsx` — add/edit student modal
 - `frontend/src/pages/AttendancePage.jsx` — attendance list + mark modal
-- `frontend/src/components/attendance/MarkAttendanceModal.jsx` — attendance form modal
 - `frontend/src/pages/TeamsPage.jsx` — teams list + create/edit form
 - `frontend/src/pages/TeamDetailPage.jsx` — single team detail view
 - `frontend/src/pages/ProjectsPage.jsx` — projects list with status toggle
@@ -56,7 +58,6 @@ Services:
 - `frontend/src/services/teamsService.js` — teams API calls
 - `frontend/src/services/projectsService.js` — projects API calls
 - `frontend/src/services/tasksService.js` — tasks API calls
-- `frontend/src/services/dashboardService.js` — dashboard stats API
 
 ---
 

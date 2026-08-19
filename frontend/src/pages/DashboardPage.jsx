@@ -24,18 +24,21 @@ import { getAttendance } from '../services/attendanceService'
 import { createStudent } from '../services/studentsService'
 import { toast } from 'react-hot-toast'
 
+// Task status style mapping
 const TASK_STATUS_STYLE = {
   completed: { icon: Award, iconBg: 'bg-clr-emerald-bg', iconColor: 'text-clr-green' },
   'in-progress': { icon: Clock, iconBg: 'bg-clr-blue-bg', iconColor: 'text-clr-blue' },
   pending: { icon: CheckSquare, iconBg: 'bg-clr-amber-bg', iconColor: 'text-clr-amber-dark' },
 }
 
+// Format date to readable string
 function formatDate(date) {
   if (!date) return '—'
   return new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 export default function DashboardPage() {
+  // State management
   const [dashboard, setDashboard] = useState(null)
   const [recentAttendance, setRecentAttendance] = useState([])
   const [attendanceSearch, setAttendanceSearch] = useState('')
@@ -44,6 +47,7 @@ export default function DashboardPage() {
   const [isStudentFormOpen, setIsStudentFormOpen] = useState(false)
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false)
 
+  // Fetch dashboard summary
   const loadDashboard = useCallback(async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true)
@@ -57,6 +61,7 @@ export default function DashboardPage() {
     }
   }, [])
 
+  // Fetch recent attendance records
   const loadRecentAttendance = useCallback(async () => {
     try {
       const params = { limit: 10 }
@@ -70,15 +75,23 @@ export default function DashboardPage() {
     }
   }, [attendanceSearch])
 
+  // Initial load
   useEffect(() => {
     loadDashboard()
   }, [loadDashboard])
 
+  // Reload recent attendance on search change
+  useEffect(() => {
+    loadRecentAttendance()
+  }, [loadRecentAttendance])
+
+  // Handle successful attendance submit
   const handleAttendanceSuccess = () => {
     loadDashboard(false)
     loadRecentAttendance()
   }
 
+  // Handle new student creation
   const handleSaveStudent = async (data) => {
     try {
       await createStudent(data)
@@ -91,14 +104,11 @@ export default function DashboardPage() {
     }
   }
 
-  useEffect(() => {
-    loadRecentAttendance()
-  }, [loadRecentAttendance])
-
   const counts = dashboard?.counts ?? {}
   const todayAttendance = dashboard?.todayAttendance ?? {}
-
   const activeBatch = dashboard?.activeBatch
+
+  // Calculate batch progress
   let batchProgress = null
   if (activeBatch?.startDate) {
     const start = new Date(activeBatch.startDate)
@@ -108,6 +118,7 @@ export default function DashboardPage() {
     batchProgress = `Day ${Math.min(elapsedDays, totalDays)} of ${totalDays} days`
   }
 
+  // Summary metric cards
   const STAT_CARDS = [
     {
       label: 'Total Students',
@@ -148,6 +159,7 @@ export default function DashboardPage() {
     },
   ]
 
+  // Recent activity list items
   const ACTIVITY_ITEMS = (dashboard?.recentTasks ?? []).map((task) => {
     const style = TASK_STATUS_STYLE[task.status] ?? TASK_STATUS_STYLE.pending
     return {
@@ -160,6 +172,7 @@ export default function DashboardPage() {
     }
   })
 
+  // Loading and error states
   if (loading) {
     return (
       <div className="grid min-h-[300px] place-items-center">
@@ -178,6 +191,7 @@ export default function DashboardPage() {
 
   return (
     <div className="grid gap-3 sm:-mt-1 md:-mt-2 -mb-1 sm:-mb-2 md:-mb-3">
+      {/* Header with actions */}
       <div className="flex flex-col items-stretch justify-between gap-2 -mb-1 sm:flex-row sm:items-start">
         <div>
           <h1 className="text-2xl font-medium tracking-tight text-foreground">
@@ -203,13 +217,17 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Stat cards grid */}
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {STAT_CARDS.map((card) => (
           <StatCard key={card.label} {...card} />
         ))}
       </div>
 
+      {/* Main split: Recent attendance & Recent activity */}
       <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
+        
+        {/* Recent attendance table */}
         <div className="min-w-0 rounded-lg border bg-card shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2 p-3">
             <div>
@@ -220,7 +238,12 @@ export default function DashboardPage() {
                 Latest student attendance records
               </p>
             </div>
-            <SearchBar value={attendanceSearch} onChange={setAttendanceSearch} placeholder="Search student..." className="w-full sm:w-[200px]" />
+            <SearchBar 
+              value={attendanceSearch} 
+              onChange={setAttendanceSearch} 
+              placeholder="Search student..." 
+              className="w-full sm:w-[200px]" 
+            />
           </div>
           <div className="h-[420px] w-full max-w-full overflow-x-auto overflow-y-auto border-t">
             <table
@@ -290,6 +313,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Recent activity feed */}
         <div className="min-w-0 rounded-lg border bg-card shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-2 p-3">
             <div>
@@ -339,6 +363,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Modals */}
       <StudentForm
         open={isStudentFormOpen}
         onClose={() => setIsStudentFormOpen(false)}

@@ -48,7 +48,61 @@ const getAttendance = async (filters = {}, pagination = {}) => {
   const { page = 1, limit = 10 } = pagination;
   const skip = (page - 1) * limit;
 
-  // 1. If a specific date is provided, return all active students with left-joined attendance status for that date.
+  // 1. If a specific studentId is provided, return all attendance records for that student
+  if (studentId) {
+    let studentObjectId;
+    try {
+      studentObjectId = new Types.ObjectId(studentId);
+    } catch {
+      throw new ApiError(400, 'Invalid student ID.');
+    }
+
+    const query = { studentId: studentObjectId };
+    if (status) query.status = status;
+    if (date) {
+      let attendanceDate = new Date(date);
+      attendanceDate.setHours(0, 0, 0, 0);
+      const nextDay = new Date(attendanceDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      query.date = { $gte: attendanceDate, $lt: nextDay };
+    }
+
+    const [records, total] = await Promise.all([
+      Attendance.find(query)
+        .populate('studentId', 'name email rollNo batch')
+        .sort({ date: -1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Attendance.countDocuments(query),
+    ]);
+
+    const formattedRecords = records.map((r) => ({
+      _id: r._id,
+      studentId: r.studentId?._id || r.studentId,
+      studentName: r.studentId?.name || '',
+      studentEmail: r.studentId?.email || '',
+      rollNo: r.studentId?.rollNo || '',
+      batch: r.studentId?.batch || '',
+      date: r.date,
+      status: r.status,
+      markedBy: r.markedBy,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    }));
+
+    return {
+      records: formattedRecords,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / limit) || 1,
+      },
+    };
+  }
+
+  // 2. If a specific date is provided, return all active students with left-joined attendance status for that date.
   if (date) {
     let studentMatch = { status: 'active' };
 
@@ -144,7 +198,8 @@ const getAttendance = async (filters = {}, pagination = {}) => {
         $group: {
           _id: null,
           present: { $sum: { $cond: [{ $eq: ['$attendanceDoc.status', 'present'] }, 1, 0] } },
-          absent: { $sum: { $cond: [{ $ne: ['$attendanceDoc.status', 'present'] }, 1, 0] } },
+          absent: { $sum: { $cond: [{ $eq: ['$attendanceDoc.status', 'absent'] }, 1, 0] } },
+          notMarked: { $sum: { $cond: [{ $or: [{ $eq: ['$attendanceDoc.status', null] }, { $not: ['$attendanceDoc.status'] }] }, 1, 0] } },
         },
       },
     ];
@@ -195,8 +250,12 @@ const getAttendance = async (filters = {}, pagination = {}) => {
 
     const total = countResult.length > 0 ? countResult[0].total : 0;
     const summary = summaryResult.length > 0
-      ? { present: summaryResult[0].present, absent: summaryResult[0].absent }
-      : { present: 0, absent: 0 };
+      ? {
+          present: summaryResult[0].present || 0,
+          absent: summaryResult[0].absent || 0,
+          notMarked: summaryResult[0].notMarked || 0,
+        }
+      : { present: 0, absent: 0, notMarked: 0 };
 
     return {
       records,
