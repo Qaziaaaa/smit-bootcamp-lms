@@ -7,6 +7,9 @@ import Attendance from '../models/attendance.model.js';
 import Team from '../models/team.model.js';
 import Task from '../models/task.model.js';
 import Project from '../models/project.model.js';
+import User from '../models/user.model.js';
+import bcrypt from 'bcryptjs';
+import env from '../config/env.js';
 import ApiError from '../utils/ApiError.js';
 
 // Get the logged-in student's profile
@@ -149,7 +152,30 @@ const updateTaskProgress = async (userId, taskId, data) => {
   return task;
 };
 
+const changePassword = async (userId, currentPassword, newPassword) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found.', ['User does not exist.']);
+  }
+
+  const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!isMatch) {
+    throw new ApiError(401, 'Incorrect current password.', ['Current password is wrong.']);
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, env.bcryptRounds);
+  await User.findByIdAndUpdate(userId, { passwordHash });
+
+  return { success: true };
+};
+
 export default {
-  getStudentProfile, getStudentAttendance, getStudentTeam,
-  getStudentTasks, getStudentProjects, getStudentProjectById, updateTaskProgress,
+  getStudentProfile,
+  getStudentAttendance,
+  getStudentTeam,
+  getStudentTasks,
+  getStudentProjects,
+  getStudentProjectById,
+  updateTaskProgress,
+  changePassword,
 };

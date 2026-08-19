@@ -40,4 +40,19 @@ const updateTaskProgress = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, task, 'Task progress updated successfully');
 });
 
-export default { getProfile, getAttendance, getTeam, getTasks, getProjects, getProjectById, updateTaskProgress };
+const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  await studentPortalService.changePassword(req.user.userId, currentPassword, newPassword);
+  sendSuccess(res, 200, { success: true }, 'Password changed successfully');
+});
+
+export default {
+  getProfile,
+  getAttendance,
+  getTeam,
+  getTasks,
+  getProjects,
+  getProjectById,
+  updateTaskProgress,
+  changePassword,
+};

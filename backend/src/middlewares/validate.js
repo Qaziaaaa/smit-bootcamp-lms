@@ -275,8 +275,6 @@ const validateBatchUpdate = [
   handleValidationErrors,
 ];
 
-// --- Generic validators ---
-
 const validateMongoId = [
   param('id').isMongoId().withMessage('Invalid ID.'),
   handleValidationErrors,

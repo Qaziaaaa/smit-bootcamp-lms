@@ -49,3 +49,9 @@ export async function changeStudentPassword({ oldPassword, password, confirmPass
   const response = await apiClient.post('/auth/change-password', { oldPassword, password, confirmPassword })
   return response.data.data
 }
+
+// Changes the logged-in student's own password
+export async function changePassword(currentPassword, newPassword) {
+  const response = await apiClient.put('/student/change-password', { currentPassword, newPassword })
+  return response.data.data
+}
