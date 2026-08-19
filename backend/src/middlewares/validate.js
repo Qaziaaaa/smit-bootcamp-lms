@@ -230,6 +230,12 @@ const validateTaskProgress = [
   handleValidationErrors,
 ];
 
+const validateChangePassword = [
+  body('currentPassword').notEmpty().withMessage('Current password is required.'),
+  body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters.'),
+  handleValidationErrors,
+];
+
 export {
   validateLogin,
   validateStudentCreate,
@@ -255,4 +261,5 @@ export {
   validateTaskCreate,
   validateTaskUpdate,
   validateTaskProgress,
+  validateChangePassword,
 };

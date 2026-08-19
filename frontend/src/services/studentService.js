@@ -39,3 +39,9 @@ export async function updateTaskProgress(taskId, status) {
   const response = await apiClient.put(`/student/tasks/${taskId}/progress`, { status })
   return response.data.data
 }
+
+// Changes the logged-in student's own password
+export async function changePassword(currentPassword, newPassword) {
+  const response = await apiClient.put('/student/change-password', { currentPassword, newPassword })
+  return response.data.data
+}

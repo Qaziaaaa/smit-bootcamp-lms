@@ -136,6 +136,97 @@ export default function StudentProfilePage() {
         </div>
       </div>
 
+      {/* Change Password Card */}
+      <ChangePasswordCard />
+    </div>
+  );
+}
+
+function ChangePasswordCard() {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (newPassword.length < 8) {
+      setError('New password must be at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('New password and confirm password do not match.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { changePassword } = await import('../services/studentService');
+      await changePassword(currentPassword, newPassword);
+      setSuccess('Password changed successfully.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to change password. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl border bg-card p-3 shadow-sm">
+      <div className="mb-3 flex items-center gap-1.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-clr-blue"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <h3 className="font-semibold text-foreground">Change Password</h3>
+      </div>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div>
+          <p className="mb-1 text-xs text-muted-foreground">Current Password</p>
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            required
+            placeholder="Current password"
+            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div>
+          <p className="mb-1 text-xs text-muted-foreground">New Password</p>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+            placeholder="Min. 8 characters"
+            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div>
+          <p className="mb-1 text-xs text-muted-foreground">Confirm New Password</p>
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            placeholder="Repeat new password"
+            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        {error && <p className="text-xs text-destructive sm:col-span-3">{error}</p>}
+        {success && <p className="text-xs text-green-600 sm:col-span-3">{success}</p>}
+        <div className="sm:col-span-3 flex justify-end">
+          <Button type="submit" disabled={submitting} className="rounded-lg px-4 font-semibold">
+            {submitting ? 'Saving...' : 'Update Password'}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }

@@ -126,7 +126,7 @@ const getStudentById = async (id) => {
 };
 
 const updateStudent = async (id, data) => {
-  const { email, rollNo, ...rest } = data;
+  const { email, rollNo, password, ...rest } = data;
   const student = await Student.findById(id);
   if (!student) {
     throw new ApiError(404, 'Student not found.', ['Student does not exist.']);
@@ -166,8 +166,11 @@ const updateStudent = async (id, data) => {
     { new: true, runValidators: true }
   ).populate('teamId', 'name');
 
-  if (email) {
-    await User.findByIdAndUpdate(student.userId, { email: email.toLowerCase() });
+  const userUpdates = {};
+  if (email) userUpdates.email = email.toLowerCase();
+  if (password) userUpdates.passwordHash = await bcrypt.hash(password, env.bcryptRounds);
+  if (Object.keys(userUpdates).length > 0) {
+    await User.findByIdAndUpdate(student.userId, userUpdates);
   }
 
   return updated;
