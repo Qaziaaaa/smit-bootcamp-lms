@@ -81,14 +81,14 @@ export default function TasksPage() {
       accessorKey: 'title',
       header: 'TASK',
       cell: ({ getValue }) => (
-        <p className="text-sm font-semibold text-foreground">{getValue()}</p>
+        <p className="min-w-[140px] text-sm font-semibold text-foreground">{getValue()}</p>
       ),
     },
     {
       accessorKey: 'projectId',
       header: 'PROJECT',
       cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">
+        <p className="whitespace-nowrap text-sm text-muted-foreground">
           {getValue()?.title || '—'}
         </p>
       ),
@@ -98,10 +98,10 @@ export default function TasksPage() {
       header: 'ASSIGNED TO',
       cell: ({ getValue }) => {
         const student = getValue();
-        if (!student) return <p className="text-sm text-muted-foreground">—</p>;
+        if (!student) return <p className="whitespace-nowrap text-sm text-muted-foreground">—</p>;
         return (
-          <div className="flex flex-col">
-            <p className="text-sm font-medium text-foreground">{student.name}</p>
+          <div className="flex flex-col min-w-[120px] whitespace-nowrap">
+            <p className="truncate text-sm font-medium text-foreground">{student.name}</p>
             {student.rollNo && (
               <span className="text-[11px] font-mono text-muted-foreground">{student.rollNo}</span>
             )}
@@ -112,18 +112,26 @@ export default function TasksPage() {
     {
       accessorKey: 'priority',
       header: 'PRIORITY',
-      cell: ({ getValue }) => <Badge status={getValue()} label={getValue()} />,
+      cell: ({ getValue }) => (
+        <div className="whitespace-nowrap">
+          <Badge status={getValue()} label={getValue()} />
+        </div>
+      ),
     },
     {
       accessorKey: 'status',
       header: 'STATUS',
-      cell: ({ getValue }) => <Badge status={getValue()} />,
+      cell: ({ getValue }) => (
+        <div className="whitespace-nowrap">
+          <Badge status={getValue()} />
+        </div>
+      ),
     },
     {
       accessorKey: 'deadline',
       header: 'DEADLINE',
       cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">
+        <p className="whitespace-nowrap text-sm text-muted-foreground">
           {getValue() ? String(getValue()).slice(0, 10) : '—'}
         </p>
       ),
@@ -132,7 +140,7 @@ export default function TasksPage() {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <div className="flex gap-1">
+        <div className="flex items-center gap-1 whitespace-nowrap">
           {row.original.status !== 'completed' && (
             <Button
               variant="ghost"
@@ -232,10 +240,10 @@ export default function TasksPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
-        <SearchBar value={search} onChange={setSearch} placeholder="Search task..." />
-        <div className="ml-auto flex flex-wrap gap-2">
-          <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px]">
+      <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-2.5 sm:flex-row sm:items-center">
+        <SearchBar value={search} onChange={setSearch} placeholder="Search task..." className="w-full sm:max-w-xs" />
+        <div className="grid w-full grid-cols-1 gap-2 sm:ml-auto sm:flex sm:w-auto sm:flex-wrap sm:grid-cols-none">
+          <div className="w-full min-w-0 sm:w-auto sm:min-w-[150px]">
             <Select
               value={projectFilter}
               onChange={(next) => setProjectFilter(next)}
@@ -243,7 +251,7 @@ export default function TasksPage() {
               placeholder="All Projects"
             />
           </div>
-          <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px]">
+          <div className="w-full min-w-0 sm:w-auto sm:min-w-[150px]">
             <Select
               value={statusFilter}
               onChange={(next) => setStatusFilter(next)}
@@ -252,7 +260,7 @@ export default function TasksPage() {
             />
           </div>
           {assignedOptions.length > 0 && (
-            <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px]">
+            <div className="w-full min-w-0 sm:w-auto sm:min-w-[150px]">
               <Select
                 value={assignedFilter}
                 onChange={(next) => setAssignedFilter(next)}

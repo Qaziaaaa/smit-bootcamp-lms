@@ -69,7 +69,7 @@ export default function ProjectsPage() {
       accessorKey: 'title',
       header: 'PROJECT',
       cell: ({ row }) => (
-        <div>
+        <div className="min-w-[160px]">
           <p className="text-sm font-semibold text-foreground">{row.original.title}</p>
           <p className="max-w-[260px] truncate text-xs text-muted-foreground">{row.original.description || ''}</p>
         </div>
@@ -79,7 +79,7 @@ export default function ProjectsPage() {
       accessorKey: 'teamId',
       header: 'TEAM',
       cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">
+        <p className="whitespace-nowrap text-sm text-muted-foreground">
           {getValue()?.name || '—'}
         </p>
       ),
@@ -91,21 +91,23 @@ export default function ProjectsPage() {
         const current = row.original.status;
         const nextStatus = STATUS_CYCLE[(STATUS_CYCLE.indexOf(current) + 1) % STATUS_CYCLE.length];
         return (
-          <button
-            onClick={async () => {
-              try {
-                await updateProject(row.original._id, { status: nextStatus });
-                toast.success(`Status changed to ${nextStatus}`);
-                fetchProjects();
-              } catch {
-                toast.error('Failed to update status');
-              }
-            }}
-            className="cursor-pointer rounded-full border-0 bg-transparent p-0"
-            title={`Click to change to ${nextStatus}`}
-          >
-            <Badge status={current} />
-          </button>
+          <div className="whitespace-nowrap">
+            <button
+              onClick={async () => {
+                try {
+                  await updateProject(row.original._id, { status: nextStatus });
+                  toast.success(`Status changed to ${nextStatus}`);
+                  fetchProjects();
+                } catch {
+                  toast.error('Failed to update status');
+                }
+              }}
+              className="cursor-pointer rounded-full border-0 bg-transparent p-0"
+              title={`Click to change to ${nextStatus}`}
+            >
+              <Badge status={current} />
+            </button>
+          </div>
         );
       },
     },
@@ -113,7 +115,7 @@ export default function ProjectsPage() {
       accessorKey: 'deadline',
       header: 'DEADLINE',
       cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">
+        <p className="whitespace-nowrap text-sm text-muted-foreground">
           {getValue() ? String(getValue()).slice(0, 10) : '—'}
         </p>
       ),
@@ -122,7 +124,7 @@ export default function ProjectsPage() {
       id: 'actions',
       header: 'ACTIONS',
       cell: ({ row }) => (
-        <div className="flex gap-1">
+        <div className="flex items-center gap-1 whitespace-nowrap">
           <Button
             variant="ghost"
             size="icon"
@@ -210,9 +212,9 @@ export default function ProjectsPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
-        <SearchBar value={search} onChange={setSearch} placeholder="Search project..." />
-        <div className="ml-auto flex flex-wrap gap-2">
+      <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-2.5 sm:flex-row sm:items-center">
+        <SearchBar value={search} onChange={setSearch} placeholder="Search project..." className="w-full sm:max-w-xs" />
+        <div className="flex w-full min-w-0 items-center sm:ml-auto sm:w-auto">
           <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px]">
             <Select
               value={statusFilter}
