@@ -47,7 +47,7 @@ export default function StudentProfilePage() {
   return (
     <div className="flex flex-col gap-3">
       {/* Cover Image & Avatar Section */}
-      <div className="relative mb-8">
+      <div className="relative mb-20">
         <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-clr-green-bg to-clr-blue-bg sm:h-50 md:h-60">
           <div className="scale-150 opacity-80">
             <Logo />
