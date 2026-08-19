@@ -1,3 +1,5 @@
+// Dashboard routes — returns aggregated stats for admin dashboard.
+// Admin only.
 import { Router } from 'express';
 import dashboardController from '../controllers/dashboard.controller.js';
 import authenticate from '../middlewares/authenticate.js';

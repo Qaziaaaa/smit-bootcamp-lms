@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { UserPlus, Edit2, Trash2, Eye } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { UserPlus, Edit2, Trash2, Eye, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
@@ -11,20 +11,22 @@ import { Pagination } from '../components/ui/Pagination';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { Modal } from '../components/ui/Modal';
 import { StudentForm } from '../components/students/StudentForm';
+import { getTeams } from '../services/teamsService';
 import {
   getStudents,
   createStudent,
   updateStudent,
   deleteStudent,
+  bulkImportStudents,
 } from '../services/studentsService';
 
 export default function StudentsPage() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [batchFilter, setBatchFilter] = useState('');
+  const [teamFilter, setTeamFilter] = useState('');
   const [page, setPage] = useState(1);
 
   const [students, setStudents] = useState([]);
@@ -34,14 +36,18 @@ export default function StudentsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importing, setImporting] = useState(false);
+  const [teams, setTeams] = useState([]);
+  const fileInputRef = useRef(null);
 
   const fetchStudents = useCallback(async () => {
     setLoading(true);
     try {
-      const params = { page, limit: 10 };
+      const params = { page, limit: 100 };
       if (search) params.search = search;
-      if (statusFilter) params.status = statusFilter;
-      if (batchFilter) params.batch = batchFilter;
+      if (teamFilter) params.teamId = teamFilter;
       const result = await getStudents(params);
       setStudents(result.students || []);
       setPagination(result.pagination || { page: 1, pages: 1, total: 0 });
@@ -50,13 +56,18 @@ export default function StudentsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, batchFilter]);
+  }, [page, search, teamFilter]);
 
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
 
-  const batchOptions = [...new Set(students.map((s) => s.batch).filter(Boolean))];
+  useEffect(() => {
+    getTeams().then((res) => {
+      const list = Array.isArray(res) ? res : res?.teams || [];
+      setTeams(list);
+    }).catch(() => {});
+  }, []);
 
   const columns = [
     {
@@ -137,8 +148,10 @@ export default function StudentsPage() {
         await updateStudent(editingStudent._id, data);
         toast.success('Student updated successfully');
       } else {
-        await createStudent(data);
-        toast.success('Student created successfully');
+        const result = await createStudent(data);
+        const email = result?.email || 'N/A';
+        const pwd = result?.generatedPassword || 'student123';
+        toast.success(`Created! Email: ${email} | Password: ${pwd}`, { duration: 10000 });
       }
       await fetchStudents();
     } catch (error) {
@@ -158,8 +171,33 @@ export default function StudentsPage() {
     }
   };
 
+  const handleBulkImport = async () => {
+    if (!importFile) {
+      toast.error('Please select a CSV file');
+      return;
+    }
+    setImporting(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', importFile);
+      const result = await bulkImportStudents(formData);
+      const msg = `Imported ${result.created} students.` + (result.errors?.length ? ` ${result.errors.length} errors.` : '');
+      toast.success(msg, { duration: 8000 });
+      if (result.errors?.length) {
+        console.warn('Import errors:', result.errors);
+      }
+      setIsImportOpen(false);
+      setImportFile(null);
+      await fetchStudents();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to import students');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-2 sm:p-4">
+    <div className="flex flex-col gap-3 p-2 sm:p-4">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
@@ -169,41 +207,45 @@ export default function StudentsPage() {
             Manage student enrollments, status, and team assignments.
           </p>
         </div>
-        <Button
-          variant="default"
-          className="rounded-md px-3 py-1 font-semibold"
-          onClick={() => {
-            setEditingStudent(null);
-            setIsFormOpen(true);
-          }}
-        >
-          <UserPlus size={18} />
-          Add New Student
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="default"
+            className="rounded-md px-3 py-1 font-semibold"
+            onClick={() => {
+              setEditingStudent(null);
+              setIsFormOpen(true);
+            }}
+          >
+            <UserPlus size={18} />
+            Add New Student
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-md px-3 py-1 font-semibold"
+            onClick={() => setIsImportOpen(true)}
+          >
+            <Upload size={18} />
+            Import CSV
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 rounded-lg border border-border bg-card p-2.5">
         <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search student by name or roll no..." />
         <div className="ml-auto flex flex-wrap gap-2">
           <FilterBar
-            label="Status"
-            value={statusFilter}
-            onChange={(next) => setStatusFilter(next)}
-            options={[
-              { label: 'Active', value: 'active' },
-              { label: 'Inactive', value: 'inactive' },
-              { label: 'Graduated', value: 'graduated' },
-            ]}
+            label="Batch"
+            value="Batch 2026"
+            onChange={() => {}}
+            options={[{ label: 'Batch 2026', value: 'Batch 2026' }]}
+            disabled
           />
-
-          {batchOptions.length > 0 && (
-            <FilterBar
-              label="Batch"
-              value={batchFilter}
-              onChange={(next) => setBatchFilter(next)}
-              options={batchOptions.map((b) => ({ label: b, value: b }))}
-            />
-          )}
+          <FilterBar
+            label="Team"
+            value={teamFilter}
+            onChange={(next) => setTeamFilter(next)}
+            options={teams.map((t) => ({ label: t.name, value: t._id }))}
+          />
         </div>
       </div>
 
@@ -231,7 +273,6 @@ export default function StudentsPage() {
         onClose={() => setIsFormOpen(false)}
         onSubmit={handleSaveStudent}
         initialData={editingStudent}
-        batchOptions={batchOptions}
       />
 
       <ConfirmDialog
@@ -241,6 +282,51 @@ export default function StudentsPage() {
         onConfirm={handleDeleteStudent}
         onCancel={() => setDeleteId(null)}
       />
+
+      <Modal
+        open={isImportOpen}
+        onClose={() => { setIsImportOpen(false); setImportFile(null); }}
+        title="Import Students from CSV"
+        hideDividers
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Upload a CSV file with columns: <strong>name</strong> (required), and optionally <strong>phone</strong> and <strong>rollNo</strong>. Email, batch, and password are auto-assigned.
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {importFile ? importFile.name : 'Choose CSV File'}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+            />
+            {importFile && (
+              <button
+                type="button"
+                onClick={() => setImportFile(null)}
+                className="text-sm text-destructive hover:underline"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => { setIsImportOpen(false); setImportFile(null); }} disabled={importing}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkImport} disabled={!importFile || importing}>
+              {importing ? 'Importing...' : 'Import Students'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
     </div>
   );

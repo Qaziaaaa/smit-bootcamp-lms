@@ -1,3 +1,5 @@
+// Attendance routes — admin marks and views attendance.
+// All routes require admin role.
 import { Router } from 'express';
 import attendanceController from '../controllers/attendance.controller.js';
 import {

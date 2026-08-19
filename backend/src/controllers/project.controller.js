@@ -1,3 +1,4 @@
+// Project controller — handles CRUD for project management.
 import asyncHandler from '../utils/asyncHandler.js';
 import { sendSuccess } from '../utils/response.js';
 import projectService from '../services/project.service.js';
@@ -31,10 +32,4 @@ const deleteProject = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, { deleted: true }, 'Project deleted successfully');
 });
 
-export default {
-  getProjects,
-  getProjectById,
-  createProject,
-  updateProject,
-  deleteProject,
-};
+export default { getProjects, getProjectById, createProject, updateProject, deleteProject };

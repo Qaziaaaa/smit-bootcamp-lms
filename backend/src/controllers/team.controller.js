@@ -1,3 +1,4 @@
+// Team controller — handles CRUD for team management.
 import asyncHandler from '../utils/asyncHandler.js';
 import { sendSuccess } from '../utils/response.js';
 import teamService from '../services/team.service.js';
@@ -28,16 +29,10 @@ const deleteTeam = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, { deleted: true }, 'Team deleted successfully');
 });
 
+// POST /teams/:id/students — assign students to a team
 const assignStudentsToTeam = asyncHandler(async (req, res) => {
   const result = await teamService.assignStudentsToTeam(req.params.id, req.body.studentIds);
   sendSuccess(res, 200, result, 'Students assigned to team successfully');
 });
 
-export default {
-  getTeams,
-  getTeamById,
-  createTeam,
-  updateTeam,
-  deleteTeam,
-  assignStudentsToTeam,
-};
+export default { getTeams, getTeamById, createTeam, updateTeam, deleteTeam, assignStudentsToTeam };

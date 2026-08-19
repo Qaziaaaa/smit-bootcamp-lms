@@ -6,12 +6,11 @@ import {
   Clock,
   Layers,
   Plus,
-  Search,
   Users,
   UserX,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
-import { Input } from '../components/ui/Input'
+import { SearchBar } from '../components/ui/SearchBar'
 import { StatCard } from '../components/ui/StatCard'
 import { Avatar } from '../components/ui/Avatar'
 import { Badge } from '../components/ui/Badge'
@@ -19,22 +18,27 @@ import { StudentForm } from '../components/students/StudentForm'
 import { MarkAttendanceModal } from '../components/attendance/MarkAttendanceModal'
 import { cn } from '../lib/utils'
 import { useEffect, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { getDashboard } from '../services/dashboardService'
-import { apiClient } from '../services/apiClient'
+import { getAttendance } from '../services/attendanceService'
+import { createStudent } from '../services/studentsService'
 import { toast } from 'react-hot-toast'
 
+// Task status style mapping
 const TASK_STATUS_STYLE = {
   completed: { icon: Award, iconBg: 'bg-clr-emerald-bg', iconColor: 'text-clr-green' },
   'in-progress': { icon: Clock, iconBg: 'bg-clr-blue-bg', iconColor: 'text-clr-blue' },
   pending: { icon: CheckSquare, iconBg: 'bg-clr-amber-bg', iconColor: 'text-clr-amber-dark' },
 }
 
+// Format date to readable string
 function formatDate(date) {
   if (!date) return '—'
   return new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 export default function DashboardPage() {
+  // State management
   const [dashboard, setDashboard] = useState(null)
   const [recentAttendance, setRecentAttendance] = useState([])
   const [attendanceSearch, setAttendanceSearch] = useState('')
@@ -43,6 +47,7 @@ export default function DashboardPage() {
   const [isStudentFormOpen, setIsStudentFormOpen] = useState(false)
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false)
 
+  // Fetch dashboard summary
   const loadDashboard = useCallback(async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true)
@@ -56,44 +61,69 @@ export default function DashboardPage() {
     }
   }, [])
 
+  // Fetch recent attendance records
   const loadRecentAttendance = useCallback(async () => {
     try {
       const params = { limit: 10 }
       if (attendanceSearch && attendanceSearch.trim()) {
         params.search = attendanceSearch.trim()
       }
-      const response = await apiClient.get('/attendance', { params })
-      setRecentAttendance(response.data?.data?.records ?? [])
+      const data = await getAttendance(params)
+      setRecentAttendance(data?.records ?? [])
     } catch (error) {
       console.error('Recent attendance error:', error)
     }
   }, [attendanceSearch])
 
+  // Initial load
   useEffect(() => {
     loadDashboard()
   }, [loadDashboard])
 
+  // Reload recent attendance on search change
+  useEffect(() => {
+    loadRecentAttendance()
+  }, [loadRecentAttendance])
+
+  // Handle successful attendance submit
   const handleAttendanceSuccess = () => {
     loadDashboard(false)
     loadRecentAttendance()
   }
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      loadRecentAttendance()
-    }, 300)
-
-    return () => clearTimeout(handler)
-  }, [attendanceSearch, loadRecentAttendance])
+  // Handle new student creation
+  const handleSaveStudent = async (data) => {
+    try {
+      await createStudent(data)
+      toast.success('Student created successfully')
+      setIsStudentFormOpen(false)
+      loadDashboard(false)
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create student')
+      throw error
+    }
+  }
 
   const counts = dashboard?.counts ?? {}
   const todayAttendance = dashboard?.todayAttendance ?? {}
+  const activeBatch = dashboard?.activeBatch
 
+  // Calculate batch progress
+  let batchProgress = null
+  if (activeBatch?.startDate) {
+    const start = new Date(activeBatch.startDate)
+    const dayMs = 24 * 60 * 60 * 1000
+    const totalDays = 90
+    const elapsedDays = Math.max(1, Math.floor((Date.now() - start) / dayMs) + 1)
+    batchProgress = `Day ${Math.min(elapsedDays, totalDays)} of ${totalDays} days`
+  }
+
+  // Summary metric cards
   const STAT_CARDS = [
     {
       label: 'Total Students',
       value: counts.students ?? '0',
-      trend: '+12% this month',
+      subtitle: batchProgress,
       icon: Users,
       iconBg: 'hsl(var(--clr-blue-bg))',
       iconBorder: 'hsl(var(--clr-blue) / 0.2)',
@@ -111,7 +141,7 @@ export default function DashboardPage() {
     {
       label: 'Active Teams',
       value: counts.teams ?? '0',
-      subtitle: 'Across 2 Active Batches',
+      subtitle: `${counts.projects ?? 0} active projects`,
       icon: Layers,
       iconBg: 'hsl(var(--clr-purple-bg))',
       iconBorder: 'hsl(var(--clr-purple) / 0.2)',
@@ -129,6 +159,7 @@ export default function DashboardPage() {
     },
   ]
 
+  // Recent activity list items
   const ACTIVITY_ITEMS = (dashboard?.recentTasks ?? []).map((task) => {
     const style = TASK_STATUS_STYLE[task.status] ?? TASK_STATUS_STYLE.pending
     return {
@@ -141,6 +172,7 @@ export default function DashboardPage() {
     }
   })
 
+  // Loading and error states
   if (loading) {
     return (
       <div className="grid min-h-[300px] place-items-center">
@@ -159,6 +191,7 @@ export default function DashboardPage() {
 
   return (
     <div className="grid gap-3 sm:-mt-1 md:-mt-2 -mb-1 sm:-mb-2 md:-mb-3">
+      {/* Header with actions */}
       <div className="flex flex-col items-stretch justify-between gap-2 -mb-1 sm:flex-row sm:items-start">
         <div>
           <h1 className="text-2xl font-medium tracking-tight text-foreground">
@@ -184,13 +217,17 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Stat cards grid */}
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {STAT_CARDS.map((card) => (
           <StatCard key={card.label} {...card} />
         ))}
       </div>
 
+      {/* Main split: Recent attendance & Recent activity */}
       <div className="grid gap-3 lg:grid-cols-[2fr_1fr]">
+        
+        {/* Recent attendance table */}
         <div className="min-w-0 rounded-lg border bg-card shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2 p-3">
             <div>
@@ -201,15 +238,12 @@ export default function DashboardPage() {
                 Latest student attendance records
               </p>
             </div>
-            <div className="relative w-full sm:w-[200px]">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={attendanceSearch}
-                onChange={(e) => setAttendanceSearch(e.target.value)}
-                placeholder="Search student..."
-                className="pl-10"
-              />
-            </div>
+            <SearchBar 
+              value={attendanceSearch} 
+              onChange={setAttendanceSearch} 
+              placeholder="Search student..." 
+              className="w-full sm:w-[200px]" 
+            />
           </div>
           <div className="h-[420px] w-full max-w-full overflow-x-auto overflow-y-auto border-t">
             <table
@@ -222,7 +256,7 @@ export default function DashboardPage() {
                     Student
                   </th>
                   <th className="w-[14%] px-4 py-1.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Batch
+                    Roll No
                   </th>
                   <th className="w-[26%] px-4 py-1.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     Date
@@ -259,8 +293,8 @@ export default function DashboardPage() {
                         </div>
                       </td>
                       <td className="px-4 py-1.25 align-middle">
-                        <p className="truncate text-xs text-foreground">
-                          {record.batch}
+                        <p className="truncate font-mono text-xs font-semibold uppercase text-foreground">
+                          {record.rollNo || record.rollNumber || ((record.studentId || record._id) ? `STU-${String(record.studentId || record._id).slice(-4).toUpperCase()}` : '—')}
                         </p>
                       </td>
                       <td className="px-4 py-1.25 align-middle">
@@ -279,6 +313,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Recent activity feed */}
         <div className="min-w-0 rounded-lg border bg-card shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-2 p-3">
             <div>
@@ -287,8 +322,10 @@ export default function DashboardPage() {
                 Latest task completions and team submissions
               </p>
             </div>
-            <Button variant="ghost" size="sm" className="gap-0.5 text-xs">
-              View All Tasks <ArrowUpRight size={14} />
+            <Button asChild variant="ghost" size="sm" className="gap-0.5 text-xs">
+              <Link to="/tasks">
+                View All Tasks <ArrowUpRight size={14} />
+              </Link>
             </Button>
           </div>
           <div className="border-t">
@@ -326,14 +363,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Modals */}
       <StudentForm
         open={isStudentFormOpen}
         onClose={() => setIsStudentFormOpen(false)}
-        onSubmit={async () => {
-          await new Promise((resolve) => setTimeout(resolve, 500))
-          toast.success('Student created successfully')
-          setIsStudentFormOpen(false)
-        }}
+        onSubmit={handleSaveStudent}
       />
 
       <MarkAttendanceModal

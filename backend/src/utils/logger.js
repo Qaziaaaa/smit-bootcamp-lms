@@ -1,3 +1,5 @@
+// Simple logger — writes timestamped messages to stdout (info) or stderr (error/warn).
+// No external logging library needed for this project size.
 const write = (stream, level, message) => {
   const timestamp = new Date().toISOString();
   stream.write(`[${timestamp}] [${level.toUpperCase()}] ${message}\n`);

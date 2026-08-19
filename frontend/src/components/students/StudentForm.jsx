@@ -5,21 +5,21 @@ import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { Label } from '../ui/Label';
-import { Select } from '../ui/Select';
 import { Modal } from '../ui/Modal';
+import { getNextRollNo } from '../../services/studentsService';
 
 const studentSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   email: z.string().email('Invalid email address'),
+  phone: z.string().optional(),
   rollNo: z.string().min(1, 'Roll No is required'),
   batch: z.string().min(1, 'Batch is required'),
-  status: z.string().min(1, 'Status is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
+  password: z.string().optional(),
 });
 
-const emptyValues = { name: '', email: '', rollNo: '', batch: '', status: 'active', password: '' };
+const emptyValues = { name: '', email: '', phone: '', rollNo: '', batch: 'Batch 2026', password: 'student123' };
 
-export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batchOptions = [] }) => {
+export const StudentForm = ({ open, onClose, onSubmit, initialData = null }) => {
   const isEditing = !!initialData;
   const [values, setValues] = useState(emptyValues);
   const [errors, setErrors] = useState({});
@@ -28,46 +28,68 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
 
   useEffect(() => {
     if (open) {
-      setValues(
-        initialData
-          ? {
-              name: initialData.name || '',
-              email: initialData.email || '',
-              rollNo: initialData.rollNo || initialData.rollNumber || '',
-              batch: initialData.batch || '',
-              status: initialData.status || 'active',
-              password: '',
-            }
-          : emptyValues,
-      );
+      if (initialData) {
+        setValues({
+          name: initialData.name || '',
+          email: initialData.email || '',
+          phone: initialData.phone || '',
+          rollNo: initialData.rollNo || initialData.rollNumber || '',
+          batch: initialData.batch || 'Batch 2026',
+          password: '',
+        });
+      } else {
+        setValues({ ...emptyValues });
+        getNextRollNo()
+          .then((data) => {
+            setValues((v) => {
+              const roll = data?.rollNo || '';
+              const base = v.name.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).join('').slice(0, 10);
+              return { ...v, rollNo: roll, email: base && roll ? `${base}${roll}@lms.com` : v.email };
+            });
+          })
+          .catch(() => {});
+      }
       setErrors({});
       setShowPassword(false);
     }
   }, [open, initialData]);
 
   const setField = (name) => (e) => {
-    setValues((v) => ({ ...v, [name]: e.target.value }));
+    setValues((v) => {
+      const next = { ...v, [name]: e.target.value };
+      if (!isEditing && (name === 'name' || name === 'rollNo')) {
+        const base = name === 'name'
+          ? e.target.value.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).join('').slice(0, 10)
+          : v.name.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).join('').slice(0, 10);
+        const roll = name === 'rollNo' ? e.target.value : v.rollNo;
+        next.email = base && roll ? `${base}${roll}@lms.com` : base ? `${base}@lms.com` : '';
+      }
+      return next;
+    });
     setErrors((err) => ({ ...err, [name]: undefined }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = studentSchema.safeParse(values);
+    const nextErrors = {};
     if (!result.success) {
-      const next = {};
       for (const issue of result.error.issues) {
-        if (!next[issue.path[0]]) next[issue.path[0]] = issue.message;
+        if (!nextErrors[issue.path[0]]) nextErrors[issue.path[0]] = issue.message;
       }
-      setErrors(next);
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
+
     setIsSubmitting(true);
     try {
-      const { password, ...rest } = result.data;
-      const payload = { ...rest };
-      if (password) payload.password = password;
-      await onSubmit(payload);
+      await onSubmit(result.data);
       onClose();
+    } catch (err) {
+      console.error('Failed to submit student form:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +99,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
     <Modal open={open} onClose={onClose} title={isEditing ? 'Edit Student' : 'Add New Student'} hideDividers>
       <form onSubmit={handleSubmit}>
         <p className="mb-6 text-sm text-muted-foreground">
-          Enroll a new student into the bootcamp roster with explicit batch setup.
+          {isEditing ? 'Update student details.' : 'Fill in student details. Batch and password have defaults.'}
         </p>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -89,17 +111,25 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
             onChange={setField('name')}
             error={errors.name}
             required
-            placeholder="e.g. Maya Lin"
+            placeholder="e.g. Ahmed Khan"
           />
           <FormField
-            label="Email Address"
+            label="Email"
             name="email"
             type="email"
             value={values.email}
             onChange={setField('email')}
             error={errors.email}
             required
-            placeholder="maya.lin@student.dev"
+            placeholder="ahmedkhan01@lms.com"
+          />
+          <FormField
+            label="Phone"
+            name="phone"
+            value={values.phone}
+            onChange={setField('phone')}
+            error={errors.phone}
+            placeholder="+92 300 1234567"
           />
           <FormField
             label="Roll No"
@@ -108,34 +138,20 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
             onChange={setField('rollNo')}
             error={errors.rollNo}
             required
-            placeholder="e.g. 112 or WMA-12345"
+            placeholder="e.g. 001"
           />
-          <Select
+          <FormField
             label="Batch"
+            name="batch"
             value={values.batch}
-            onChange={(next) => setField('batch')({ target: { value: next } })}
-            options={[
-              ...batchOptions.map((b) => ({ label: b, value: b })),
-              ...(batchOptions.length === 0 ? [{ label: 'Batch 12 - Web Dev', value: 'Batch 12 - Web Dev' }] : []),
-            ]}
-            placeholder="Select Batch"
+            onChange={setField('batch')}
             error={errors.batch}
             required
-          />
-          <Select
-            label="Status"
-            value={values.status}
-            onChange={(next) => setField('status')({ target: { value: next } })}
-            options={[
-              { label: 'Active', value: 'active' },
-              { label: 'Inactive', value: 'inactive' },
-            ]}
-            error={errors.status}
+            disabled
           />
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="password">
-              {isEditing ? 'Update Password' : 'Initial Password'}
-              <span className="text-destructive"> *</span>
+              {isEditing ? 'New Password' : 'Password'}
             </Label>
             <div className="relative">
               <Input
@@ -144,8 +160,7 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
                 type={showPassword ? 'text' : 'password'}
                 value={values.password}
                 onChange={setField('password')}
-                placeholder={isEditing ? 'Leave blank to keep current' : 'Min. 8 characters'}
-                aria-invalid={!!errors.password}
+                placeholder={isEditing ? 'Leave blank to keep current' : 'student123'}
                 className="pr-10"
               />
               <button
@@ -157,7 +172,6 @@ export const StudentForm = ({ open, onClose, onSubmit, initialData = null, batch
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            {errors.password && <p className="text-xs font-medium text-destructive">{errors.password}</p>}
           </div>
         </div>
 

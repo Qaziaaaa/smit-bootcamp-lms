@@ -1,6 +1,9 @@
+// Student controller — handles CRUD requests for student management.
+// Parses CSV uploads for bulk import, delegates business logic to studentService.
 import asyncHandler from '../utils/asyncHandler.js';
 import { sendSuccess } from '../utils/response.js';
 import studentService from '../services/student.service.js';
+import { parse } from 'csv-parse/sync';
 
 const createStudent = asyncHandler(async (req, res) => {
   const student = await studentService.createStudent(req.body);
@@ -36,11 +39,21 @@ const getStudentAttendance = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, result, 'Student attendance retrieved successfully');
 });
 
-export default {
-  createStudent,
-  getStudents,
-  getStudentById,
-  updateStudent,
-  deleteStudent,
-  getStudentAttendance,
-};
+// Bulk import — receives CSV file via multer, parses it, creates students
+const bulkImportStudents = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'No file uploaded.' });
+  }
+  const csvContent = req.file.buffer.toString('utf-8');
+  const records = parse(csvContent, { columns: true, skip_empty_lines: true, trim: true });
+  const result = await studentService.bulkImportStudents(records);
+  sendSuccess(res, 200, result, 'Bulk import completed');
+});
+
+// Auto-suggest next roll number for the student form
+const getNextRollNo = asyncHandler(async (req, res) => {
+  const rollNo = await studentService.getNextRollNo();
+  sendSuccess(res, 200, { rollNo }, 'Next roll number retrieved');
+});
+
+export default { createStudent, getStudents, getStudentById, updateStudent, deleteStudent, getStudentAttendance, bulkImportStudents, getNextRollNo };

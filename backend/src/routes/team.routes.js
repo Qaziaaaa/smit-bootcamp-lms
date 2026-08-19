@@ -1,3 +1,5 @@
+// Team routes — admin CRUD for team management.
+// All routes require admin role.
 import { Router } from 'express';
 import teamController from '../controllers/team.controller.js';
 import { validateTeamsQuery, validateTeamId, validateTeamCreate, validateTeamUpdate, validateTeamStudentsAssign } from '../middlewares/validate.js';

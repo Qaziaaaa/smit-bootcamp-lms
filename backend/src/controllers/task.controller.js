@@ -1,3 +1,4 @@
+// Task controller — handles CRUD for task management.
 import asyncHandler from '../utils/asyncHandler.js';
 import { sendSuccess } from '../utils/response.js';
 import taskService from '../services/task.service.js';
@@ -31,10 +32,4 @@ const deleteTask = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, { deleted: true }, 'Task deleted successfully');
 });
 
-export default {
-  getTasks,
-  getTaskById,
-  createTask,
-  updateTask,
-  deleteTask,
-};
+export default { getTasks, getTaskById, createTask, updateTask, deleteTask };

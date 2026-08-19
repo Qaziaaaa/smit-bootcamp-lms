@@ -1,3 +1,6 @@
+// Authorization middleware — checks if the user's role is allowed.
+// Usage: authorize('admin') or authorize('admin', 'student')
+// Must be used AFTER authenticate (which sets req.user).
 const authorize = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user || !req.user.role) {

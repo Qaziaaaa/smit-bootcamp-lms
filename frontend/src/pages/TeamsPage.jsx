@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Users, Eye, Edit2, Trash2, Search } from 'lucide-react';
+import { Users, Eye, Edit2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
@@ -10,7 +10,6 @@ import { Checkbox } from '../components/ui/Checkbox';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { DataTable } from '../components/ui/DataTable';
 import { FormField } from '../components/ui/FormField';
-import { Input } from '../components/ui/Input';
 import { Label } from '../components/ui/Label';
 import { Modal } from '../components/ui/Modal';
 import { Pagination } from '../components/ui/Pagination';
@@ -123,10 +122,13 @@ export default function TeamsPage() {
     const result = teamSchema.safeParse(formValues);
     if (!result.success) {
       const next = {};
+      const messages = [];
       for (const issue of result.error.issues) {
         if (!next[issue.path[0]]) next[issue.path[0]] = issue.message;
+        messages.push(issue.message);
       }
       setFormErrors(next);
+      toast.error(messages[0]);
       return;
     }
     try {
@@ -278,7 +280,7 @@ export default function TeamsPage() {
   ];
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-6 p-3">
+    <div className="flex flex-col gap-6 p-3">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-foreground">Teams</h1>
@@ -326,16 +328,14 @@ export default function TeamsPage() {
                 <span className="text-destructive"> *</span>
               </Label>
               <div className="rounded-lg border bg-muted/40 p-3">
-                <div className="relative mb-2">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
+                <div className="mb-2">
+                  <SearchBar
                     value={memberSearch}
-                    onChange={(e) => setMemberSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') e.preventDefault();
-                    }}
+                    onChange={setMemberSearch}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                     placeholder="Search students by name or roll no..."
-                    className="h-9 bg-card pl-9"
+                    delay={0}
+                    className="w-full max-w-none"
                   />
                 </div>
                 <div className="max-h-48 space-y-0.5 overflow-y-auto">
@@ -352,7 +352,7 @@ export default function TeamsPage() {
                           onClick={() => toggleMember(sId)}
                           className="flex w-full cursor-pointer items-center gap-2 rounded px-1.5 py-1.5 text-left hover:bg-accent"
                         >
-                          <Checkbox checked={checked} onCheckedChange={() => toggleMember(sId)} />
+                          <Checkbox checked={checked} />
                           <span className="flex min-w-0 items-center gap-1.5">
                             <span className="text-sm text-foreground">{student.name}</span>
                             {roll && <span className="font-mono text-xs text-muted-foreground">({roll})</span>}
@@ -375,16 +375,14 @@ export default function TeamsPage() {
                 <span className="text-destructive"> *</span>
               </Label>
               <div className="rounded-lg border bg-muted/40 p-3">
-                <div className="relative mb-2">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
+                <div className="mb-2">
+                  <SearchBar
                     value={leaderSearch}
-                    onChange={(e) => setLeaderSearch(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') e.preventDefault();
-                    }}
+                    onChange={setLeaderSearch}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                     placeholder="Search team lead by name or roll no..."
-                    className="h-9 bg-card pl-9"
+                    delay={0}
+                    className="w-full max-w-none"
                   />
                 </div>
                 <div className="max-h-48 space-y-0.5 overflow-y-auto">

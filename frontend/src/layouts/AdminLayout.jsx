@@ -1,4 +1,8 @@
-import { useState } from 'react'
+// Admin layout — sidebar + header + mobile nav for the admin portal.
+// Wraps all admin pages via <Outlet />.
+// Sidebar shows navigation links, user dropdown (profile, theme toggle, logout).
+// Mobile: bottom navigation bar instead of sidebar.
+import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   CalendarCheck,
@@ -15,6 +19,7 @@ import {
   Sun,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { toast } from 'react-hot-toast'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../context/useTheme'
 import { Avatar } from '../components/ui/Avatar'
@@ -22,6 +27,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Logo } from '../components/ui/Logo'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../components/ui/Tooltip'
 
+// Sidebar and mobile nav links — defines every admin page with its route, label, and icon.
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/students', label: 'Students', icon: Users },
@@ -31,20 +37,25 @@ const NAV_ITEMS = [
   { to: '/tasks', label: 'Tasks', icon: CheckSquare },
 ]
 
+// Checks if a route is active — exact match or child route (e.g. /students/123 matches /students).
 function isPathActive(pathname, to) {
   return pathname === to || pathname.startsWith(`${to}/`)
 }
 
+// Returns today's date as a short label (e.g. "Mon, Aug 18") for the header.
 function todayLabel() {
   return new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
+// Sidebar — shared between desktop sidebar and contains nav, user card, and theme toggle.
+// Accepts pathname for active link highlighting and onNavigate callback for mobile nav close.
 function SidebarContent({ pathname, onNavigate }) {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(false)
 
+  // Clears auth state and redirects to login page.
   async function handleLogout() {
     await logout()
     navigate('/login', { replace: true })
@@ -57,6 +68,7 @@ function SidebarContent({ pathname, onNavigate }) {
         collapsed ? 'w-[70px]' : 'w-[180px] lg:w-[200px]',
       )}
     >
+      {/* Header — logo + collapse toggle button. Logo hides when collapsed. */}
       <div className="flex shrink-0 items-center border-b p-4">
         {!collapsed && (
           <div className="flex flex-1 justify-center">
@@ -72,6 +84,8 @@ function SidebarContent({ pathname, onNavigate }) {
         </button>
       </div>
 
+      {/* Navigation links — each item highlights when its route is active.
+          When collapsed, shows tooltip on hover instead of label text. */}
       <nav className="flex-1 overflow-y-auto px-3 py-3">
         {!collapsed && (
           <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -106,6 +120,8 @@ function SidebarContent({ pathname, onNavigate }) {
         </TooltipProvider>
       </nav>
 
+      {/* User card at bottom — shows avatar, name, email. Clicking opens dropdown with
+          Profile, Theme toggle, and Logout options. */}
       <div className="shrink-0 border-t bg-muted/40 p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -133,6 +149,7 @@ function SidebarContent({ pathname, onNavigate }) {
                 Profile
               </Link>
             </DropdownMenuItem>
+            {/* Theme toggle — switches between light and dark mode */}
             <DropdownMenuItem onClick={toggleTheme}>
               {theme === 'dark' ? <Sun /> : <Moon />}
               {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
@@ -149,38 +166,62 @@ function SidebarContent({ pathname, onNavigate }) {
   )
 }
 
+// Main layout component — renders sidebar (desktop) + header + page content + mobile bottom nav.
+// Wrapped by ProtectedRoute which ensures only admin users can access.
 export function AdminLayout() {
+  const location = useLocation()
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
+  // Determines the current page title for the breadcrumb in the header.
   const current = NAV_ITEMS.find((item) => isPathActive(pathname, item.to))
   const title = current?.label || 'Dashboard'
 
+  // Prevents the "Logged in!" toast from showing more than once per session.
+  const loginToastShown = useRef(false)
+
+  // Shows a success toast on first login, then clears the state so it doesn't repeat on navigation.
+  useEffect(() => {
+    if (location.state?.justLoggedIn && !loginToastShown.current) {
+      loginToastShown.current = true
+      toast.success('Logged in!')
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location, navigate])
+
   return (
     <div className="flex h-screen w-full max-w-full flex-col overflow-hidden bg-background md:flex-row">
+      {/* Desktop sidebar — hidden on mobile, visible on md+ screens */}
       <aside className="hidden shrink-0 md:block">
         <SidebarContent pathname={pathname} />
       </aside>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/40">
+        {/* Top header bar — shows breadcrumb (Home > Page Name) and today's date */}
         <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-card px-4 md:px-6">
+          {/* Mobile header — shows logo on left */}
           <div className="flex items-center gap-1.5 md:hidden">
             <Logo />
           </div>
+          {/* Breadcrumb navigation — Home > Current Page */}
           <div className="flex min-w-0 flex-1 items-center gap-1.5">
             <span className="whitespace-nowrap text-sm font-medium text-muted-foreground">Home</span>
             <ChevronRight size={14} className="text-muted-foreground" />
             <span className="truncate text-sm font-semibold text-foreground">{title}</span>
           </div>
+          {/* Today's date — desktop only */}
           <span className="hidden text-xs font-medium text-muted-foreground md:block">{todayLabel()}</span>
         </header>
 
-        <div className="w-full flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8">
-          <div className="mx-auto w-full max-w-[1200px]">
+        {/* Page content — renders the active admin page via React Router's Outlet */}
+        <div className="w-full flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-5">
+          <div className="w-full">
             <Outlet />
           </div>
         </div>
 
+        {/* Mobile bottom navigation — 6-column grid with icon + label for each nav item.
+            Hidden on desktop (md+), visible on mobile. Replaces sidebar on small screens. */}
         <nav className="mobile-bottom-nav grid grid-cols-6 border-t bg-card shadow-[0_-2px_10px_rgba(0,0,0,0.08)] md:hidden">
           {NAV_ITEMS.map((item) => {
             const active = isPathActive(pathname, item.to)

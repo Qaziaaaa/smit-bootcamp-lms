@@ -8,7 +8,6 @@ export function StatCard({
   subtitleColor,
   icon: Icon,
   iconBg,
-  iconBorder,
   iconColor,
   trendColor = 'hsl(var(--clr-green))',
 }) {
@@ -37,10 +36,10 @@ export function StatCard({
         </div>
         {Icon && (
           <span
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border bg-clr-blue-bg text-clr-blue"
-            style={iconBg ? { backgroundColor: iconBg, borderColor: iconBorder, color: iconColor } : undefined}
+            className="flex shrink-0 items-center justify-center rounded-full p-2.5 bg-clr-blue-bg text-clr-blue"
+            style={iconBg ? { backgroundColor: iconBg, color: iconColor } : undefined}
           >
-            <Icon size={24} strokeWidth={1.75} />
+            <Icon size={20} strokeWidth={1.75} className="sm:h-6 sm:w-6" />
           </span>
         )}
       </div>

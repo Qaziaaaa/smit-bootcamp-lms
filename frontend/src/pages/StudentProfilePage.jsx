@@ -1,12 +1,22 @@
 import { useEffect, useState } from 'react';
-import { Mail, User, Loader2 } from 'lucide-react';
-import { getStudentProfile } from '../services/studentService';
+import { Mail, User, Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { getStudentProfile, changeStudentPassword } from '../services/studentService';
 import { Logo } from '../components/ui/Logo';
 import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/Label';
 
 export default function StudentProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [oldPassword, setOldPassword] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -44,17 +54,45 @@ export default function StudentProfilePage() {
   const qualification = student.lastQualification || 'Not provided';
   const cnic = student.cnic || 'Not provided';
 
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!oldPassword) {
+      toast.error('Current password is required');
+      return;
+    }
+    if (password.length < 8) {
+      toast.error('New password must be at least 8 characters');
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setSavingPassword(true);
+    try {
+      await changeStudentPassword({ oldPassword, password, confirmPassword });
+      toast.success('Password changed successfully');
+      setOldPassword('');
+      setPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to change password');
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-3">
       {/* Cover Image & Avatar Section */}
-      <div className="relative mb-20">
+      <div className="relative mb-16 sm:mb-20">
         <div className="flex h-40 items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-clr-green-bg to-clr-blue-bg sm:h-50 md:h-60">
           <div className="scale-150 opacity-80">
             <Logo />
           </div>
         </div>
 
-        <div className="absolute -bottom-[60px] left-6 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-full border-4 border-white bg-clr-blue text-[48px] font-semibold text-white shadow-md sm:left-10">
+        <div className="absolute -bottom-14 left-6 flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-clr-blue text-4xl font-semibold text-white shadow-md sm:-bottom-16 sm:left-10 sm:h-32 sm:w-32 sm:text-5xl">
           {student.profileImage ? (
             <img src={student.profileImage} alt={name} className="h-full w-full object-cover" />
           ) : (
@@ -137,96 +175,92 @@ export default function StudentProfilePage() {
       </div>
 
       {/* Change Password Card */}
-      <ChangePasswordCard />
-    </div>
-  );
-}
-
-function ChangePasswordCard() {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (newPassword.length < 8) {
-      setError('New password must be at least 8 characters.');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError('New password and confirm password do not match.');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const { changePassword } = await import('../services/studentService');
-      await changePassword(currentPassword, newPassword);
-      setSuccess('Password changed successfully.');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to change password. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="rounded-xl border bg-card p-3 shadow-sm">
-      <div className="mb-3 flex items-center gap-1.5">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-clr-blue"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <h3 className="font-semibold text-foreground">Change Password</h3>
+      <div className="mt-2 rounded-xl border bg-card p-3 shadow-sm">
+        <div className="mb-3 flex items-center gap-1.5">
+          <KeyRound size={18} className="text-clr-blue" />
+          <h3 className="font-semibold text-foreground">Change Password</h3>
+        </div>
+        <form onSubmit={handleChangePassword} className="grid max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="old-password">
+              Current Password <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Input
+                id="old-password"
+                type={showOldPassword ? 'text' : 'password'}
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                placeholder="Enter current password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowOldPassword((p) => !p)}
+                tabIndex={-1}
+                aria-label={showOldPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-2.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent p-0.5 text-muted-foreground"
+              >
+                {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="new-password">
+              New Password <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Input
+                id="new-password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter new password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-2.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent p-0.5 text-muted-foreground"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="confirm-password">
+              Confirm Password <span className="text-destructive">*</span>
+            </Label>
+            <div className="relative">
+              <Input
+                id="confirm-password"
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((p) => !p)}
+                tabIndex={-1}
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-2.5 top-1/2 flex -translate-y-1/2 cursor-pointer items-center border-0 bg-transparent p-0.5 text-muted-foreground"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <Button type="submit" disabled={savingPassword}>
+              {savingPassword ? 'Saving...' : 'Change Password'}
+            </Button>
+          </div>
+        </form>
       </div>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div>
-          <p className="mb-1 text-xs text-muted-foreground">Current Password</p>
-          <input
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-            placeholder="Current password"
-            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-          />
-        </div>
-        <div>
-          <p className="mb-1 text-xs text-muted-foreground">New Password</p>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-            placeholder="Min. 8 characters"
-            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-          />
-        </div>
-        <div>
-          <p className="mb-1 text-xs text-muted-foreground">Confirm New Password</p>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            placeholder="Repeat new password"
-            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-          />
-        </div>
-        {error && <p className="text-xs text-destructive sm:col-span-3">{error}</p>}
-        {success && <p className="text-xs text-green-600 sm:col-span-3">{success}</p>}
-        <div className="sm:col-span-3 flex justify-end">
-          <Button type="submit" disabled={submitting} className="rounded-lg px-4 font-semibold">
-            {submitting ? 'Saving...' : 'Update Password'}
-          </Button>
-        </div>
-      </form>
+
     </div>
   );
 }

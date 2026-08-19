@@ -20,6 +20,8 @@ const STATUS_OPTIONS = [
   { label: 'On Hold', value: 'on-hold' },
 ];
 
+const STATUS_CYCLE = ['active', 'completed', 'on-hold'];
+
 export default function ProjectsPage() {
   const navigate = useNavigate();
 
@@ -85,7 +87,27 @@ export default function ProjectsPage() {
     {
       accessorKey: 'status',
       header: 'STATUS',
-      cell: ({ getValue }) => <Badge status={getValue()} />,
+      cell: ({ row }) => {
+        const current = row.original.status;
+        const nextStatus = STATUS_CYCLE[(STATUS_CYCLE.indexOf(current) + 1) % STATUS_CYCLE.length];
+        return (
+          <button
+            onClick={async () => {
+              try {
+                await updateProject(row.original._id, { status: nextStatus });
+                toast.success(`Status changed to ${nextStatus}`);
+                fetchProjects();
+              } catch {
+                toast.error('Failed to update status');
+              }
+            }}
+            className="cursor-pointer rounded-full border-0 bg-transparent p-0"
+            title={`Click to change to ${nextStatus}`}
+          >
+            <Badge status={current} />
+          </button>
+        );
+      },
     },
     {
       accessorKey: 'deadline',
@@ -164,7 +186,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 p-3">
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">

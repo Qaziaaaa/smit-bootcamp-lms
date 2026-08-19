@@ -1,42 +1,52 @@
+// Student self-service API (student-facing) — profile, attendance, team, projects, tasks.
+// These endpoints use the student's own JWT token — no studentId needed.
 import { apiClient } from './apiClient'
 
-// Fetches the logged-in student's profile (name, email, batch, teamId)
+// Get the logged-in student's profile
 export async function getStudentProfile() {
   const response = await apiClient.get('/student/profile')
   return response.data.data
 }
 
-// Fetches the student's attendance records + summary (present, absent, totalDays, percentage)
+// Get attendance records + summary
 export async function getStudentAttendance() {
   const response = await apiClient.get('/student/attendance')
   return response.data.data
 }
 
-// Fetches the student's team details (name, project)
+// Get the student's team info + members + project
 export async function getStudentTeam() {
   const response = await apiClient.get('/student/team')
   return response.data.data
 }
 
-export async function getStudentProjects() {
-  const response = await apiClient.get('/student/projects')
-  return response.data.data
-}
-
-// Fetches a single project assigned to the logged-in student's team, including its tasks
-export async function getStudentProjectById(id) {
-  const response = await apiClient.get(`/student/projects/${id}`)
-  return response.data.data
-}
-// Fetches the tasks assigned to the logged-in student
+// Get tasks assigned to this student
 export async function getStudentTasks() {
   const response = await apiClient.get('/student/tasks')
   return response.data.data
 }
 
-// Updates the status of one of the student's tasks (in-progress / completed)
-export async function updateTaskProgress(taskId, status) {
-  const response = await apiClient.put(`/student/tasks/${taskId}/progress`, { status })
+// Get projects assigned to the student's team
+export async function getStudentProjects() {
+  const response = await apiClient.get('/student/projects')
+  return response.data.data
+}
+
+// Get a single project (only if it belongs to the student's team)
+export async function getStudentProjectById(id) {
+  const response = await apiClient.get(`/student/projects/${id}`)
+  return response.data.data
+}
+
+// Update task status (student can only update their own tasks)
+export async function updateTaskProgress(taskId, data) {
+  const response = await apiClient.patch(`/student/tasks/${taskId}/progress`, data)
+  return response.data.data
+}
+
+// Change the student's own password (requires old password)
+export async function changeStudentPassword({ oldPassword, password, confirmPassword }) {
+  const response = await apiClient.post('/auth/change-password', { oldPassword, password, confirmPassword })
   return response.data.data
 }
 

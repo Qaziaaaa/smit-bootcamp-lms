@@ -1,3 +1,4 @@
+// MongoDB connection using Mongoose.
 import mongoose from 'mongoose';
 import env from './env.js';
 import logger from '../utils/logger.js';
@@ -9,10 +10,12 @@ const connectDB = async () => {
     logger.info(`MongoDB connected at ${mongoose.connection.host}`);
   } catch (err) {
     logger.error(`MongoDB connection failed: ${err.message}`);
-    process.exit(1);
+    if (process.env.VERCEL) return; // don't crash in serverless — handler will retry
+    process.exit(1); // can't run without database
   }
 };
 
+// Log if connection drops at runtime
 mongoose.connection.on('error', (err) => {
   logger.error(`MongoDB runtime error: ${err.message}`);
 });

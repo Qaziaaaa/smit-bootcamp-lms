@@ -92,7 +92,7 @@ export default function TeamDetailPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-[1200px] p-3">
+      <div className="w-full p-3">
         <p className="text-sm text-muted-foreground">Loading team...</p>
       </div>
     );
@@ -100,14 +100,14 @@ export default function TeamDetailPage() {
 
   if (!team) {
     return (
-      <div className="mx-auto max-w-[1200px] p-3">
+      <div className="w-full p-3">
         <p className="text-sm text-muted-foreground">Team not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 p-3">
 
       {/* Topbar */}
       <div className="flex items-center justify-between gap-2">

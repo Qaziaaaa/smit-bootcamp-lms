@@ -1,5 +1,11 @@
+// Dashboard API call — fetches all stats for the admin dashboard.
 import { apiClient } from './apiClient'
-export const getDashboard = async () => {
+
+export async function getDashboard() {
+  return getDashboardStats()
+}
+
+export async function getDashboardStats() {
   const response = await apiClient.get('/dashboard')
-  return response.data.data
+  return response.data.data   // { counts, taskStatus, todayAttendance, activeBatch, recentStudents, recentTasks }
 }

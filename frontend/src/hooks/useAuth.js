@@ -1,3 +1,5 @@
+// Hook to access auth context (user, token, login, logout).
+// Must be used inside AuthProvider.
 import { useContext } from 'react'
 import { AuthContext } from '../context/AuthContext'
 

@@ -1,27 +1,25 @@
+// Task service — manages individual tasks within projects.
+// Tasks belong to a project (projectId) and are optionally assigned to a student (assignedTo).
+// Status flow: pending -> in-progress -> in_review -> review_requested -> completed.
 import ApiError from '../utils/ApiError.js';
+import escapeRegex from '../utils/escapeRegex.js';
 import Task from '../models/task.model.js';
 import Project from '../models/project.model.js';
 import Student from '../models/student.model.js';
 
+// List tasks with optional filters (project, status, assignee, search)
 const getTasks = async ({ projectId, status, assignedTo, search }, { page = 1, limit = 10 }) => {
   const query = {};
 
-  if (projectId) {
-    query.projectId = projectId;
-  }
-
-  if (status) {
-    query.status = status;
-  }
-
-  if (assignedTo) {
-    query.assignedTo = assignedTo;
-  }
+  if (projectId) query.projectId = projectId;
+  if (status) query.status = status;
+  if (assignedTo) query.assignedTo = assignedTo;
 
   if (search) {
+    const escaped = escapeRegex(search);
     query.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
+      { title: { $regex: escaped, $options: 'i' } },
+      { description: { $regex: escaped, $options: 'i' } },
     ];
   }
 
@@ -29,8 +27,8 @@ const getTasks = async ({ projectId, status, assignedTo, search }, { page = 1, l
 
   const [tasks, total] = await Promise.all([
     Task.find(query)
-      .populate('projectId', 'title')
-      .populate('assignedTo', 'name email')
+      .populate('projectId', 'title')           // show project name in the list
+      .populate('assignedTo', 'name email rollNo') // show assignee info
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -40,19 +38,14 @@ const getTasks = async ({ projectId, status, assignedTo, search }, { page = 1, l
 
   return {
     tasks,
-    pagination: {
-      page: Number(page),
-      limit: Number(limit),
-      total,
-      pages: Math.ceil(total / limit),
-    },
+    pagination: { page: Number(page), limit: Number(limit), total, pages: Math.ceil(total / limit) },
   };
 };
 
 const getTaskById = async (id) => {
   const task = await Task.findById(id)
     .populate('projectId', 'title')
-    .populate('assignedTo', 'name email')
+    .populate('assignedTo', 'name email rollNo')
     .lean();
 
   if (!task) {
@@ -62,6 +55,7 @@ const getTaskById = async (id) => {
   return task;
 };
 
+// Create a task — validates that the project and assigned student exist
 const createTask = async (data) => {
   const { projectId, title, description, assignedTo, priority, status, deadline } = data;
 
@@ -103,7 +97,7 @@ const updateTask = async (id, data) => {
 
   const updated = await Task.findByIdAndUpdate(id, data, { new: true, runValidators: true })
     .populate('projectId', 'title')
-    .populate('assignedTo', 'name email');
+    .populate('assignedTo', 'name email rollNo');
 
   return updated;
 };
@@ -115,14 +109,7 @@ const deleteTask = async (id) => {
   }
 
   await Task.findByIdAndDelete(id);
-
   return { success: true };
 };
 
-export default {
-  getTasks,
-  getTaskById,
-  createTask,
-  updateTask,
-  deleteTask,
-};
+export default { getTasks, getTaskById, createTask, updateTask, deleteTask };

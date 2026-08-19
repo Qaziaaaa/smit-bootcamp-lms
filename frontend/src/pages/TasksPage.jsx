@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Edit2, Trash2, Plus, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { toastInfo } from '../lib/toast';
 
 import { Button } from '../components/ui/Button';
 import { DataTable } from '../components/ui/DataTable';
@@ -18,7 +17,7 @@ import { getStudents } from '../services/studentsService';
 const STATUS_OPTIONS = [
   { label: 'Pending', value: 'pending' },
   { label: 'In Progress', value: 'in-progress' },
-  { label: 'Review Requested', value: 'review_requested' },
+  { label: 'In Review', value: 'in_review' },
   { label: 'Completed', value: 'completed' },
 ];
 
@@ -38,8 +37,6 @@ export default function TasksPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
-  const [bulkConfirm, setBulkConfirm] = useState(false);
-  const [bulkLoading, setBulkLoading] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
@@ -76,7 +73,7 @@ export default function TasksPage() {
     (tasks || [])
       .map((t) => t.assignedTo)
       .filter(Boolean)
-      .map((a) => [a._id, { label: a.name, value: a._id }])
+      .map((a) => [a._id, { label: a.rollNo ? `${a.name} (${a.rollNo})` : a.name, value: a._id }])
   ).values()];
 
   const columns = [
@@ -99,11 +96,18 @@ export default function TasksPage() {
     {
       accessorKey: 'assignedTo',
       header: 'ASSIGNED TO',
-      cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">
-          {getValue()?.name || '—'}
-        </p>
-      ),
+      cell: ({ getValue }) => {
+        const student = getValue();
+        if (!student) return <p className="text-sm text-muted-foreground">—</p>;
+        return (
+          <div className="flex flex-col">
+            <p className="text-sm font-medium text-foreground">{student.name}</p>
+            {student.rollNo && (
+              <span className="text-[11px] font-mono text-muted-foreground">{student.rollNo}</span>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'priority',
@@ -201,42 +205,8 @@ export default function TasksPage() {
     }
   };
 
-  const handleMarkAllCompleted = async () => {
-    setBulkLoading(true);
-    try {
-      const params = { limit: 500 };
-      if (search) params.search = search;
-      if (projectFilter) params.projectId = projectFilter;
-      if (statusFilter) params.status = statusFilter;
-      if (assignedFilter) params.assignedTo = assignedFilter;
-      const result = await getTasks(params);
-      const allTasks = result.tasks || [];
-      const pending = allTasks.filter((t) => t.status !== 'completed');
-      if (pending.length === 0) {
-        toastInfo('All tasks are already completed');
-      } else {
-        let marked = 0;
-        for (const task of pending) {
-          try {
-            await updateTask(task._id, { status: 'completed' });
-            marked += 1;
-          } catch {
-            // continue marking the rest; failures reported below
-          }
-        }
-        toast.success(`${marked} of ${pending.length} task(s) marked as completed`);
-      }
-      setBulkConfirm(false);
-      await fetchTasks();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to mark tasks completed');
-    } finally {
-      setBulkLoading(false);
-    }
-  };
-
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 p-3">
 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -249,13 +219,6 @@ export default function TasksPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setBulkConfirm(true)}
-          >
-            <CheckCircle size={18} />
-            Mark All Completed
-          </Button>
           <Button
             onClick={() => {
               setEditingTask(null);
@@ -336,18 +299,6 @@ export default function TasksPage() {
         message="Are you sure you want to delete this task? This action cannot be undone."
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
-      />
-
-      {/* Bulk Complete Confirmation */}
-      <ConfirmDialog
-        open={bulkConfirm}
-        title="Mark All Tasks Completed"
-        message="This will mark every task in the current view as completed. This action cannot be undone. Continue?"
-        confirmText="Mark All Completed"
-        confirmColor="success"
-        loading={bulkLoading}
-        onConfirm={handleMarkAllCompleted}
-        onCancel={() => setBulkConfirm(false)}
       />
     </div>
   );

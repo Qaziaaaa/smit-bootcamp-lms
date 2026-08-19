@@ -1,3 +1,5 @@
+// Task routes — admin CRUD for task management.
+// All routes require admin role.
 import { Router } from 'express';
 import taskController from '../controllers/task.controller.js';
 import { validateTasksQuery, validateTaskId, validateTaskCreate, validateTaskUpdate } from '../middlewares/validate.js';

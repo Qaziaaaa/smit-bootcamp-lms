@@ -3,7 +3,7 @@ import { Search } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Input } from './Input'
 
-export const SearchBar = ({ value, onChange, placeholder = 'Search...', delay = 300, className }) => {
+export const SearchBar = ({ value, onChange, onKeyDown, placeholder = 'Search...', delay = 300, className }) => {
   const [localValue, setLocalValue] = useState(value || '')
 
   useEffect(() => {
@@ -24,6 +24,7 @@ export const SearchBar = ({ value, onChange, placeholder = 'Search...', delay = 
       <Input
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         className="h-11 rounded-lg bg-card pl-10"
       />

@@ -80,11 +80,18 @@ export default function ProjectDetailPage() {
     {
       accessorKey: 'assignedTo',
       header: 'ASSIGNED TO',
-      cell: ({ getValue }) => (
-        <p className="text-sm text-muted-foreground">
-          {getValue()?.name || '—'}
-        </p>
-      ),
+      cell: ({ getValue }) => {
+        const student = getValue();
+        if (!student) return <p className="text-sm text-muted-foreground">—</p>;
+        return (
+          <div className="flex flex-col">
+            <p className="text-sm font-medium text-foreground">{student.name}</p>
+            {student.rollNo && (
+              <span className="text-[11px] font-mono text-muted-foreground">{student.rollNo}</span>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'deadline',
@@ -193,7 +200,7 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-[1200px] p-3">
+      <div className="w-full p-3">
         <p className="text-sm text-muted-foreground">Loading project...</p>
       </div>
     );
@@ -201,7 +208,7 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="mx-auto max-w-[1200px] p-3">
+      <div className="w-full p-3">
         <p className="text-sm text-muted-foreground">Project not found.</p>
       </div>
     );
@@ -210,7 +217,7 @@ export default function ProjectDetailPage() {
   const completedTasks = tasks.filter((t) => t.status === 'completed').length;
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 p-3">
 
       {/* Topbar — "Project — {title}" + Edit button */}
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -235,53 +242,93 @@ export default function ProjectDetailPage() {
       <div className="grid gap-3">
 
         {/* Info card */}
-        <div className="col-span-12 md:col-span-4">
-          <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-            <p className="mb-2 text-sm font-medium uppercase tracking-wide text-muted-foreground">
-              Project Information
-            </p>
-            <div className="flex flex-col gap-2.5">
-              <div>
-                <p className="text-xs text-muted-foreground">Title</p>
-                <p className="text-sm font-semibold text-foreground">{project.title}</p>
-              </div>
-              {project.description && (
-                <div>
+              <div className="col-span-12 md:col-span-8">
+        <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-8 overflow-x-auto">
+      
+            {/* Title */}
+            <div className="min-w-[140px] shrink-0">
+              <p className="text-xs text-muted-foreground">Title</p>
+              <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                {project.title}
+              </p>
+            </div>
+      
+            {/* Description */}
+            {project.description && (
+              <>
+                <div className="h-10 w-px shrink-0 bg-border" />
+      
+                <div className="min-w-[180px] max-w-[220px] shrink-0">
                   <p className="text-xs text-muted-foreground">Description</p>
-                  <p className="mt-0.5 text-sm text-foreground">
+                  <p className="mt-1 truncate text-sm text-foreground">
                     {project.description}
                   </p>
                 </div>
-              )}
-              <div>
-                <p className="text-xs text-muted-foreground">Assigned Team</p>
-                <p className="text-sm text-foreground">{project.teamId?.name || '—'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Status</p>
-                <div className="mt-0.5">
-                  <Badge status={project.status} />
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Deadline</p>
-                <p className="text-sm text-foreground">{project.deadline ? String(project.deadline).slice(0, 10) : '—'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Task Progress</p>
-                <p className="text-sm text-foreground">
-                  {completedTasks} / {tasks.length} completed
-                </p>
-                {tasks.length > 0 && (
-                  <Progress
-                    value={(completedTasks / tasks.length) * 100}
-                    className="mt-1 h-2"
-                  />
-                )}
+              </>
+            )}
+      
+            {/* Assigned Team */}
+            <div className="h-10 w-px shrink-0 bg-border" />
+      
+            <div className="min-w-[130px] shrink-0">
+              <p className="text-xs text-muted-foreground">Assigned Team</p>
+              <p className="mt-1 truncate text-sm text-foreground">
+                {project.teamId?.name || '—'}
+              </p>
+            </div>
+      
+            {/* Status */}
+            <div className="h-10 w-px shrink-0 bg-border" />
+      
+            <div className="min-w-[100px] shrink-0">
+              <p className="text-xs text-muted-foreground">Status</p>
+              <div className="mt-1">
+                <Badge status={project.status} />
               </div>
             </div>
+      
+            {/* Deadline */}
+            <div className="h-10 w-px shrink-0 bg-border" />
+      
+            <div className="min-w-[110px] shrink-0">
+              <p className="text-xs text-muted-foreground">Deadline</p>
+              <p className="mt-1 text-sm text-foreground">
+                {project.deadline
+                  ? String(project.deadline).slice(0, 10)
+                  : '—'}
+              </p>
+            </div>
+      
+            {/* Task Progress */}
+            <div className="h-10 w-px shrink-0 bg-border" />
+      
+            <div className="min-w-[180px] shrink-0">
+              <p className="text-xs text-muted-foreground">Task Progress</p>
+      
+              <p className="mt-1 text-sm font-semibold text-foreground">
+                {completedTasks} / {tasks.length} completed
+              </p>
+      
+              {tasks.length > 0 && (
+                <Progress
+                  value={(completedTasks / tasks.length) * 100}
+                  className="mt-2 h-2 bg-clr-emerald-bg [&>div]:bg-clr-green"
+                />
+              )}
+      
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {tasks.length > 0
+                  ? `${Math.round(
+                      (completedTasks / tasks.length) * 100
+                    )}% overall completion`
+                  : 'No tasks assigned yet'}
+              </p>
+            </div>
+      
           </div>
         </div>
+      </div>
 
         {/* Tasks subview */}
         <div className="col-span-12 md:col-span-8">

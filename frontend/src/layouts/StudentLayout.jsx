@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react'
+// Student layout — sidebar + header + mobile nav for the student portal.
+// Same structure as AdminLayout but with student-specific nav items.
+// Fetches student profile on mount to display name/email in sidebar.
+import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   CalendarCheck,
@@ -14,6 +17,7 @@ import {
   Sun,
 } from 'lucide-react'
 import { cn } from '../lib/utils'
+import { toast } from 'react-hot-toast'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../context/useTheme'
 import { Avatar } from '../components/ui/Avatar'
@@ -150,9 +154,19 @@ function SidebarContent({ pathname, profile, onNavigate }) {
 }
 
 export function StudentLayout() {
+  const location = useLocation()
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
+  const loginToastShown = useRef(false)
+
+  useEffect(() => {
+    if (location.state?.justLoggedIn && !loginToastShown.current) {
+      loginToastShown.current = true
+      toast.success('Logged in!')
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location, navigate])
 
   useEffect(() => {
     let cancelled = false
@@ -189,7 +203,7 @@ export function StudentLayout() {
         </header>
 
         <div className="w-full flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 md:p-8">
-          <div className="mx-auto w-full max-w-[1200px]">
+          <div className="w-full">
             <Outlet />
           </div>
         </div>

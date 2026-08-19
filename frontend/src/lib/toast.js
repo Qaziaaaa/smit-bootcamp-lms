@@ -1,3 +1,5 @@
+// Toast helper — creates styled info toasts that match the current theme.
+// Used alongside react-hot-toast's default toast.success/error for consistency.
 import toast from 'react-hot-toast'
 
 export function toastInfo(message) {
