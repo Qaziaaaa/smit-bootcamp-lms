@@ -240,8 +240,8 @@ export default function TasksPage() {
       {/* Toolbar */}
       <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-2.5 sm:flex-row sm:items-center">
         <SearchBar value={search} onChange={setSearch} placeholder="Search task..." className="w-full sm:max-w-xs" />
-        <div className="grid w-full grid-cols-1 gap-2 sm:ml-auto sm:flex sm:w-auto sm:flex-wrap sm:grid-cols-none">
-          <div className="w-full min-w-0 sm:w-auto sm:min-w-[150px]">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
+          <div className="w-full min-w-[150px] sm:w-auto">
             <Select
               value={projectFilter}
               onChange={(next) => setProjectFilter(next)}
@@ -249,7 +249,7 @@ export default function TasksPage() {
               placeholder="All Projects"
             />
           </div>
-          <div className="w-full min-w-0 sm:w-auto sm:min-w-[150px]">
+          <div className="w-full min-w-[150px] sm:w-auto">
             <Select
               value={statusFilter}
               onChange={(next) => setStatusFilter(next)}
@@ -257,7 +257,7 @@ export default function TasksPage() {
               placeholder="All Statuses"
             />
           </div>
-          <div className="w-full min-w-0 sm:w-auto sm:min-w-[150px]">
+          <div className="w-full min-w-[150px] sm:w-auto">
             <Select
               value={assignedFilter}
               onChange={(next) => setAssignedFilter(next)}
