@@ -23,6 +23,7 @@ import { getDashboard } from '../services/dashboardService'
 import { getAttendance } from '../services/attendanceService'
 import { createStudent } from '../services/studentsService'
 import { toast } from 'react-hot-toast'
+import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
 
 // Task status style mapping
 const TASK_STATUS_STYLE = {
@@ -174,11 +175,7 @@ export default function DashboardPage() {
 
   // Loading and error states
   if (loading) {
-    return (
-      <div className="grid min-h-[300px] place-items-center">
-        <p className="text-sm text-muted-foreground">Loading dashboard...</p>
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   if (error || !dashboard) {
