@@ -244,15 +244,15 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Two-column layout: Info card | Tasks subview */}
-      <div className="grid gap-3">
+      <div className="flex flex-col gap-3">
 
         {/* Info card */}
-              <div className="col-span-12 md:col-span-8">
+        <div>
         <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-8 overflow-x-auto">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
       
             {/* Title */}
-            <div className="min-w-[140px] shrink-0">
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Title</p>
               <p className="mt-1 truncate text-sm font-semibold text-foreground">
                 {project.title}
@@ -261,22 +261,16 @@ export default function ProjectDetailPage() {
       
             {/* Description */}
             {project.description && (
-              <>
-                <div className="h-10 w-px shrink-0 bg-border" />
-      
-                <div className="min-w-[180px] max-w-[220px] shrink-0">
-                  <p className="text-xs text-muted-foreground">Description</p>
-                  <p className="mt-1 truncate text-sm text-foreground">
-                    {project.description}
-                  </p>
-                </div>
-              </>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Description</p>
+                <p className="mt-1 truncate text-sm text-foreground">
+                  {project.description}
+                </p>
+              </div>
             )}
       
             {/* Assigned Team */}
-            <div className="h-10 w-px shrink-0 bg-border" />
-      
-            <div className="min-w-[130px] shrink-0">
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Assigned Team</p>
               <p className="mt-1 truncate text-sm text-foreground">
                 {project.teamId?.name || '—'}
@@ -284,9 +278,7 @@ export default function ProjectDetailPage() {
             </div>
       
             {/* Status */}
-            <div className="h-10 w-px shrink-0 bg-border" />
-      
-            <div className="min-w-[100px] shrink-0">
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Status</p>
               <div className="mt-1">
                 <Badge status={project.status} />
@@ -294,9 +286,7 @@ export default function ProjectDetailPage() {
             </div>
       
             {/* Deadline */}
-            <div className="h-10 w-px shrink-0 bg-border" />
-      
-            <div className="min-w-[110px] shrink-0">
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Deadline</p>
               <p className="mt-1 text-sm text-foreground">
                 {project.deadline
@@ -306,9 +296,7 @@ export default function ProjectDetailPage() {
             </div>
       
             {/* Task Progress */}
-            <div className="h-10 w-px shrink-0 bg-border" />
-      
-            <div className="min-w-[180px] shrink-0">
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Task Progress</p>
       
               <p className="mt-1 text-sm font-semibold text-foreground">
@@ -333,10 +321,10 @@ export default function ProjectDetailPage() {
       
           </div>
         </div>
-      </div>
+        </div>
 
         {/* Tasks subview */}
-        <div className="col-span-12 md:col-span-8">
+        <div>
           <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
             <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/50 p-3">
               <h2 className="text-base font-semibold text-foreground">
