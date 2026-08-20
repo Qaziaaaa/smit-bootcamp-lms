@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CalendarCheck } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -28,34 +28,33 @@ export default function AttendancePage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [togglingId, setTogglingId] = useState(null);
 
-  const fetchRecords = useCallback(async () => {
-    setInitialLoading(true);
-    try {
-      const params = { date: dateFilter, page: 1, limit: 500 };
-      const result = await getAttendance(params);
-      const marked = result.records || [];
-      setRecords(marked);
-
-      const present = marked.filter((r) => r.status === 'present').length;
-      const absent = marked.filter((r) => r.status === 'absent').length;
-      const notMarked = Math.max(0, allStudents.length - present - absent);
-      setSummary({ present, absent, notMarked });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to load attendance');
-    } finally {
-      setInitialLoading(false);
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setInitialLoading(true);
+      try {
+        const [stuResult, attResult] = await Promise.all([
+          getStudents({ limit: 500 }),
+          getAttendance({ date: dateFilter, page: 1, limit: 500 }),
+        ]);
+        if (cancelled) return;
+        const studs = stuResult.students || [];
+        const marked = attResult.records || [];
+        setAllStudents(studs);
+        setRecords(marked);
+        const present = marked.filter((r) => r.status === 'present').length;
+        const absent = marked.filter((r) => r.status === 'absent').length;
+        const notMarked = Math.max(0, studs.length - present - absent);
+        setSummary({ present, absent, notMarked });
+      } catch (error) {
+        if (!cancelled) toast.error(error.response?.data?.message || 'Failed to load attendance');
+      } finally {
+        if (!cancelled) setInitialLoading(false);
+      }
     }
-  }, [dateFilter, allStudents.length]);
-
-  useEffect(() => {
-    fetchRecords();
-  }, [dateFilter, fetchRecords]);
-
-  useEffect(() => {
-    getStudents({ limit: 500 })
-      .then((result) => setAllStudents(result.students || []))
-      .catch(() => setAllStudents([]));
-  }, []);
+    load();
+    return () => { cancelled = true };
+  }, [dateFilter]);
 
   // Merge all students with attendance records — unmarked students appear with status: null
   const mergedRecords = allStudents.map((s) => {
