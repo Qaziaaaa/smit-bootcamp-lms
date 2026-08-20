@@ -70,10 +70,8 @@ export default function TasksPage() {
   }, []);
 
   const assignedOptions = [...new Map(
-    (tasks || [])
-      .map((t) => t.assignedTo)
-      .filter(Boolean)
-      .map((a) => [a._id, { label: a.rollNo ? `${a.name} (${a.rollNo})` : a.name, value: a._id }])
+    students
+      .map((s) => [s._id, { label: s.rollNo ? `${s.name} (${s.rollNo})` : s.name, value: s._id }])
   ).values()];
 
   const columns = [
@@ -259,16 +257,14 @@ export default function TasksPage() {
               placeholder="All Statuses"
             />
           </div>
-          {assignedOptions.length > 0 && (
-            <div className="w-full min-w-0 sm:w-auto sm:min-w-[150px]">
-              <Select
-                value={assignedFilter}
-                onChange={(next) => setAssignedFilter(next)}
-                options={assignedOptions}
-                placeholder="All Assignees"
-              />
-            </div>
-          )}
+          <div className="w-full min-w-0 sm:w-auto sm:min-w-[150px]">
+            <Select
+              value={assignedFilter}
+              onChange={(next) => setAssignedFilter(next)}
+              options={assignedOptions}
+              placeholder="All Assignees"
+            />
+          </div>
         </div>
       </div>
 
