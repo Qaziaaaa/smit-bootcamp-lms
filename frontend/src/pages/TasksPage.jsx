@@ -69,10 +69,21 @@ export default function TasksPage() {
       .catch(() => setStudents([]));
   }, []);
 
-  const assignedOptions = [...new Map(
-    students
-      .map((s) => [s._id, { label: s.rollNo ? `${s.name} (${s.rollNo})` : s.name, value: s._id }])
-  ).values()];
+  // When a project is selected, only show assignees from that project's tasks
+  // Otherwise show all students
+  const assignedOptions = (() => {
+    if (projectFilter) {
+      const projectStudentIds = new Set(
+        tasks
+          .filter((t) => t.projectId?._id === projectFilter && t.assignedTo)
+          .map((t) => t.assignedTo._id)
+      );
+      return students
+        .filter((s) => projectStudentIds.has(s._id))
+        .map((s) => ({ label: s.rollNo ? `${s.name} (${s.rollNo})` : s.name, value: s._id }));
+    }
+    return students.map((s) => ({ label: s.rollNo ? `${s.name} (${s.rollNo})` : s.name, value: s._id }));
+  })();
 
   const columns = [
     {
@@ -241,26 +252,31 @@ export default function TasksPage() {
       <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-2.5 sm:flex-row sm:items-center">
         <SearchBar value={search} onChange={setSearch} placeholder="Search task..." className="w-full sm:max-w-xs" />
         <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
-          <div className="w-full min-w-[150px] sm:w-auto">
+          <div className="w-full sm:w-[170px]">
             <Select
               value={projectFilter}
-              onChange={(next) => setProjectFilter(next)}
+              onChange={(next) => {
+                setProjectFilter(next);
+                setPage(1);
+                // Clear assignee if project changes
+                setAssignedFilter('');
+              }}
               options={projects.map((p) => ({ label: p.title, value: p._id }))}
               placeholder="All Projects"
             />
           </div>
-          <div className="w-full min-w-[150px] sm:w-auto">
+          <div className="w-full sm:w-[170px]">
             <Select
               value={statusFilter}
-              onChange={(next) => setStatusFilter(next)}
+              onChange={(next) => { setStatusFilter(next); setPage(1); }}
               options={STATUS_OPTIONS}
               placeholder="All Statuses"
             />
           </div>
-          <div className="w-full min-w-[150px] sm:w-auto">
+          <div className="w-full sm:w-[170px]">
             <Select
               value={assignedFilter}
-              onChange={(next) => setAssignedFilter(next)}
+              onChange={(next) => { setAssignedFilter(next); setPage(1); }}
               options={assignedOptions}
               placeholder="All Assignees"
             />
