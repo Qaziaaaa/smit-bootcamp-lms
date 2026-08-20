@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { CalendarCheck, CalendarX, CalendarDays, Percent } from 'lucide-react'
 import { getStudentAttendance } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
+import { TablePageSkeleton } from '../components/ui/page-skeletons'
 import { Badge } from '../components/ui/Badge'
 import { StatCard } from '../components/ui/StatCard'
 import { cn } from '../lib/utils'
@@ -38,11 +39,7 @@ export default function StudentAttendancePage() {
 
   // Loading state while fetching data
   if (loading) {
-    return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-muted-foreground">Loading attendance...</p>
-      </div>
-    )
+    return <TablePageSkeleton statCount={4} />
   }
 
   // Error state with retry button if the API call failed

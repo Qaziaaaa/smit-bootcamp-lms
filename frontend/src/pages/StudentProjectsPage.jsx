@@ -3,6 +3,7 @@ import { FolderKanban, Users, Calendar, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { getStudentProjects } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
+import { CardGridSkeleton } from '../components/ui/page-skeletons'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 
@@ -79,11 +80,7 @@ export default function StudentProjectsPage() {
   }, [loadProjects])
 
   if (loading) {
-    return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-muted-foreground">Loading projects...</p>
-      </div>
-    )
+    return <CardGridSkeleton />
   }
 
   if (error) {

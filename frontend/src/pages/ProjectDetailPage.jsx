@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, Plus, Trash2, CheckCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { toastInfo } from '../lib/toast';
+import { DetailPageSkeleton } from '../components/ui/page-skeletons';
 
 import { Button } from '../components/ui/Button';
 import { Progress } from '../components/ui/Progress';
@@ -207,11 +208,7 @@ export default function ProjectDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="w-full p-3">
-        <p className="text-sm text-muted-foreground">Loading project...</p>
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (!project) {

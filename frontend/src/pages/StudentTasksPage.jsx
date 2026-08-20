@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { CheckSquare, Send } from 'lucide-react'
 import { getStudentTasks, updateTaskProgress } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
+import { TablePageSkeleton } from '../components/ui/page-skeletons'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { cn } from '../lib/utils'
@@ -53,11 +54,7 @@ export default function StudentTasksPage() {
 
   // Loading state while fetching data
   if (loading) {
-    return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-muted-foreground">Loading tasks...</p>
-      </div>
-    )
+    return <TablePageSkeleton statCount={3} />
   }
 
   // Error state with retry button if any API call failed

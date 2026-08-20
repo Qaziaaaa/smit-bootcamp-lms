@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Calendar, Users, CheckSquare } from 'lucide-react'
 import { getStudentProjectById, updateTaskProgress } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
+import { DetailPageSkeleton } from '../components/ui/page-skeletons'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Progress } from '../components/ui/Progress'
@@ -55,11 +56,7 @@ export default function StudentProjectDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-muted-foreground">Loading project...</p>
-      </div>
-    )
+    return <DetailPageSkeleton />
   }
 
   if (error) {

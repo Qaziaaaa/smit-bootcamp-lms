@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit2, CalendarCheck, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
+import { DetailPageSkeleton } from '../components/ui/page-skeletons';
 import { Progress } from '../components/ui/Progress';
 import { Avatar } from '../components/ui/Avatar';
 import { Badge } from '../components/ui/Badge';
@@ -73,11 +74,7 @@ export default function StudentDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="w-full p-3">
-        <p className="text-sm text-muted-foreground">Loading student...</p>
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (!student) {

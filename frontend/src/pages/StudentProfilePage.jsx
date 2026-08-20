@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Mail, User, Loader2, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { Mail, User, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getStudentProfile, changeStudentPassword } from '../services/studentService';
 import { Logo } from '../components/ui/Logo';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Label } from '../components/ui/Label';
+import { ProfilePageSkeleton } from '../components/ui/page-skeletons';
 
 export default function StudentProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -34,11 +35,7 @@ export default function StudentProfilePage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <Loader2 className="animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   // Fallback data since backend doesn't store all these fields yet

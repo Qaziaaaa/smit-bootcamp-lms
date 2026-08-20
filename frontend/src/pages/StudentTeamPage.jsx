@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { FolderKanban, Mail, Users } from 'lucide-react'
 import { getStudentTeam } from '../services/studentService'
 import { EmptyState, ErrorState } from '../components/ui/StateComponents'
+import { CardGridSkeleton } from '../components/ui/page-skeletons'
 import { Badge } from '../components/ui/Badge'
 import { Avatar } from '../components/ui/Avatar'
 
@@ -51,11 +52,7 @@ export default function StudentTeamPage() {
 
   // Loading state while fetching data
   if (loading) {
-    return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-muted-foreground">Loading team...</p>
-      </div>
-    )
+    return <CardGridSkeleton />
   }
 
   // Error state with retry button if the API call failed

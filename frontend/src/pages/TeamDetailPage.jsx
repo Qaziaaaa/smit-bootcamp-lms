@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Button } from '../components/ui/Button';
+import { DetailPageSkeleton } from '../components/ui/page-skeletons';
 import { Avatar } from '../components/ui/Avatar';
 import { Badge } from '../components/ui/Badge';
 import { Modal } from '../components/ui/Modal';
@@ -91,11 +92,7 @@ export default function TeamDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="w-full p-3">
-        <p className="text-sm text-muted-foreground">Loading team...</p>
-      </div>
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (!team) {
