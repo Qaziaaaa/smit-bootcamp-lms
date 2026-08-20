@@ -16,6 +16,7 @@ import { EmptyState, ErrorState } from '../components/ui/StateComponents'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { StatCard } from '../components/ui/StatCard'
+import { StudentDashboardSkeleton } from '../components/dashboard/StudentDashboardSkeleton'
 import { cn } from '../lib/utils'
 
 function currentWeek(activeDays = []) {
@@ -93,11 +94,7 @@ export default function StudentDashboardPage() {
 
   // Loading state while fetching data
   if (loading) {
-    return (
-      <div className="flex min-h-[300px] items-center justify-center">
-        <p className="text-muted-foreground">Loading dashboard...</p>
-      </div>
-    )
+    return <StudentDashboardSkeleton />
   }
 
   // Error state with retry button if any API call failed
