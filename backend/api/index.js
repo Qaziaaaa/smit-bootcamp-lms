@@ -7,10 +7,9 @@ import '../src/models/index.js';
 let isConnected = false;
 
 export default async function handler(req, res) {
-  // Health check for root path (Vercel pings this to verify deployment)
   if (req.url === '/' || req.url === '') {
     res.setHeader('Content-Type', 'application/json');
-    return res.status(200).json({ success: true, message: 'LMS API is running' });
+    return res.status(404).json({ success: false, message: 'Not found' });
   }
 
   if (!isConnected) {
