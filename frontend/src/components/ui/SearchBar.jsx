@@ -1,22 +1,39 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Search } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Input } from './Input'
 
-export const SearchBar = ({ value, onChange, onKeyDown, placeholder = 'Search...', delay = 300, className }) => {
+export const SearchBar = ({ value = '', onChange, onKeyDown, placeholder = 'Search...', delay = 300, className }) => {
   const [localValue, setLocalValue] = useState(value || '')
+  const onChangeRef = useRef(onChange)
+  const isMounted = useRef(false)
+
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
 
   useEffect(() => {
     setLocalValue(value || '')
   }, [value])
 
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true
+      return
+    }
+
+    if (localValue === (value || '')) {
+      return
+    }
+
     const handler = setTimeout(() => {
-      if (onChange) onChange(localValue)
+      if (onChangeRef.current) {
+        onChangeRef.current(localValue)
+      }
     }, delay)
 
     return () => clearTimeout(handler)
-  }, [localValue, onChange, delay])
+  }, [localValue, delay, value])
 
   return (
     <div className={cn('relative w-full min-w-0 sm:max-w-xs', className)}>
