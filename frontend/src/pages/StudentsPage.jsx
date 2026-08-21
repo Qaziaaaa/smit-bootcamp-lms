@@ -45,7 +45,7 @@ export default function StudentsPage() {
   const fetchStudents = useCallback(async () => {
     setLoading(true);
     try {
-      const params = { page, limit: 100 };
+      const params = { page, limit: 10 };
       if (search) params.search = search;
       if (teamFilter) params.teamId = teamFilter;
       const result = await getStudents(params);
@@ -247,7 +247,7 @@ export default function StudentsPage() {
           <FilterBar
             label="Team"
             value={teamFilter}
-            onChange={(next) => setTeamFilter(next)}
+            onChange={(next) => { setTeamFilter(next); setPage(1); }}
             options={teams.map((t) => ({ label: t.name, value: t._id }))}
           />
         </div>
@@ -264,7 +264,7 @@ export default function StudentsPage() {
 
         <div className="border-t bg-card p-2">
           <Pagination
-            page={pagination.page}
+            page={page}
             totalPages={pagination.pages}
             totalItems={pagination.total}
             onChange={setPage}

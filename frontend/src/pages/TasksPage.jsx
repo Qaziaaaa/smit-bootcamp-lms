@@ -250,9 +250,9 @@ export default function TasksPage() {
 
       {/* Toolbar */}
       <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-2.5 sm:flex-row sm:items-center">
-        <SearchBar value={search} onChange={setSearch} placeholder="Search task..." className="w-full sm:max-w-xs" />
+        <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search task..." className="w-full sm:max-w-xs" />
         <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
-          <div className="w-full sm:w-[170px]">
+          <div className="w-full min-w-0 sm:w-[170px]">
             <Select
               value={projectFilter}
               onChange={(next) => {
@@ -265,7 +265,7 @@ export default function TasksPage() {
               placeholder="All Projects"
             />
           </div>
-          <div className="w-full sm:w-[170px]">
+          <div className="w-full min-w-0 sm:w-[170px]">
             <Select
               value={statusFilter}
               onChange={(next) => { setStatusFilter(next); setPage(1); }}
@@ -273,7 +273,7 @@ export default function TasksPage() {
               placeholder="All Statuses"
             />
           </div>
-          <div className="w-full sm:w-[170px]">
+          <div className="w-full min-w-0 sm:w-[170px]">
             <Select
               value={assignedFilter}
               onChange={(next) => { setAssignedFilter(next); setPage(1); }}
@@ -293,7 +293,7 @@ export default function TasksPage() {
       />
 
       <Pagination
-        page={pagination.page}
+        page={page}
         totalPages={pagination.pages}
         totalItems={pagination.total}
         onChange={setPage}

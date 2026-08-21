@@ -213,12 +213,12 @@ export default function ProjectsPage() {
 
       {/* Toolbar */}
       <div className="flex flex-col gap-2.5 rounded-lg border border-border bg-card p-2.5 sm:flex-row sm:items-center">
-        <SearchBar value={search} onChange={setSearch} placeholder="Search project..." className="w-full sm:max-w-xs" />
+        <SearchBar value={search} onChange={(val) => { setSearch(val); setPage(1); }} placeholder="Search project..." className="w-full sm:max-w-xs" />
         <div className="flex w-full min-w-0 items-center sm:ml-auto sm:w-auto">
           <div className="w-full min-w-0 sm:w-auto sm:min-w-[160px]">
             <Select
               value={statusFilter}
-              onChange={(next) => setStatusFilter(next)}
+              onChange={(next) => { setStatusFilter(next); setPage(1); }}
               options={STATUS_OPTIONS}
               placeholder="All Statuses"
             />
@@ -235,7 +235,7 @@ export default function ProjectsPage() {
       />
 
       <Pagination
-        page={pagination.page}
+        page={page}
         totalPages={pagination.pages}
         totalItems={pagination.total}
         onChange={setPage}

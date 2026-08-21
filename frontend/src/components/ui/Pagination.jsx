@@ -24,6 +24,7 @@ export const Pagination = ({ page, totalPages, onChange, totalItems = 0, pageSiz
       </p>
       <div className="flex items-center gap-1">
         <Button
+          type="button"
           variant="outline"
           size="icon"
           className="h-8 w-8"
@@ -37,6 +38,7 @@ export const Pagination = ({ page, totalPages, onChange, totalItems = 0, pageSiz
           <div key={p} className="flex items-center gap-1">
             {index > 0 && pageItems[index - 1] !== p - 1 && <span className="px-1 text-sm text-muted-foreground">…</span>}
             <button
+              type="button"
               onClick={() => onChange(p)}
               className={cn(
                 'h-8 min-w-8 rounded-md px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -51,6 +53,7 @@ export const Pagination = ({ page, totalPages, onChange, totalItems = 0, pageSiz
           </div>
         ))}
         <Button
+          type="button"
           variant="outline"
           size="icon"
           className="h-8 w-8"

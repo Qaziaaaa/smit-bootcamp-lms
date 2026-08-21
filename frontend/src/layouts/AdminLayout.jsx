@@ -169,9 +169,16 @@ function SidebarContent({ pathname, onNavigate }) {
 // Main layout component — renders sidebar (desktop) + header + page content + mobile bottom nav.
 // Wrapped by ProtectedRoute which ensures only admin users can access.
 export function AdminLayout() {
+  const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const { pathname } = useLocation()
   const navigate = useNavigate()
+
+  async function handleLogout() {
+    await logout()
+    navigate('/login', { replace: true })
+  }
 
   // Determines the current page title for the breadcrumb in the header.
   const current = NAV_ITEMS.find((item) => isPathActive(pathname, item.to))
@@ -197,7 +204,7 @@ export function AdminLayout() {
       </aside>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-muted/40">
-        {/* Top header bar — shows breadcrumb (Home > Page Name) and today's date */}
+        {/* Top header bar — shows breadcrumb (Home > Page Name), date on desktop, and avatar menu on mobile */}
         <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-card px-4 md:px-6">
           {/* Mobile header — shows logo on left */}
           <div className="flex items-center gap-1.5 md:hidden">
@@ -209,8 +216,49 @@ export function AdminLayout() {
             <ChevronRight size={14} className="text-muted-foreground" />
             <span className="truncate text-sm font-semibold text-foreground">{title}</span>
           </div>
-          {/* Today's date — desktop only */}
-          <span className="hidden text-xs font-medium text-muted-foreground md:block">{todayLabel()}</span>
+          {/* Header right: Today's date (desktop) + Avatar profile dropdown (mobile) */}
+          <div className="flex shrink-0 items-center gap-3">
+            <span className="hidden text-xs font-medium text-muted-foreground md:block">{todayLabel()}</span>
+            <div className="md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Open profile menu"
+                    className="flex items-center justify-center rounded-full transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Avatar
+                      name={user?.name || 'A'}
+                      className="h-8 w-8 text-xs font-bold ring-2 ring-border/50 hover:ring-clr-blue/60"
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" sideOffset={8}>
+                  <div className="border-b border-border px-3 py-2.5">
+                    <p className="truncate text-sm font-semibold text-foreground">{user?.name || 'Admin'}</p>
+                    <p className="truncate text-xs text-muted-foreground">{user?.email || 'admin@saylani.org'}</p>
+                  </div>
+                  <div className="p-1">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex w-full cursor-pointer items-center gap-2">
+                        <UserIcon />
+                        <span>Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
+                      {theme === 'dark' ? <Sun /> : <Moon />}
+                      <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive" onClick={handleLogout} className="cursor-pointer">
+                      <LogOut />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
         </header>
 
         {/* Page content — renders the active admin page via React Router's Outlet */}
