@@ -9,7 +9,7 @@ const login = asyncHandler(async (req, res) => {
   const { email, password, role } = req.body;
   const result = await authService.login(email, password, role);
   sendSuccess(res, 200, result, 'Login successful');
-});
+}); 
 
 // GET /auth/me — returns current user info from JWT token
 const getMe = asyncHandler(async (req, res) => {
@@ -19,7 +19,7 @@ const getMe = asyncHandler(async (req, res) => {
 
 // POST /auth/logout — client handles token removal
 const logout = asyncHandler(async (req, res) => {
-  sendSuccess(res, 200, { loggedOut: true }, 'Logged out successfully. Remove token on client side.');
+  sendSuccess(res, 200, { loggedOut: true }, 'Logged out successfully. ');
 });
 
 // POST /auth/change-password — requires old password, sets new one
