@@ -2,7 +2,7 @@
 // Provides tab-based switching, client-side input validation, error handling,
 // password visibility toggle, and role-based post-login redirection.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -17,6 +17,10 @@ export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Input refs for programmatic focus management
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+
   // Component state
   const [activeTab, setActiveTab] = useState(0); // 0 = Student login, 1 = Admin login
   const [email, setEmail] = useState("");
@@ -24,6 +28,11 @@ export default function LoginPage() {
   const [showPwd, setShowPwd] = useState(false); // Toggles password visibility between text and password
   const [fieldErrors, setFieldErrors] = useState({}); // Stores field validation error messages
   const [submitting, setSubmitting] = useState(false); // Tracks async login request in progress
+
+  // Auto-focus email input on initial mount and when switching tabs
+  useEffect(() => {
+    emailInputRef.current?.focus();
+  }, [activeTab]);
 
   // Redirect user to their designated dashboard after successful authentication
   function goHome(user) {
@@ -51,8 +60,15 @@ export default function LoginPage() {
     if (!password) errs.password = "Password is required.";
     setFieldErrors(errs);
 
-    // Stop execution if there are validation errors
-    if (Object.keys(errs).length) return;
+    // Focus the first invalid field and stop execution
+    if (errs.email) {
+      emailInputRef.current?.focus();
+      return;
+    }
+    if (errs.password) {
+      passwordInputRef.current?.focus();
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -133,6 +149,7 @@ export default function LoginPage() {
                 Email <span className="text-destructive">*</span>
               </Label>
               <Input
+                ref={emailInputRef}
                 id="login-email"
                 type="email"
                 autoComplete="email"
@@ -161,6 +178,7 @@ export default function LoginPage() {
               </Label>
               <div className="relative">
                 <Input
+                  ref={passwordInputRef}
                   id="login-password"
                   type={showPwd ? "text" : "password"}
                   autoComplete="current-password"
