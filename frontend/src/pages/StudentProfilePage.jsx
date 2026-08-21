@@ -98,15 +98,12 @@ export default function StudentProfilePage() {
         </div>
       </div>
 
-      {/* Name and Edit Action */}
-      <div className="flex items-start justify-between px-1 sm:px-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">{name}</h2>
-          <div className="mt-1 inline-flex rounded-md border border-border bg-muted px-1.5 py-0.5">
-            <span className="text-[13px] font-medium text-clr-slate">Student</span>
-          </div>
+      {/* Name Section */}
+      <div className="px-1 sm:px-2">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">{name}</h2>
+        <div className="mt-1 inline-flex rounded-md border border-border bg-muted px-1.5 py-0.5">
+          <span className="text-[13px] font-medium text-clr-slate">Student</span>
         </div>
-        <Button className="rounded-lg px-3 font-semibold">Edit Profile</Button>
       </div>
 
       {/* Information Cards Grid */}
